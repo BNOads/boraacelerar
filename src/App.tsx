@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Layout } from "./components/Layout";
+import { NotificationPopup } from "./components/NotificationPopup";
 import Auth from "./pages/Auth";
 import UpdatePassword from "./pages/UpdatePassword";
 import Dashboard from "./pages/Dashboard";
@@ -17,6 +18,8 @@ import Mentorados from "./pages/Mentorados";
 import Livraria from "./pages/Livraria";
 import Navegador from "./pages/Navegador";
 import Links from "./pages/Links";
+import Notifications from "./pages/Notifications";
+import AdminNotifications from "./pages/AdminNotifications";
 import Configuracoes from "./pages/Configuracoes";
 import NotFound from "./pages/NotFound";
 
@@ -49,6 +52,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <NotificationPopup />
       <BrowserRouter>
         <Routes>
           <Route path="/auth" element={<Auth />} />
@@ -63,6 +67,8 @@ const App = () => (
           <Route path="/livraria" element={<ProtectedRoute><Livraria /></ProtectedRoute>} />
           <Route path="/navegador" element={<ProtectedRoute><Navegador /></ProtectedRoute>} />
           <Route path="/links" element={<ProtectedRoute><Links /></ProtectedRoute>} />
+          <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+          <Route path="/admin/notifications/create" element={<ProtectedRoute><AdminNotifications /></ProtectedRoute>} />
           <Route path="/configuracoes" element={<ProtectedRoute><Configuracoes /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
