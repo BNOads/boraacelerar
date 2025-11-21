@@ -201,7 +201,7 @@ export function AdminNavegadorDialog() {
             <>
               <div className="space-y-2">
                 <Label htmlFor="user">Usuário do Sistema *</Label>
-                <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+                <Select value={selectedUserId || undefined} onValueChange={setSelectedUserId}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione um usuário" />
                   </SelectTrigger>

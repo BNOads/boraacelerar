@@ -90,7 +90,7 @@ export function AdminAgendaDialog() {
 
           <div className="space-y-2">
             <Label htmlFor="tipo">Tipo *</Label>
-            <Select value={formData.tipo} onValueChange={(value) => setFormData({ ...formData, tipo: value as typeof formData.tipo })}>
+            <Select value={formData.tipo || undefined} onValueChange={(value) => setFormData({ ...formData, tipo: value as typeof formData.tipo })}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione o tipo" />
               </SelectTrigger>

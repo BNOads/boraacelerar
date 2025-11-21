@@ -133,7 +133,7 @@ export function SolicitarAtendimentoDialog({ navegadorId }: SolicitarAtendimento
           {!navegadorId && (
             <div className="space-y-2">
               <Label htmlFor="navegador">Navegador *</Label>
-              <Select value={formData.navegador_id} onValueChange={(value) => setFormData({ ...formData, navegador_id: value })}>
+              <Select value={formData.navegador_id || undefined} onValueChange={(value) => setFormData({ ...formData, navegador_id: value })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione um navegador" />
                 </SelectTrigger>
@@ -172,7 +172,7 @@ export function SolicitarAtendimentoDialog({ navegadorId }: SolicitarAtendimento
 
           <div className="space-y-2">
             <Label htmlFor="tipo">Tipo de Atendimento *</Label>
-            <Select value={formData.tipo_atendimento} onValueChange={(value) => setFormData({ ...formData, tipo_atendimento: value })}>
+            <Select value={formData.tipo_atendimento || undefined} onValueChange={(value) => setFormData({ ...formData, tipo_atendimento: value })}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione o tipo" />
               </SelectTrigger>
@@ -187,7 +187,7 @@ export function SolicitarAtendimentoDialog({ navegadorId }: SolicitarAtendimento
 
           <div className="space-y-2">
             <Label htmlFor="canal">Canal de Atendimento *</Label>
-            <Select value={formData.canal} onValueChange={(value) => setFormData({ ...formData, canal: value })}>
+            <Select value={formData.canal || undefined} onValueChange={(value) => setFormData({ ...formData, canal: value })}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione o canal" />
               </SelectTrigger>
