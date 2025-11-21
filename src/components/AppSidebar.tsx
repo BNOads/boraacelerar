@@ -2,6 +2,8 @@ import { Home, BookOpen, TrendingUp, Trophy, Calendar, Video, Library, Users as 
 import { NavLink, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { AdminBadge } from "./AdminBadge";
 import {
   Sidebar,
   SidebarContent,
@@ -34,7 +36,7 @@ const menuItems = [
 export function AppSidebar() {
   const { state } = useSidebar();
   const navigate = useNavigate();
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { isAdmin } = useIsAdmin();
 
   // Buscar dados do usuário e perfil
   const { data: userData } = useQuery({
@@ -53,23 +55,6 @@ export function AppSidebar() {
     },
   });
 
-  // Verificar se usuário é admin
-  useEffect(() => {
-    const checkAdmin = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .eq("role", "admin")
-        .maybeSingle();
-
-      setIsAdmin(!!data);
-    };
-    checkAdmin();
-  }, []);
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -127,9 +112,12 @@ export function AppSidebar() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white truncate">
-                    {userData.profile.apelido || userData.profile.nome_completo}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold text-white truncate">
+                      {userData.profile.apelido || userData.profile.nome_completo}
+                    </p>
+                    {isAdmin && <AdminBadge />}
+                  </div>
                   <p className="text-xs text-gray-300 truncate">
                     {userData.user.email}
                   </p>
