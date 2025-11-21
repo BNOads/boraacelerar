@@ -13,6 +13,7 @@ import { Search, User, Edit, Save, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { AdminCriarUsuarioDialog } from "@/components/AdminCriarUsuarioDialog";
 
 export default function Mentorados() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -134,12 +135,17 @@ export default function Mentorados() {
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-          👥 Gerenciar Mentorados
-        </h1>
-        <p className="text-muted-foreground">
-          Visualize e edite informações de todos os mentorados da plataforma
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+              👥 Gerenciar Usuários
+            </h1>
+            <p className="text-muted-foreground">
+              Adicione novos usuários e gerencie informações dos mentorados
+            </p>
+          </div>
+          <AdminCriarUsuarioDialog />
+        </div>
       </div>
 
       {/* Search */}
