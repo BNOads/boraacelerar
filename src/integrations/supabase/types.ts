@@ -602,6 +602,53 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          is_active: boolean
+          message: string
+          priority: string
+          read_by: string[] | null
+          title: string
+          type: string
+          visible_to: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          is_active?: boolean
+          message: string
+          priority?: string
+          read_by?: string[] | null
+          title: string
+          type?: string
+          visible_to?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_active?: boolean
+          message?: string
+          priority?: string
+          read_by?: string[] | null
+          title?: string
+          type?: string
+          visible_to?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pilares_desempenho: {
         Row: {
           created_at: string
