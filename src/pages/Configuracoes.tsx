@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,11 +7,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import { User, Mail, Instagram, Phone, Save } from "lucide-react";
+import { User, Mail, Instagram, Phone, Save, Upload, Lock, Eye, EyeOff } from "lucide-react";
 
 export default function Configuracoes() {
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Buscar dados do usuário e perfil
   const { data: userData } = useQuery({
@@ -44,7 +54,7 @@ export default function Configuracoes() {
   });
 
   // Atualizar formData quando os dados chegarem
-  useState(() => {
+  useEffect(() => {
     if (userData?.profile) {
       setFormData({
         nome_completo: userData.profile.nome_completo || "",
@@ -53,7 +63,7 @@ export default function Configuracoes() {
         instagram: userData.mentorado?.instagram || "",
       });
     }
-  });
+  }, [userData]);
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
@@ -98,6 +108,105 @@ export default function Configuracoes() {
     updateProfileMutation.mutate(formData);
   };
 
+  const uploadAvatarMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const userId = userData?.user?.id;
+      if (!userId) throw new Error("Usuário não encontrado");
+
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${userId}/avatar.${fileExt}`;
+
+      // Upload do arquivo
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Obter URL pública
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // Atualizar perfil com a URL da foto
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ foto_url: publicUrl })
+        .eq('id', userId);
+
+      if (updateError) throw updateError;
+
+      return publicUrl;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-settings"] });
+      toast.success("Foto de perfil atualizada com sucesso!");
+    },
+    onError: () => {
+      toast.error("Erro ao fazer upload da foto");
+    },
+  });
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("A imagem deve ter no máximo 5MB");
+        return;
+      }
+      if (!file.type.startsWith('image/')) {
+        toast.error("Por favor, selecione uma imagem válida");
+        return;
+      }
+      uploadAvatarMutation.mutate(file);
+    }
+  };
+
+  const changePasswordMutation = useMutation({
+    mutationFn: async (data: typeof passwordData) => {
+      if (data.newPassword !== data.confirmPassword) {
+        throw new Error("As senhas não coincidem");
+      }
+
+      if (data.newPassword.length < 6) {
+        throw new Error("A nova senha deve ter pelo menos 6 caracteres");
+      }
+
+      // Primeiro verifica a senha atual tentando fazer login
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: userData?.user?.email || "",
+        password: data.currentPassword,
+      });
+
+      if (signInError) {
+        throw new Error("Senha atual incorreta");
+      }
+
+      // Atualiza a senha
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: data.newPassword,
+      });
+
+      if (updateError) throw updateError;
+    },
+    onSuccess: () => {
+      toast.success("Senha alterada com sucesso!");
+      setIsChangingPassword(false);
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+
   if (!userData) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -141,12 +250,28 @@ export default function Configuracoes() {
         <CardContent className="space-y-6">
           {/* Avatar */}
           <div className="flex items-center gap-4">
-            <Avatar className="h-20 w-20 border-4 border-primary/20">
-              <AvatarImage src={userData.profile?.foto_url} />
-              <AvatarFallback className="bg-primary/10 text-primary text-2xl">
-                {userData.profile?.nome_completo?.charAt(0) || <User className="h-8 w-8" />}
-              </AvatarFallback>
-            </Avatar>
+            <div className="relative group">
+              <Avatar className="h-20 w-20 border-4 border-primary/20">
+                <AvatarImage src={userData.profile?.foto_url} />
+                <AvatarFallback className="bg-primary/10 text-primary text-2xl">
+                  {userData.profile?.nome_completo?.charAt(0) || <User className="h-8 w-8" />}
+                </AvatarFallback>
+              </Avatar>
+              <button
+                onClick={handleAvatarClick}
+                disabled={uploadAvatarMutation.isPending}
+                className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+              >
+                <Upload className="h-6 w-6 text-white" />
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+            </div>
             <div>
               <p className="font-semibold text-lg">
                 {userData.profile?.nome_completo || userData.profile?.apelido}
@@ -155,6 +280,15 @@ export default function Configuracoes() {
                 <Mail className="h-3 w-3" />
                 {userData.user?.email}
               </p>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="mt-1 h-7 text-xs"
+                onClick={handleAvatarClick}
+                disabled={uploadAvatarMutation.isPending}
+              >
+                {uploadAvatarMutation.isPending ? "Enviando..." : "Alterar foto"}
+              </Button>
             </div>
           </div>
 
@@ -251,6 +385,124 @@ export default function Configuracoes() {
             </div>
           )}
         </CardContent>
+      </Card>
+
+      {/* Segurança */}
+      <Card className="border-border bg-card/50 backdrop-blur-sm">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-2xl">Segurança</CardTitle>
+              <CardDescription>Altere sua senha de acesso</CardDescription>
+            </div>
+            {!isChangingPassword && (
+              <Button
+                variant="outline"
+                onClick={() => setIsChangingPassword(true)}
+              >
+                <Lock className="mr-2 h-4 w-4" />
+                Alterar Senha
+              </Button>
+            )}
+          </div>
+        </CardHeader>
+        {isChangingPassword && (
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="currentPassword">Senha Atual</Label>
+              <div className="relative">
+                <Input
+                  id="currentPassword"
+                  type={showPassword ? "text" : "password"}
+                  value={passwordData.currentPassword}
+                  onChange={(e) =>
+                    setPasswordData({ ...passwordData, currentPassword: e.target.value })
+                  }
+                  className="bg-card/50 pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="newPassword">Nova Senha</Label>
+              <div className="relative">
+                <Input
+                  id="newPassword"
+                  type={showNewPassword ? "text" : "password"}
+                  value={passwordData.newPassword}
+                  onChange={(e) =>
+                    setPasswordData({ ...passwordData, newPassword: e.target.value })
+                  }
+                  className="bg-card/50 pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirmar Nova Senha</Label>
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={passwordData.confirmPassword}
+                  onChange={(e) =>
+                    setPasswordData({ ...passwordData, confirmPassword: e.target.value })
+                  }
+                  className="bg-card/50 pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <Button
+                className="flex-1 bg-primary hover:bg-primary/90"
+                onClick={() => changePasswordMutation.mutate(passwordData)}
+                disabled={
+                  changePasswordMutation.isPending ||
+                  !passwordData.currentPassword ||
+                  !passwordData.newPassword ||
+                  !passwordData.confirmPassword
+                }
+              >
+                {changePasswordMutation.isPending ? "Salvando..." : "Salvar Nova Senha"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsChangingPassword(false);
+                  setPasswordData({
+                    currentPassword: "",
+                    newPassword: "",
+                    confirmPassword: "",
+                  });
+                }}
+              >
+                Cancelar
+              </Button>
+            </div>
+          </CardContent>
+        )}
       </Card>
 
       {/* Informações da Conta */}
