@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { ExternalLink, BookOpen } from "lucide-react";
+import { AdminTrilhaDialog } from "@/components/AdminTrilhaDialog";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 interface TrilhaItem {
   id: string;
@@ -27,6 +29,7 @@ const pilarColors: Record<string, string> = {
 export default function Trilha() {
   const [items, setItems] = useState<TrilhaItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const { isAdmin } = useIsAdmin();
 
   useEffect(() => {
     const fetchTrilha = async () => {
@@ -59,13 +62,18 @@ export default function Trilha() {
 
   return (
     <div className="space-y-8 animate-slide-in">
-      <div className="flex items-center gap-3">
-        <BookOpen className="h-8 w-8 text-primary" />
-        <h1 className="text-4xl font-bold text-foreground">Trilha & Conteúdo</h1>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <BookOpen className="h-8 w-8 text-primary" />
+          <div>
+            <h1 className="text-4xl font-bold text-foreground">Trilha & Conteúdo</h1>
+            <p className="text-muted-foreground text-lg">
+              Explore os módulos organizados por pilar para acelerar seu crescimento
+            </p>
+          </div>
+        </div>
+        {isAdmin && <AdminTrilhaDialog />}
       </div>
-      <p className="text-muted-foreground text-lg">
-        Explore os módulos organizados por pilar para acelerar seu crescimento
-      </p>
 
       {Object.keys(groupedByPilar).length === 0 ? (
         <Card className="border-border bg-card">

@@ -3,8 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Video, ExternalLink, Lock, BookOpen } from "lucide-react";
+import { AdminLinksDialog } from "@/components/AdminLinksDialog";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 export default function Links() {
+  const { isAdmin } = useIsAdmin();
   const { data: zoomInfo, isLoading } = useQuery({
     queryKey: ["zoom-info"],
     queryFn: async () => {
@@ -47,12 +50,17 @@ export default function Links() {
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-          🔗 Links Úteis
-        </h1>
-        <p className="text-muted-foreground">
-          Acesso rápido às ferramentas e recursos essenciais da plataforma
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+              🔗 Links Úteis
+            </h1>
+            <p className="text-muted-foreground">
+              Acesso rápido às ferramentas e recursos essenciais da plataforma
+            </p>
+          </div>
+          {isAdmin && <AdminLinksDialog />}
+        </div>
       </div>
 
       {/* Zoom Info */}
