@@ -50,7 +50,9 @@ export type Database = {
       atendimentos_navegador: {
         Row: {
           assunto: string | null
+          avaliacao: number | null
           canal: Database["public"]["Enums"]["canal_atendimento"]
+          comentario_avaliacao: string | null
           created_at: string
           data_hora: string
           id: string
@@ -62,7 +64,9 @@ export type Database = {
         }
         Insert: {
           assunto?: string | null
+          avaliacao?: number | null
           canal: Database["public"]["Enums"]["canal_atendimento"]
+          comentario_avaliacao?: string | null
           created_at?: string
           data_hora?: string
           id?: string
@@ -74,7 +78,9 @@ export type Database = {
         }
         Update: {
           assunto?: string | null
+          avaliacao?: number | null
           canal?: Database["public"]["Enums"]["canal_atendimento"]
+          comentario_avaliacao?: string | null
           created_at?: string
           data_hora?: string
           id?: string
@@ -690,6 +696,63 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      solicitacoes_agendamento: {
+        Row: {
+          assunto: string | null
+          canal: Database["public"]["Enums"]["canal_atendimento"]
+          created_at: string
+          data_hora: string
+          id: string
+          mentorado_id: string
+          navegador_id: string
+          observacoes: string | null
+          status: string
+          tipo_atendimento: string
+          updated_at: string
+        }
+        Insert: {
+          assunto?: string | null
+          canal: Database["public"]["Enums"]["canal_atendimento"]
+          created_at?: string
+          data_hora: string
+          id?: string
+          mentorado_id: string
+          navegador_id: string
+          observacoes?: string | null
+          status?: string
+          tipo_atendimento: string
+          updated_at?: string
+        }
+        Update: {
+          assunto?: string | null
+          canal?: Database["public"]["Enums"]["canal_atendimento"]
+          created_at?: string
+          data_hora?: string
+          id?: string
+          mentorado_id?: string
+          navegador_id?: string
+          observacoes?: string | null
+          status?: string
+          tipo_atendimento?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "solicitacoes_agendamento_mentorado_id_fkey"
+            columns: ["mentorado_id"]
+            isOneToOne: false
+            referencedRelation: "mentorados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitacoes_agendamento_navegador_id_fkey"
+            columns: ["navegador_id"]
+            isOneToOne: false
+            referencedRelation: "navegadores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trilha_aceleracao: {
         Row: {
