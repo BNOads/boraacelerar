@@ -1,25 +1,37 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MessageCircle, Mail, User, Clock } from "lucide-react";
+import { MessageCircle, Mail, User, Clock, Edit } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { AdminNavegadorDialog } from "@/components/AdminNavegadorDialog";
+import { EditarNavegadorDialog } from "@/components/EditarNavegadorDialog";
+import { SolicitarAtendimentoDialog } from "@/components/SolicitarAtendimentoDialog";
+import { EstatisticasNavegadorDialog } from "@/components/EstatisticasNavegadorDialog";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 export default function Navegador() {
   const { isAdmin } = useIsAdmin();
-  // Buscar navegadores ativos
+  const [editingNavegador, setEditingNavegador] = useState<any>(null);
+  
+  // Buscar navegadores (ativos para usuários, todos para admins)
   const { data: navegadores, isLoading: loadingNavegadores } = useQuery({
-    queryKey: ["navegadores"],
+    queryKey: ["navegadores", isAdmin],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("navegadores")
-        .select("id, user_id, nome, foto_url, cargo, bio_curta, email, whatsapp_url, ativo, profiles(id, nome_completo, apelido, foto_url)")
-        .eq("ativo", true);
+        .select("id, user_id, nome, foto_url, cargo, bio_curta, email, whatsapp_url, ativo, profiles(id, nome_completo, apelido, foto_url)");
+      
+      // Se não for admin, filtrar apenas ativos
+      if (!isAdmin) {
+        query = query.eq("ativo", true);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
@@ -103,6 +115,29 @@ export default function Navegador() {
                   className="border-border bg-card/50 backdrop-blur-sm hover:shadow-elegant hover:scale-[1.02] transition-all duration-300"
                 >
                   <CardHeader className="text-center">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex-1" />
+                      <div className="flex gap-2">
+                        {!nav.ativo && (
+                          <Badge variant="secondary">Inativo</Badge>
+                        )}
+                        {isAdmin && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setEditingNavegador(nav)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <EstatisticasNavegadorDialog
+                              navegadorId={nav.id}
+                              navegadorNome={nome}
+                            />
+                          </>
+                        )}
+                      </div>
+                    </div>
                     <div className="flex justify-center mb-4">
                       <Avatar className="h-24 w-24 border-4 border-primary/20">
                         <AvatarImage src={fotoUrl || ""} alt={nome} />
@@ -127,6 +162,7 @@ export default function Navegador() {
                     </p>
                   )}
                   <div className="space-y-2">
+                    {nav.ativo && <SolicitarAtendimentoDialog navegadorId={nav.id} />}
                     {nav.whatsapp_url && (
                       <Button
                         className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
@@ -228,6 +264,15 @@ export default function Navegador() {
           </Card>
         )}
       </div>
+
+      {/* Dialog de Edição */}
+      {editingNavegador && (
+        <EditarNavegadorDialog
+          navegador={editingNavegador}
+          open={!!editingNavegador}
+          onOpenChange={(open) => !open && setEditingNavegador(null)}
+        />
+      )}
     </div>
   );
 }
