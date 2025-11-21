@@ -97,7 +97,7 @@ export function AdminTrilhaDialog() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="pilar">Pilar *</Label>
-              <Select value={formData.pilar} onValueChange={(value) => setFormData({ ...formData, pilar: value as typeof formData.pilar })}>
+              <Select value={formData.pilar || undefined} onValueChange={(value) => setFormData({ ...formData, pilar: value as typeof formData.pilar })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o pilar" />
                 </SelectTrigger>

@@ -97,7 +97,7 @@ export function AdminMembrosDialog() {
         data_publicacao: new Date().toISOString().split('T')[0],
         ativo: true,
       });
-      setSelectedMentorado("");
+      setSelectedMentorado("todos");
     },
     onError: () => {
       toast.error("Erro ao adicionar conteúdo");
@@ -133,7 +133,7 @@ export function AdminMembrosDialog() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="tipo">Tipo *</Label>
-              <Select value={formData.tipo} onValueChange={(value) => setFormData({ ...formData, tipo: value as typeof formData.tipo })}>
+              <Select value={formData.tipo || undefined} onValueChange={(value) => setFormData({ ...formData, tipo: value as typeof formData.tipo })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o tipo" />
                 </SelectTrigger>
@@ -149,7 +149,7 @@ export function AdminMembrosDialog() {
 
             <div className="space-y-2">
               <Label htmlFor="pilar">Pilar</Label>
-              <Select value={formData.pilar} onValueChange={(value) => setFormData({ ...formData, pilar: value as typeof formData.pilar })}>
+              <Select value={formData.pilar || undefined} onValueChange={(value) => setFormData({ ...formData, pilar: value as typeof formData.pilar })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o pilar" />
                 </SelectTrigger>
