@@ -553,9 +553,11 @@ export type Database = {
           cargo: string | null
           created_at: string
           email: string | null
+          foto_url: string | null
           id: string
+          nome: string | null
           updated_at: string
-          user_id: string
+          user_id: string | null
           whatsapp_url: string | null
         }
         Insert: {
@@ -564,9 +566,11 @@ export type Database = {
           cargo?: string | null
           created_at?: string
           email?: string | null
+          foto_url?: string | null
           id?: string
+          nome?: string | null
           updated_at?: string
-          user_id: string
+          user_id?: string | null
           whatsapp_url?: string | null
         }
         Update: {
@@ -575,9 +579,11 @@ export type Database = {
           cargo?: string | null
           created_at?: string
           email?: string | null
+          foto_url?: string | null
           id?: string
+          nome?: string | null
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
           whatsapp_url?: string | null
         }
         Relationships: [
