@@ -18,7 +18,7 @@ export default function Navegador() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("navegadores")
-        .select("*, profiles(*)")
+        .select("id, user_id, nome, foto_url, cargo, bio_curta, email, whatsapp_url, ativo, profiles(id, nome_completo, apelido, foto_url)")
         .eq("ativo", true);
       if (error) throw error;
       return data;
@@ -51,7 +51,7 @@ export default function Navegador() {
       
       const { data, error } = await supabase
         .from("atendimentos_navegador")
-        .select("*, navegadores(*, profiles(*))")
+        .select("*, navegadores(id, user_id, nome, foto_url, cargo, profiles(id, nome_completo, apelido, foto_url))")
         .eq("mentorado_id", mentorado.id)
         .order("data_hora", { ascending: false })
         .limit(10);
@@ -92,29 +92,34 @@ export default function Navegador() {
         <h2 className="text-2xl font-bold text-foreground">Equipe de Navegadores</h2>
         {navegadores && navegadores.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {navegadores.map((nav) => (
-              <Card
-                key={nav.id}
-                className="border-border bg-card/50 backdrop-blur-sm hover:shadow-elegant hover:scale-[1.02] transition-all duration-300"
-              >
-                <CardHeader className="text-center">
-                  <div className="flex justify-center mb-4">
-                    <Avatar className="h-24 w-24 border-4 border-primary/20">
-                      <AvatarImage src={nav.profiles?.foto_url} alt={nav.profiles?.nome_completo} />
-                      <AvatarFallback className="bg-primary/10 text-primary text-2xl">
-                        {nav.profiles?.nome_completo?.charAt(0) || <User className="h-8 w-8" />}
-                      </AvatarFallback>
-                    </Avatar>
-                  </div>
-                  <CardTitle className="text-xl">
-                    {nav.profiles?.nome_completo || nav.profiles?.apelido}
-                  </CardTitle>
-                  {nav.cargo && (
-                    <CardDescription className="font-medium text-primary">
-                      {nav.cargo}
-                    </CardDescription>
-                  )}
-                </CardHeader>
+            {navegadores.map((nav) => {
+              // Se for navegador externo, usar campos diretos; senão usar do profile
+              const nome = nav.nome || nav.profiles?.nome_completo || nav.profiles?.apelido || "Navegador";
+              const fotoUrl = nav.foto_url || nav.profiles?.foto_url;
+              
+              return (
+                <Card
+                  key={nav.id}
+                  className="border-border bg-card/50 backdrop-blur-sm hover:shadow-elegant hover:scale-[1.02] transition-all duration-300"
+                >
+                  <CardHeader className="text-center">
+                    <div className="flex justify-center mb-4">
+                      <Avatar className="h-24 w-24 border-4 border-primary/20">
+                        <AvatarImage src={fotoUrl || ""} alt={nome} />
+                        <AvatarFallback className="bg-primary/10 text-primary text-2xl">
+                          {nome.charAt(0) || <User className="h-8 w-8" />}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
+                    <CardTitle className="text-xl">
+                      {nome}
+                    </CardTitle>
+                    {nav.cargo && (
+                      <CardDescription className="font-medium text-primary">
+                        {nav.cargo}
+                      </CardDescription>
+                    )}
+                  </CardHeader>
                 <CardContent className="space-y-4">
                   {nav.bio_curta && (
                     <p className="text-sm text-muted-foreground text-center">
@@ -144,7 +149,8 @@ export default function Navegador() {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            );
+            })}
           </div>
         ) : (
           <Card className="border-border bg-card/50">
