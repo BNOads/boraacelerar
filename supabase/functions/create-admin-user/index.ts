@@ -53,7 +53,33 @@ serve(async (req) => {
       const user = existingUser.users.find((u) => u.email === adminEmail);
       
       if (user) {
-        console.log("Usuário encontrado, adicionando role de admin:", user.id);
+        console.log("Usuário encontrado, verificando profile:", user.id);
+        
+        // Verificar se o profile existe
+        const { data: profile } = await supabaseAdmin
+          .from("profiles")
+          .select("id")
+          .eq("id", user.id)
+          .single();
+
+        // Se não existe, criar o profile
+        if (!profile) {
+          console.log("Profile não existe, criando:", user.id);
+          const { error: profileError } = await supabaseAdmin
+            .from("profiles")
+            .insert({
+              id: user.id,
+              nome_completo: "Administrador BORA",
+              apelido: "Admin"
+            });
+
+          if (profileError) {
+            console.error("Erro ao criar profile:", profileError);
+            throw profileError;
+          }
+        }
+        
+        console.log("Adicionando role de admin:", user.id);
         
         // Adicionar role de admin
         const { error: roleError } = await supabaseAdmin
@@ -85,7 +111,28 @@ serve(async (req) => {
       throw authError;
     }
 
-    console.log("Usuário criado com sucesso, adicionando role:", authData.user.id);
+    console.log("Usuário criado com sucesso:", authData.user.id);
+
+    // Criar profile
+    console.log("Criando profile:", authData.user.id);
+    const { error: profileError } = await supabaseAdmin
+      .from("profiles")
+      .insert({
+        id: authData.user.id,
+        nome_completo: "Administrador BORA",
+        apelido: "Admin"
+      });
+
+    if (profileError) {
+      console.error("Erro ao criar profile:", profileError);
+      // Não falhar se o profile já existe
+      if (profileError.code !== "23505") {
+        throw profileError;
+      }
+    }
+
+    // Aguardar um momento
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     // Adicionar role de admin
     const { error: roleError } = await supabaseAdmin
