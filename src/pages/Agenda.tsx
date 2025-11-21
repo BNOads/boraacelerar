@@ -6,6 +6,7 @@ import { Calendar, Clock, Video } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { AdminAgendaDialog } from "@/components/AdminAgendaDialog";
+import { AdminImportarAgendaDialog } from "@/components/AdminImportarAgendaDialog";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 export default function Agenda() {
@@ -47,7 +48,12 @@ export default function Agenda() {
               Confira os próximos encontros e não perca nenhuma oportunidade de acelerar!
             </p>
           </div>
-          {isAdmin && <AdminAgendaDialog />}
+          {isAdmin && (
+            <div className="flex gap-2">
+              <AdminImportarAgendaDialog />
+              <AdminAgendaDialog />
+            </div>
+          )}
         </div>
       </div>
 

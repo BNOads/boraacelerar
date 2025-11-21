@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { ExternalLink, BookOpen } from "lucide-react";
 import { AdminTrilhaDialog } from "@/components/AdminTrilhaDialog";
+import { AdminImportarTrilhaDialog } from "@/components/AdminImportarTrilhaDialog";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 interface TrilhaItem {
@@ -72,7 +73,12 @@ export default function Trilha() {
             </p>
           </div>
         </div>
-        {isAdmin && <AdminTrilhaDialog />}
+        {isAdmin && (
+          <div className="flex gap-2">
+            <AdminImportarTrilhaDialog />
+            <AdminTrilhaDialog />
+          </div>
+        )}
       </div>
 
       {Object.keys(groupedByPilar).length === 0 ? (
