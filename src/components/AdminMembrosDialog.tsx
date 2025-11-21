@@ -48,7 +48,7 @@ export function AdminMembrosDialog() {
     enabled: open,
   });
 
-  const [selectedMentorado, setSelectedMentorado] = useState("");
+  const [selectedMentorado, setSelectedMentorado] = useState("todos");
 
   const addConteudoMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
@@ -70,8 +70,8 @@ export function AdminMembrosDialog() {
       
       if (conteudoError) throw conteudoError;
 
-      // Se mentorado selecionado, criar atribuição
-      if (selectedMentorado && conteudo) {
+      // Se mentorado selecionado (não "todos"), criar atribuição
+      if (selectedMentorado && selectedMentorado !== "todos" && conteudo) {
         const atribData: TablesInsert<"atribuicoes_conteudo"> = {
           conteudo_id: conteudo.id,
           audience_type: "mentorado",
@@ -193,7 +193,7 @@ export function AdminMembrosDialog() {
                 <SelectValue placeholder="Todos os membros" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos os membros</SelectItem>
+                <SelectItem value="todos">Todos os membros</SelectItem>
                 {mentorados?.map((m) => (
                   <SelectItem key={m.id} value={m.id}>
                     {m.profiles?.nome_completo || m.profiles?.apelido}
