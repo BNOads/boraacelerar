@@ -7,8 +7,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageCircle, Mail, User, Clock } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { AdminNavegadorDialog } from "@/components/AdminNavegadorDialog";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 export default function Navegador() {
+  const { isAdmin } = useIsAdmin();
   // Buscar navegadores ativos
   const { data: navegadores, isLoading: loadingNavegadores } = useQuery({
     queryKey: ["navegadores"],
@@ -71,12 +74,17 @@ export default function Navegador() {
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-          🤝 Navegador
-        </h1>
-        <p className="text-muted-foreground">
-          Seu time de suporte está aqui para te ajudar a acelerar ainda mais!
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+              🤝 Navegador
+            </h1>
+            <p className="text-muted-foreground">
+              Seu time de suporte está aqui para te ajudar a acelerar ainda mais!
+            </p>
+          </div>
+          {isAdmin && <AdminNavegadorDialog />}
+        </div>
       </div>
 
       {/* Navegadores */}

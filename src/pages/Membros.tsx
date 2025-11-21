@@ -7,9 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Search, Video, FileText, Clock, Play } from "lucide-react";
+import { AdminMembrosDialog } from "@/components/AdminMembrosDialog";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 export default function Membros() {
   const [searchTerm, setSearchTerm] = useState("");
+  const { isAdmin } = useIsAdmin();
 
   // Buscar mentorado_id do usuário
   const { data: mentorado } = useQuery({
@@ -104,12 +107,17 @@ export default function Membros() {
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-          🎥 Área de Membros
-        </h1>
-        <p className="text-muted-foreground">
-          Acesse suas gravações, conteúdos direcionados e recomendações personalizadas
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+              🎥 Área de Membros
+            </h1>
+            <p className="text-muted-foreground">
+              Acesse suas gravações, conteúdos direcionados e recomendações personalizadas
+            </p>
+          </div>
+          {isAdmin && <AdminMembrosDialog />}
+        </div>
       </div>
 
       {/* Search */}

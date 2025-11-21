@@ -5,8 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Clock, Video } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { AdminAgendaDialog } from "@/components/AdminAgendaDialog";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 export default function Agenda() {
+  const { isAdmin } = useIsAdmin();
   const { data: encontros, isLoading } = useQuery({
     queryKey: ["agenda"],
     queryFn: async () => {
@@ -35,12 +38,17 @@ export default function Agenda() {
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-          📅 Agenda de Mentorias
-        </h1>
-        <p className="text-muted-foreground">
-          Confira os próximos encontros e não perca nenhuma oportunidade de acelerar!
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+              📅 Agenda de Mentorias
+            </h1>
+            <p className="text-muted-foreground">
+              Confira os próximos encontros e não perca nenhuma oportunidade de acelerar!
+            </p>
+          </div>
+          {isAdmin && <AdminAgendaDialog />}
+        </div>
       </div>
 
       {/* Próximos Encontros */}
