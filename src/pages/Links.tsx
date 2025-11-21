@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ExternalLink, Edit } from "lucide-react";
 import { AdminLinksDialog } from "@/components/AdminLinksDialog";
+import { AdminImportarLinksDialog } from "@/components/AdminImportarLinksDialog";
 import { EditarLinkDialog } from "@/components/EditarLinkDialog";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 
@@ -54,7 +55,12 @@ export default function Links() {
               Acesso rápido às ferramentas e recursos essenciais da plataforma
             </p>
           </div>
-          {isAdmin && <AdminLinksDialog />}
+          {isAdmin && (
+            <div className="flex gap-2">
+              <AdminImportarLinksDialog />
+              <AdminLinksDialog />
+            </div>
+          )}
         </div>
       </div>
 

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Search, Video, FileText, Clock, Play } from "lucide-react";
 import { AdminMembrosDialog } from "@/components/AdminMembrosDialog";
+import { AdminImportarConteudoDialog } from "@/components/AdminImportarConteudoDialog";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 export default function Membros() {
@@ -116,7 +117,12 @@ export default function Membros() {
               Acesse suas gravações, conteúdos direcionados e recomendações personalizadas
             </p>
           </div>
-          {isAdmin && <AdminMembrosDialog />}
+          {isAdmin && (
+            <div className="flex gap-2">
+              <AdminImportarConteudoDialog />
+              <AdminMembrosDialog />
+            </div>
+          )}
         </div>
       </div>
 

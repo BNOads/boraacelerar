@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { BookOpen, ShoppingCart } from "lucide-react";
 import { CadastrarLivroDialog } from "@/components/CadastrarLivroDialog";
+import { AdminImportarLivrosDialog } from "@/components/AdminImportarLivrosDialog";
 import { useEffect, useState } from "react";
 
 export default function Livraria() {
@@ -59,7 +60,12 @@ export default function Livraria() {
               Livros cuidadosamente selecionados para acelerar sua jornada empreendedora
             </p>
           </div>
-          {isAdmin && <CadastrarLivroDialog />}
+          {isAdmin && (
+            <div className="flex gap-2">
+              <AdminImportarLivrosDialog />
+              <CadastrarLivroDialog />
+            </div>
+          )}
         </div>
       </div>
 
