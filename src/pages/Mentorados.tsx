@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { AdminCriarUsuarioDialog } from "@/components/AdminCriarUsuarioDialog";
+import { AdminImportarUsuariosDialog } from "@/components/AdminImportarUsuariosDialog";
 
 export default function Mentorados() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -144,7 +145,10 @@ export default function Mentorados() {
               Adicione novos usuários e gerencie informações dos mentorados
             </p>
           </div>
-          <AdminCriarUsuarioDialog />
+          <div className="flex gap-2">
+            <AdminImportarUsuariosDialog />
+            <AdminCriarUsuarioDialog />
+          </div>
         </div>
       </div>
 
