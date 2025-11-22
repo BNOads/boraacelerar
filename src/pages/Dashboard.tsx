@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, TrendingUp, Trophy, BookOpen, Rocket } from "lucide-react";
+import { Calendar, TrendingUp, Trophy, BookOpen, Rocket, Users } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 interface Profile {
   nome_completo: string;
@@ -16,9 +17,23 @@ interface AcelerometroData {
   maior_faturamento: number;
 }
 
+interface AdminStats {
+  total_mentorados: number;
+  faturamento_medio_mensal: number;
+  faturamento_acumulado_total: number;
+  distribuicao_faixas: {
+    faixa: string;
+    quantidade: number;
+    min_faturamento: number;
+    max_faturamento: number | null;
+  }[];
+}
+
 export default function Dashboard() {
+  const { isAdmin } = useIsAdmin();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [acelerometro, setAcelerometro] = useState<AcelerometroData | null>(null);
+  const [adminStats, setAdminStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,35 +49,123 @@ export default function Dashboard() {
         
         setProfile(profileData);
 
-        // Buscar mentorado_id
-        const { data: mentoradoData } = await supabase
-          .from("mentorados")
-          .select("id, meta_clientes")
-          .eq("user_id", user.id)
-          .single();
+        if (isAdmin) {
+          // Buscar estatísticas para admin
+          
+          // Total de mentorados ativos
+          const { count: totalMentorados } = await supabase
+            .from("mentorados")
+            .select("*", { count: "exact", head: true })
+            .eq("status", "ativo");
 
-        if (mentoradoData) {
-          // Buscar dados de desempenho
-          const { data: desempenhoData } = await supabase
+          // Faturamento total e médio
+          const { data: allDesempenho } = await supabase
             .from("desempenho_mensal")
-            .select("faturamento_mensal, clientes_mes")
-            .eq("mentorado_id", mentoradoData.id);
+            .select("faturamento_mensal, mentorado_id");
 
-          if (desempenhoData && desempenhoData.length > 0) {
-            const faturamentoAcumulado = desempenhoData.reduce(
-              (acc, item) => acc + (item.faturamento_mensal || 0),
-              0
-            );
-            const maiorFaturamento = Math.max(
-              ...desempenhoData.map(item => item.faturamento_mensal || 0)
-            );
-            const clientesAtuais = desempenhoData[desempenhoData.length - 1]?.clientes_mes || 0;
-
-            setAcelerometro({
-              clientes_atuais: clientesAtuais,
-              faturamento_acumulado: faturamentoAcumulado,
-              maior_faturamento: maiorFaturamento,
+          let faturamentoTotal = 0;
+          let countRegistros = 0;
+          
+          if (allDesempenho) {
+            allDesempenho.forEach(item => {
+              if (item.faturamento_mensal) {
+                faturamentoTotal += item.faturamento_mensal;
+                countRegistros++;
+              }
             });
+          }
+
+          const faturamentoMedio = countRegistros > 0 ? faturamentoTotal / countRegistros : 0;
+
+          // Buscar faixas de premiação
+          const { data: premiacoes } = await supabase
+            .from("premiacoes")
+            .select("*")
+            .order("min_faturamento", { ascending: true });
+
+          // Para cada mentorado, pegar o faturamento mais recente
+          const { data: mentoradosAtivos } = await supabase
+            .from("mentorados")
+            .select("id")
+            .eq("status", "ativo");
+
+          const distribuicaoFaixas: Record<string, number> = {};
+          
+          if (premiacoes) {
+            premiacoes.forEach(p => {
+              distribuicaoFaixas[p.faixa] = 0;
+            });
+          }
+
+          if (mentoradosAtivos && premiacoes) {
+            for (const mentorado of mentoradosAtivos) {
+              const { data: ultimoDesempenho } = await supabase
+                .from("desempenho_mensal")
+                .select("faturamento_mensal")
+                .eq("mentorado_id", mentorado.id)
+                .order("mes_ano", { ascending: false })
+                .limit(1)
+                .maybeSingle();
+
+              const faturamento = ultimoDesempenho?.faturamento_mensal || 0;
+
+              // Encontrar faixa correspondente
+              const faixa = premiacoes.find(p => {
+                const acimaDe = faturamento >= p.min_faturamento;
+                const abaixoDe = p.max_faturamento === null || faturamento <= p.max_faturamento;
+                return acimaDe && abaixoDe;
+              });
+
+              if (faixa) {
+                distribuicaoFaixas[faixa.faixa]++;
+              }
+            }
+          }
+
+          const distribuicaoArray = premiacoes?.map(p => ({
+            faixa: p.faixa,
+            quantidade: distribuicaoFaixas[p.faixa] || 0,
+            min_faturamento: p.min_faturamento,
+            max_faturamento: p.max_faturamento,
+          })) || [];
+
+          setAdminStats({
+            total_mentorados: totalMentorados || 0,
+            faturamento_medio_mensal: faturamentoMedio,
+            faturamento_acumulado_total: faturamentoTotal,
+            distribuicao_faixas: distribuicaoArray,
+          });
+        } else {
+          // Buscar mentorado_id
+          const { data: mentoradoData } = await supabase
+            .from("mentorados")
+            .select("id, meta_clientes")
+            .eq("user_id", user.id)
+            .maybeSingle();
+
+          if (mentoradoData) {
+            // Buscar dados de desempenho
+            const { data: desempenhoData } = await supabase
+              .from("desempenho_mensal")
+              .select("faturamento_mensal, clientes_mes")
+              .eq("mentorado_id", mentoradoData.id);
+
+            if (desempenhoData && desempenhoData.length > 0) {
+              const faturamentoAcumulado = desempenhoData.reduce(
+                (acc, item) => acc + (item.faturamento_mensal || 0),
+                0
+              );
+              const maiorFaturamento = Math.max(
+                ...desempenhoData.map(item => item.faturamento_mensal || 0)
+              );
+              const clientesAtuais = desempenhoData[desempenhoData.length - 1]?.clientes_mes || 0;
+
+              setAcelerometro({
+                clientes_atuais: clientesAtuais,
+                faturamento_acumulado: faturamentoAcumulado,
+                maior_faturamento: maiorFaturamento,
+              });
+            }
           }
         }
       }
@@ -70,7 +173,7 @@ export default function Dashboard() {
     };
 
     fetchData();
-  }, []);
+  }, [isAdmin]);
 
   const quickAccessCards = [
     { title: "Próximo Encontro", icon: Calendar, link: "/agenda", color: "from-primary/20 to-primary/5" },
@@ -120,40 +223,94 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Acelerômetro Preview */}
+      {/* Acelerômetro Preview - Admin ou Mentorado */}
       <Card className="border-border bg-card shadow-card">
         <CardHeader>
           <CardTitle className="text-2xl text-foreground flex items-center gap-2">
-            <TrendingUp className="h-6 w-6 text-primary" />
-            Acelerômetro
+            {isAdmin ? <Users className="h-6 w-6 text-primary" /> : <TrendingUp className="h-6 w-6 text-primary" />}
+            {isAdmin ? "Estatísticas da Mentoria" : "Acelerômetro"}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center p-6 bg-muted/30 rounded-lg">
-              <p className="text-4xl font-bold text-primary mb-2">{acelerometro?.clientes_atuais || 0}</p>
-              <p className="text-sm text-muted-foreground">Clientes Atuais</p>
-            </div>
-            <div className="text-center p-6 bg-muted/30 rounded-lg">
-              <p className="text-4xl font-bold text-primary mb-2">
-                R$ {acelerometro?.maior_faturamento?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}
-              </p>
-              <p className="text-sm text-muted-foreground">Maior Faturamento Mensal</p>
-            </div>
-            <div className="text-center p-6 bg-muted/30 rounded-lg">
-              <p className="text-4xl font-bold text-primary mb-2">
-                R$ {acelerometro?.faturamento_acumulado?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}
-              </p>
-              <p className="text-sm text-muted-foreground">Faturamento Acumulado</p>
-            </div>
-          </div>
-          <div className="mt-6 text-center">
-            <Link to="/resultados">
-              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                Ver Minha Evolução Completa
-              </Button>
-            </Link>
-          </div>
+          {isAdmin && adminStats ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="text-center p-6 bg-muted/30 rounded-lg">
+                  <p className="text-4xl font-bold text-primary mb-2">{adminStats.total_mentorados}</p>
+                  <p className="text-sm text-muted-foreground">Total de Mentorados</p>
+                </div>
+                <div className="text-center p-6 bg-muted/30 rounded-lg">
+                  <p className="text-4xl font-bold text-primary mb-2">
+                    R$ {adminStats.faturamento_medio_mensal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Faturamento Médio Mensal</p>
+                </div>
+                <div className="text-center p-6 bg-muted/30 rounded-lg">
+                  <p className="text-4xl font-bold text-primary mb-2">
+                    R$ {adminStats.faturamento_acumulado_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Faturamento Acumulado Total</p>
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold text-foreground mb-4">Distribuição por Faixa de Faturamento</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {adminStats.distribuicao_faixas.map((faixa) => (
+                    <div key={faixa.faixa} className="p-4 bg-muted/20 rounded-lg border border-border">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-semibold text-foreground">{faixa.faixa}</span>
+                        <Trophy className="h-5 w-5 text-primary" />
+                      </div>
+                      <p className="text-2xl font-bold text-primary mb-1">{faixa.quantidade}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {faixa.max_faturamento 
+                          ? `R$ ${faixa.min_faturamento.toLocaleString('pt-BR')} - R$ ${faixa.max_faturamento.toLocaleString('pt-BR')}`
+                          : `Acima de R$ ${faixa.min_faturamento.toLocaleString('pt-BR')}`
+                        }
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-6 text-center">
+                <Link to="/mentorados">
+                  <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                    Ver Todos os Mentorados
+                  </Button>
+                </Link>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="text-center p-6 bg-muted/30 rounded-lg">
+                  <p className="text-4xl font-bold text-primary mb-2">{acelerometro?.clientes_atuais || 0}</p>
+                  <p className="text-sm text-muted-foreground">Clientes Atuais</p>
+                </div>
+                <div className="text-center p-6 bg-muted/30 rounded-lg">
+                  <p className="text-4xl font-bold text-primary mb-2">
+                    R$ {acelerometro?.maior_faturamento?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Maior Faturamento Mensal</p>
+                </div>
+                <div className="text-center p-6 bg-muted/30 rounded-lg">
+                  <p className="text-4xl font-bold text-primary mb-2">
+                    R$ {acelerometro?.faturamento_acumulado?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Faturamento Acumulado</p>
+                </div>
+              </div>
+              <div className="mt-6 text-center">
+                <Link to="/resultados">
+                  <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                    Ver Minha Evolução Completa
+                  </Button>
+                </Link>
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
 
