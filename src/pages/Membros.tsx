@@ -6,9 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, Video, FileText, Clock, Play } from "lucide-react";
+import { Search, Video, FileText, Clock, Play, BookOpen, ShoppingCart } from "lucide-react";
 import { AdminMembrosDialog } from "@/components/AdminMembrosDialog";
 import { AdminImportarConteudoDialog } from "@/components/AdminImportarConteudoDialog";
+import { CadastrarLivroDialog } from "@/components/CadastrarLivroDialog";
+import { AdminImportarLivrosDialog } from "@/components/AdminImportarLivrosDialog";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 export default function Membros() {
@@ -86,6 +88,19 @@ export default function Membros() {
     enabled: !!mentorado?.id,
   });
 
+  // Livros Recomendados
+  const { data: livros, isLoading: loadingLivros } = useQuery({
+    queryKey: ["livros"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("livros_recomendados")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const filteredEncontros = gravacoesEncontros?.filter(
     (g) =>
       g.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -104,6 +119,13 @@ export default function Membros() {
       c.descricao?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const filteredLivros = livros?.filter(
+    (l) =>
+      l.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      l.autor.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      l.descricao_curta?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
@@ -119,8 +141,10 @@ export default function Membros() {
           </div>
           {isAdmin && (
             <div className="flex gap-2">
+              <AdminImportarLivrosDialog />
               <AdminImportarConteudoDialog />
               <AdminMembrosDialog />
+              <CadastrarLivroDialog />
             </div>
           )}
         </div>
@@ -142,6 +166,7 @@ export default function Membros() {
         <TabsList className="bg-card/50 border border-border">
           <TabsTrigger value="gravacoes">Minhas Gravações</TabsTrigger>
           <TabsTrigger value="conteudo">Meu Conteúdo</TabsTrigger>
+          <TabsTrigger value="livraria">Livraria BORA</TabsTrigger>
           <TabsTrigger value="recomendacoes">Recomendações</TabsTrigger>
         </TabsList>
 
@@ -331,6 +356,73 @@ export default function Membros() {
                 <FileText className="h-16 w-16 text-muted-foreground mb-4" />
                 <p className="text-muted-foreground">
                   Nenhum conteúdo direcionado no momento.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="livraria" className="space-y-4">
+          <div className="mb-6">
+            <h3 className="text-2xl font-bold text-foreground mb-2">📖 Livraria BORA</h3>
+            <p className="text-muted-foreground">
+              Livros cuidadosamente selecionados para acelerar sua jornada empreendedora
+            </p>
+          </div>
+          
+          {loadingLivros ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+            </div>
+          ) : filteredLivros && filteredLivros.length > 0 ? (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {filteredLivros.map((livro) => (
+                <Card
+                  key={livro.id}
+                  className="border-border bg-card/50 backdrop-blur-sm hover:shadow-elegant hover:scale-[1.02] transition-all duration-300"
+                >
+                  <div className="relative aspect-[2/3] bg-muted overflow-hidden">
+                    {livro.capa_url ? (
+                      <img
+                        src={livro.capa_url}
+                        alt={livro.titulo}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-full">
+                        <BookOpen className="h-16 w-16 text-muted-foreground" />
+                      </div>
+                    )}
+                  </div>
+                  <CardHeader>
+                    <CardTitle className="text-lg line-clamp-2">{livro.titulo}</CardTitle>
+                    <CardDescription className="font-medium">{livro.autor}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {livro.descricao_curta && (
+                      <p className="text-sm text-muted-foreground line-clamp-3">
+                        {livro.descricao_curta}
+                      </p>
+                    )}
+                    {livro.url_compra && (
+                      <Button
+                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
+                        onClick={() => window.open(livro.url_compra, "_blank")}
+                      >
+                        <ShoppingCart className="mr-2 h-4 w-4" />
+                        Comprar Agora
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card className="border-border bg-card/50 backdrop-blur-sm">
+              <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                <BookOpen className="h-16 w-16 text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">
+                  Nenhum livro cadastrado no momento. Em breve teremos recomendações incríveis!
                 </p>
               </CardContent>
             </Card>

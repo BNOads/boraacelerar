@@ -1,4 +1,4 @@
-import { Home, BookOpen, TrendingUp, Trophy, Calendar, Video, Library, Users as UsersIcon, Link as LinkIcon, Settings, LogOut, User, Users, Bell } from "lucide-react";
+import { Home, BookOpen, TrendingUp, Trophy, Calendar, Video, Users as UsersIcon, Link as LinkIcon, Settings, LogOut, User, Users, Bell } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
@@ -29,7 +29,6 @@ const menuItems = [
   { title: "Resultados", url: "/resultados", icon: TrendingUp },
   { title: "Agenda", url: "/agenda", icon: Calendar },
   { title: "Área de Membros", url: "/membros", icon: Video },
-  { title: "Livraria BORA", url: "/livraria", icon: Library },
   { title: "Navegador", url: "/navegador", icon: UsersIcon },
   { title: "Links Úteis", url: "/links", icon: LinkIcon },
   { title: "Mentorados", url: "/mentorados", icon: Users, adminOnly: true },
