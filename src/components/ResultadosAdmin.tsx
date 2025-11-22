@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
 import { TrendingUp, Users, CheckCircle, Target, ArrowUpDown, Search, ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -57,11 +58,14 @@ const getPerformanceColor = (valor: number): string => {
   return "text-red-500";
 };
 
+const ITEMS_PER_PAGE = 20;
+
 export function ResultadosAdmin() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [filtroTurma, setFiltroTurma] = useState<string>("todas");
   const [filtroFaixa, setFiltroFaixa] = useState<string>("todas");
+  const [currentPage, setCurrentPage] = useState(1);
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; order: SortOrder }>({
     key: 'faturamentoMedio',
     order: 'desc'
@@ -189,6 +193,17 @@ export function ResultadosAdmin() {
 
     return resultado;
   }, [mentoradosRanking, searchTerm, filtroTurma, filtroFaixa, sortConfig]);
+
+  // Cálculos de paginação
+  const totalPages = Math.ceil(mentoradosFiltrados.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const mentoradosPaginados = mentoradosFiltrados.slice(startIndex, endIndex);
+
+  // Reset para primeira página quando filtros mudarem
+  useMemo(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filtroTurma, filtroFaixa]);
 
   // KPIs agregados
   const kpisAgregados = useMemo(() => {
@@ -356,9 +371,14 @@ export function ResultadosAdmin() {
       {/* Tabela de Ranking */}
       <Card className="border-border bg-card shadow-card">
         <CardHeader>
-          <CardTitle className="text-foreground">Ranking de Mentorados</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-foreground">Ranking de Mentorados</CardTitle>
+            <div className="text-sm text-muted-foreground">
+              Mostrando {startIndex + 1} - {Math.min(endIndex, mentoradosFiltrados.length)} de {mentoradosFiltrados.length} mentorados
+            </div>
+          </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
@@ -457,14 +477,14 @@ export function ResultadosAdmin() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mentoradosFiltrados.length === 0 ? (
+                {mentoradosPaginados.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={11} className="text-center text-muted-foreground py-8">
                       Nenhum mentorado encontrado
                     </TableCell>
                   </TableRow>
                 ) : (
-                  mentoradosFiltrados.map((mentorado) => (
+                  mentoradosPaginados.map((mentorado) => (
                     <TableRow 
                       key={mentorado.id} 
                       className="hover:bg-muted/50 cursor-pointer"
@@ -533,6 +553,83 @@ export function ResultadosAdmin() {
               </TableBody>
             </Table>
           </div>
+
+          {/* Paginação */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between pt-4 border-t">
+              <div className="text-sm text-muted-foreground">
+                Página {currentPage} de {totalPages}
+              </div>
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+
+                  {/* Primeira página */}
+                  {currentPage > 2 && (
+                    <>
+                      <PaginationItem>
+                        <PaginationLink onClick={() => setCurrentPage(1)} className="cursor-pointer">
+                          1
+                        </PaginationLink>
+                      </PaginationItem>
+                      {currentPage > 3 && (
+                        <PaginationItem>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      )}
+                    </>
+                  )}
+
+                  {/* Páginas ao redor da atual */}
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter(page => {
+                      return page === currentPage || 
+                             page === currentPage - 1 || 
+                             page === currentPage + 1;
+                    })
+                    .map(page => (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          onClick={() => setCurrentPage(page)}
+                          isActive={page === currentPage}
+                          className="cursor-pointer"
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+
+                  {/* Última página */}
+                  {currentPage < totalPages - 1 && (
+                    <>
+                      {currentPage < totalPages - 2 && (
+                        <PaginationItem>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      )}
+                      <PaginationItem>
+                        <PaginationLink onClick={() => setCurrentPage(totalPages)} className="cursor-pointer">
+                          {totalPages}
+                        </PaginationLink>
+                      </PaginationItem>
+                    </>
+                  )}
+
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
