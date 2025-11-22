@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, User, Calendar, TrendingUp, Target, Award, Instagram, Mail, Phone } from "lucide-react";
-import { format } from "date-fns";
+import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 export default function MentoradoProfile() {
@@ -285,7 +285,9 @@ export default function MentoradoProfile() {
                   {desempenho.map((d) => (
                     <div key={d.id} className="flex items-center justify-between">
                       <div className="space-y-1">
-                        <p className="text-sm font-medium">{d.mes_ano}</p>
+                        <p className="text-sm font-medium">
+                          {format(parse(d.mes_ano, 'yyyy-MM', new Date()), 'MMM yyyy', { locale: ptBR })}
+                        </p>
                         <p className="text-xs text-muted-foreground">
                           {d.contratos_fechados} contratos • {d.clientes_mes} clientes
                         </p>
