@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { TrendingUp, Users, CheckCircle, ArrowUp, Trophy } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { TrendingUp, Users, CheckCircle, ArrowUp, Trophy, UserPlus, Instagram, Youtube, Music } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 interface DesempenhoData {
   mes_ano: string;
@@ -22,6 +26,14 @@ interface FaixaPremiacao {
   emoji: string;
 }
 
+interface MetricasMensais {
+  mes_ano: string;
+  qtd_colaboradores: number;
+  seguidores_instagram: number;
+  seguidores_youtube: number;
+  seguidores_tiktok: number;
+}
+
 const faixas: FaixaPremiacao[] = [
   { nome: "Bronze", min: 10000, max: 24999, cor: "bg-amber-700", emoji: "🥉" },
   { nome: "Prata", min: 25000, max: 49999, cor: "bg-slate-400", emoji: "🥈" },
@@ -34,6 +46,15 @@ export default function Resultados() {
   const [desempenhoAtual, setDesempenhoAtual] = useState<DesempenhoData | null>(null);
   const [historico, setHistorico] = useState<DesempenhoData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [mentoradoId, setMentoradoId] = useState<string | null>(null);
+  const [metricasMensais, setMetricasMensais] = useState<MetricasMensais[]>([]);
+  const [novaMetrica, setNovaMetrica] = useState({
+    mes_ano: new Date().toISOString().slice(0, 7),
+    qtd_colaboradores: 0,
+    seguidores_instagram: 0,
+    seguidores_youtube: 0,
+    seguidores_tiktok: 0,
+  });
 
   useEffect(() => {
     const fetchDesempenho = async () => {
@@ -47,6 +68,8 @@ export default function Resultados() {
           .single();
 
         if (mentoradoData) {
+          setMentoradoId(mentoradoData.id);
+          
           const { data: allData } = await supabase
             .from("desempenho_mensal")
             .select("*")
@@ -57,6 +80,17 @@ export default function Resultados() {
             setHistorico(allData);
             setDesempenhoAtual(allData[allData.length - 1]);
           }
+
+          // Buscar métricas mensais
+          const { data: metricasData } = await supabase
+            .from("metricas_mensais")
+            .select("*")
+            .eq("mentorado_id", mentoradoData.id)
+            .order("mes_ano", { ascending: true });
+
+          if (metricasData) {
+            setMetricasMensais(metricasData);
+          }
         }
       }
       setLoading(false);
@@ -64,6 +98,38 @@ export default function Resultados() {
 
     fetchDesempenho();
   }, []);
+
+  const handleSalvarMetricas = async () => {
+    if (!mentoradoId) {
+      toast.error("Erro ao identificar mentorado");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("metricas_mensais")
+      .upsert({
+        mentorado_id: mentoradoId,
+        ...novaMetrica,
+      });
+
+    if (error) {
+      toast.error("Erro ao salvar métricas");
+      console.error(error);
+    } else {
+      toast.success("Métricas salvas com sucesso!");
+      
+      // Atualizar lista
+      const { data: metricasData } = await supabase
+        .from("metricas_mensais")
+        .select("*")
+        .eq("mentorado_id", mentoradoId)
+        .order("mes_ano", { ascending: true });
+
+      if (metricasData) {
+        setMetricasMensais(metricasData);
+      }
+    }
+  };
 
   const faturamentoTotal = historico.reduce((acc, item) => acc + (item.faturamento_mensal || 0), 0);
   const contratosTotal = historico.reduce((acc, item) => acc + (item.contratos_fechados || 0), 0);
@@ -243,6 +309,145 @@ export default function Resultados() {
           ) : (
             <div className="h-64 flex items-center justify-center bg-muted/30 rounded-lg">
               <p className="text-muted-foreground">Dados insuficientes</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Métricas de Crescimento */}
+      <Card className="border-border bg-card shadow-card">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <UserPlus className="h-6 w-6 text-primary" />
+            <CardTitle className="text-foreground">Métricas de Crescimento</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Formulário */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 p-4 bg-muted/30 rounded-lg">
+            <div className="space-y-2">
+              <Label htmlFor="mes_ano">Mês/Ano</Label>
+              <Input
+                id="mes_ano"
+                type="month"
+                value={novaMetrica.mes_ano}
+                onChange={(e) => setNovaMetrica({ ...novaMetrica, mes_ano: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="colaboradores" className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Colaboradores
+              </Label>
+              <Input
+                id="colaboradores"
+                type="number"
+                value={novaMetrica.qtd_colaboradores}
+                onChange={(e) => setNovaMetrica({ ...novaMetrica, qtd_colaboradores: parseInt(e.target.value) || 0 })}
+                min="0"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="instagram" className="flex items-center gap-2">
+                <Instagram className="h-4 w-4" />
+                Instagram
+              </Label>
+              <Input
+                id="instagram"
+                type="number"
+                value={novaMetrica.seguidores_instagram}
+                onChange={(e) => setNovaMetrica({ ...novaMetrica, seguidores_instagram: parseInt(e.target.value) || 0 })}
+                min="0"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="youtube" className="flex items-center gap-2">
+                <Youtube className="h-4 w-4" />
+                YouTube
+              </Label>
+              <Input
+                id="youtube"
+                type="number"
+                value={novaMetrica.seguidores_youtube}
+                onChange={(e) => setNovaMetrica({ ...novaMetrica, seguidores_youtube: parseInt(e.target.value) || 0 })}
+                min="0"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="tiktok" className="flex items-center gap-2">
+                <Music className="h-4 w-4" />
+                TikTok
+              </Label>
+              <Input
+                id="tiktok"
+                type="number"
+                value={novaMetrica.seguidores_tiktok}
+                onChange={(e) => setNovaMetrica({ ...novaMetrica, seguidores_tiktok: parseInt(e.target.value) || 0 })}
+                min="0"
+              />
+            </div>
+            <div className="md:col-span-2 lg:col-span-5 flex justify-end">
+              <Button onClick={handleSalvarMetricas} className="w-full md:w-auto">
+                Salvar Métricas
+              </Button>
+            </div>
+          </div>
+
+          {/* Gráfico de Métricas */}
+          {metricasMensais.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={metricasMensais}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis 
+                  dataKey="mes_ano" 
+                  className="text-xs"
+                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                />
+                <YAxis 
+                  className="text-xs"
+                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                />
+                <Tooltip 
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                  }}
+                />
+                <Legend />
+                <Line 
+                  type="monotone" 
+                  dataKey="qtd_colaboradores" 
+                  name="Colaboradores"
+                  stroke="#8b5cf6" 
+                  strokeWidth={2}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="seguidores_instagram" 
+                  name="Instagram"
+                  stroke="#e4405f" 
+                  strokeWidth={2}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="seguidores_youtube" 
+                  name="YouTube"
+                  stroke="#ff0000" 
+                  strokeWidth={2}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="seguidores_tiktok" 
+                  name="TikTok"
+                  stroke="#00f2ea" 
+                  strokeWidth={2}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-64 flex items-center justify-center bg-muted/30 rounded-lg">
+              <p className="text-muted-foreground">Adicione suas primeiras métricas para visualizar o gráfico</p>
             </div>
           )}
         </CardContent>

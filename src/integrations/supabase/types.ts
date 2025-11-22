@@ -552,6 +552,50 @@ export type Database = {
           },
         ]
       }
+      metricas_mensais: {
+        Row: {
+          created_at: string
+          id: string
+          mentorado_id: string
+          mes_ano: string
+          qtd_colaboradores: number | null
+          seguidores_instagram: number | null
+          seguidores_tiktok: number | null
+          seguidores_youtube: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mentorado_id: string
+          mes_ano: string
+          qtd_colaboradores?: number | null
+          seguidores_instagram?: number | null
+          seguidores_tiktok?: number | null
+          seguidores_youtube?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mentorado_id?: string
+          mes_ano?: string
+          qtd_colaboradores?: number | null
+          seguidores_instagram?: number | null
+          seguidores_tiktok?: number | null
+          seguidores_youtube?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "metricas_mensais_mentorado_id_fkey"
+            columns: ["mentorado_id"]
+            isOneToOne: false
+            referencedRelation: "mentorados"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       navegadores: {
         Row: {
           ativo: boolean | null
