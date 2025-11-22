@@ -149,7 +149,7 @@ export function AppSidebar() {
 
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild className="text-white hover:text-white">
+              <SidebarMenuButton asChild className="hover:text-sidebar-foreground">
                 <NavLink 
                   to="/configuracoes" 
                   className={({ isActive }) =>
