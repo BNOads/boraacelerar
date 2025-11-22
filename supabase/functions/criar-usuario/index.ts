@@ -42,6 +42,17 @@ Deno.serve(async (req) => {
       }
     )
 
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+        },
+      }
+    )
+
     const { data: { user: requestUser }, error: authError } = await supabaseClient.auth.getUser(
       authHeader.replace('Bearer ', '')
     )
@@ -50,8 +61,8 @@ Deno.serve(async (req) => {
       throw new Error('Usuário não autenticado')
     }
 
-    // Verificar se o usuário tem role de admin
-    const { data: roles } = await supabaseClient
+    // Verificar se o usuário tem role de admin usando o client com service role (bypassa RLS)
+    const { data: roles } = await supabaseAdmin
       .from('user_roles')
       .select('role')
       .eq('user_id', requestUser.id)
@@ -66,16 +77,6 @@ Deno.serve(async (req) => {
     console.log('Criando usuário:', { email: requestData.email, role: requestData.role })
 
     // Criar usuário usando o admin API
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      {
-        auth: {
-          persistSession: false,
-          autoRefreshToken: false,
-        },
-      }
-    )
 
     // Criar o usuário no auth
     const { data: newUser, error: createUserError } = await supabaseAdmin.auth.admin.createUser({
