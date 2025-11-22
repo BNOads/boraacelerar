@@ -309,15 +309,15 @@ export function AdminImportarMentoradosCompleto() {
             <Button
               variant="outline"
               className="gap-2"
-              onClick={() => {
-                const link = document.createElement("a");
-                link.href = "/templates/template-mentorados-completo.csv";
-                link.download = "template-mentorados-completo.csv";
-                link.click();
-              }}
+              asChild
             >
-              <Download className="h-4 w-4" />
-              Baixar Template CSV
+              <a 
+                href="/templates/template-mentorados-completo.csv" 
+                download="template-mentorados-completo.csv"
+              >
+                <Download className="h-4 w-4" />
+                Baixar Template CSV
+              </a>
             </Button>
           </div>
 
