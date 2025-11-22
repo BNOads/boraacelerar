@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
       .select('role')
       .eq('user_id', requestUser.id)
       .eq('role', 'admin')
-      .single()
+      .maybeSingle()
 
     if (!roles) {
       throw new Error('Usuário não tem permissão de administrador')
