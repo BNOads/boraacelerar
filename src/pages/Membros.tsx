@@ -6,17 +6,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, Video, FileText, Clock, Play, BookOpen, ShoppingCart, ExternalLink, Building2 } from "lucide-react";
+import { Search, Video, FileText, Clock, Play, BookOpen, ShoppingCart, ExternalLink, Edit, Trash2 } from "lucide-react";
 import { AdminMembrosDialog } from "@/components/AdminMembrosDialog";
 import { AdminImportarConteudoDialog } from "@/components/AdminImportarConteudoDialog";
 import { CadastrarLivroDialog } from "@/components/CadastrarLivroDialog";
 import { AdminImportarLivrosDialog } from "@/components/AdminImportarLivrosDialog";
 import { AdminPostoIpirangaDialog } from "@/components/AdminPostoIpirangaDialog";
+import { EditarPostoIpirangaDialog } from "@/components/EditarPostoIpirangaDialog";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 export default function Membros() {
   const [searchTerm, setSearchTerm] = useState("");
   const { isAdmin } = useIsAdmin();
+  const [editingLink, setEditingLink] = useState<any>(null);
 
   // Buscar mentorado_id do usuário
   const { data: mentorado } = useQuery({
@@ -181,7 +183,7 @@ export default function Membros() {
           <TabsTrigger value="conteudo">Meu Conteúdo</TabsTrigger>
           <TabsTrigger value="livraria">Livraria BORA</TabsTrigger>
           <TabsTrigger value="posto-ipiranga">
-            <Building2 className="h-4 w-4 mr-2" />
+            <span className="mr-2">⛽️</span>
             Posto Ipiranga
           </TabsTrigger>
           <TabsTrigger value="recomendacoes">Recomendações</TabsTrigger>
@@ -461,7 +463,7 @@ export default function Membros() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="flex items-center gap-2">
-                    <Building2 className="h-5 w-5" />
+                    <span className="text-2xl">⛽️</span>
                     Posto Ipiranga
                   </CardTitle>
                   <CardDescription>
@@ -516,17 +518,28 @@ export default function Membros() {
                                     {link.descricao && (
                                       <p className="text-sm text-muted-foreground mb-3">{link.descricao}</p>
                                     )}
-                                    <a
-                                      href={link.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
-                                    >
-                                      Acessar recurso
-                                      <ExternalLink className="h-4 w-4" />
-                                    </a>
-                                  </div>
-                                </div>
+                                     <a
+                                       href={link.url}
+                                       target="_blank"
+                                       rel="noopener noreferrer"
+                                       className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
+                                     >
+                                       Acessar recurso
+                                       <ExternalLink className="h-4 w-4" />
+                                     </a>
+                                   </div>
+                                   {isAdmin && (
+                                     <div className="flex gap-2">
+                                       <Button
+                                         size="icon"
+                                         variant="ghost"
+                                         onClick={() => setEditingLink(link)}
+                                       >
+                                         <Edit className="h-4 w-4" />
+                                       </Button>
+                                     </div>
+                                   )}
+                                 </div>
                               </CardContent>
                             </Card>
                           ))}
@@ -565,6 +578,12 @@ export default function Membros() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <EditarPostoIpirangaDialog
+        link={editingLink}
+        open={!!editingLink}
+        onOpenChange={(open) => !open && setEditingLink(null)}
+      />
     </div>
   );
 }
