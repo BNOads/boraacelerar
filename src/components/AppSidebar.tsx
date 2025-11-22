@@ -2,6 +2,7 @@ import { Home, BookOpen, TrendingUp, Trophy, Calendar, Video, Library, Users as 
 import { NavLink, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { AdminBadge } from "./AdminBadge";
 import {
@@ -20,6 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import logo from "@/assets/logo-bora.png";
+import logoLight from "@/assets/logo-bora-light.png";
 
 const menuItems = [
   { title: "Início", url: "/dashboard", icon: Home },
@@ -35,6 +37,7 @@ const menuItems = [
 
 export function AppSidebar() {
   const { state } = useSidebar();
+  const { theme } = useTheme();
   const navigate = useNavigate();
   const { isAdmin } = useIsAdmin();
 
@@ -71,7 +74,11 @@ export function AppSidebar() {
       <SidebarContent className="bg-sidebar">
         {state !== "collapsed" && (
           <div className="p-6 flex justify-center">
-            <img src={logo} alt="BORA Acelerar" className="h-20 w-auto" />
+            <img 
+              src={theme === "light" ? logoLight : logo} 
+              alt="BORA Acelerar" 
+              className="h-20 w-auto" 
+            />
           </div>
         )}
 
