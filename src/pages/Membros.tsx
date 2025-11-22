@@ -141,10 +141,8 @@ export default function Membros() {
           </div>
           {isAdmin && (
             <div className="flex gap-2">
-              <AdminImportarLivrosDialog />
               <AdminImportarConteudoDialog />
               <AdminMembrosDialog />
-              <CadastrarLivroDialog />
             </div>
           )}
         </div>
@@ -154,7 +152,7 @@ export default function Membros() {
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Buscar por título, descrição ou tag..."
+          placeholder="Buscar por título, descrição, tag, livro ou autor..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="pl-10 bg-card/50 border-border"
@@ -363,11 +361,19 @@ export default function Membros() {
         </TabsContent>
 
         <TabsContent value="livraria" className="space-y-4">
-          <div className="mb-6">
-            <h3 className="text-2xl font-bold text-foreground mb-2">📖 Livraria BORA</h3>
-            <p className="text-muted-foreground">
-              Livros cuidadosamente selecionados para acelerar sua jornada empreendedora
-            </p>
+          <div className="flex items-start justify-between mb-6">
+            <div>
+              <h3 className="text-2xl font-bold text-foreground mb-2">📖 Livraria BORA</h3>
+              <p className="text-muted-foreground">
+                Livros cuidadosamente selecionados para acelerar sua jornada empreendedora
+              </p>
+            </div>
+            {isAdmin && (
+              <div className="flex gap-2">
+                <AdminImportarLivrosDialog />
+                <CadastrarLivroDialog />
+              </div>
+            )}
           </div>
           
           {loadingLivros ? (
