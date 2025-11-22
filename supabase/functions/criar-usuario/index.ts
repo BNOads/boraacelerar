@@ -100,9 +100,26 @@ Deno.serve(async (req) => {
 
     console.log('Usuário criado com sucesso:', newUser.user.id)
 
-    // Criar perfil (será criado automaticamente pelo trigger handle_new_user)
-    // Aguardar um pouco para garantir que o trigger foi executado
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // Aguardar a criação do perfil pelo trigger (com retry)
+    let profileExists = false
+    for (let i = 0; i < 10; i++) {
+      const { data: profile } = await supabaseAdmin
+        .from('profiles')
+        .select('id')
+        .eq('id', newUser.user.id)
+        .maybeSingle()
+      
+      if (profile) {
+        profileExists = true
+        console.log('Perfil criado com sucesso')
+        break
+      }
+      await new Promise(resolve => setTimeout(resolve, 500))
+    }
+
+    if (!profileExists) {
+      throw new Error('Perfil não foi criado automaticamente')
+    }
 
     // Adicionar role
     const { error: roleError } = await supabaseAdmin
