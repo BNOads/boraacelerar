@@ -875,6 +875,42 @@ export type Database = {
           },
         ]
       }
+      posto_ipiranga_links: {
+        Row: {
+          ativo: boolean
+          categoria: string
+          created_at: string
+          descricao: string | null
+          id: string
+          ordem: number
+          titulo: string
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          ativo?: boolean
+          categoria: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          ordem?: number
+          titulo: string
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          ativo?: boolean
+          categoria?: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          ordem?: number
+          titulo?: string
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       premiacoes: {
         Row: {
           badge_url: string | null
