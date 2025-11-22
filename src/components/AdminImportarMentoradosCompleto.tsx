@@ -46,6 +46,8 @@ export function AdminImportarMentoradosCompleto() {
   const [isImporting, setIsImporting] = useState(false);
   const [progress, setProgress] = useState(0);
   const [results, setResults] = useState<ImportResult[]>([]);
+  const [previewData, setPreviewData] = useState<CSVRow[]>([]);
+  const [showPreview, setShowPreview] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -54,6 +56,18 @@ export function AdminImportarMentoradosCompleto() {
     if (selectedFile && selectedFile.type === "text/csv") {
       setFile(selectedFile);
       setResults([]);
+      setPreviewData([]);
+      setShowPreview(false);
+      
+      // Parse CSV para preview
+      Papa.parse<CSVRow>(selectedFile, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (parseResult) => {
+          setPreviewData(parseResult.data);
+          setShowPreview(true);
+        },
+      });
     } else {
       toast({
         title: "Erro",
@@ -248,8 +262,18 @@ export function AdminImportarMentoradosCompleto() {
     setFile(null);
     setResults([]);
     setProgress(0);
+    setPreviewData([]);
+    setShowPreview(false);
     setOpen(false);
   };
+
+  // Calcular estatísticas do preview
+  const previewStats = previewData.length > 0 ? {
+    totalLinhas: previewData.length,
+    mentoradosUnicos: new Set(previewData.map(row => row.email)).size,
+    primeiraData: previewData[0]?.mes_ano,
+    ultimaData: previewData[previewData.length - 1]?.mes_ano,
+  } : null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -314,6 +338,68 @@ export function AdminImportarMentoradosCompleto() {
               </p>
             )}
           </div>
+
+          {showPreview && previewStats && !results.length && (
+            <div className="space-y-4 border rounded-lg p-4 bg-muted/50">
+              <div className="flex items-center justify-between">
+                <h4 className="font-semibold">📊 Resumo do Arquivo</h4>
+              </div>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Total de Linhas</p>
+                  <p className="text-2xl font-bold text-primary">{previewStats.totalLinhas}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Mentorados Únicos</p>
+                  <p className="text-2xl font-bold text-primary">{previewStats.mentoradosUnicos}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Primeiro Período</p>
+                  <p className="text-lg font-semibold">{previewStats.primeiraData}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Último Período</p>
+                  <p className="text-lg font-semibold">{previewStats.ultimaData}</p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <h5 className="text-sm font-medium">Preview (primeiros 5 registros):</h5>
+                <div className="border rounded-lg overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-xs">Email</TableHead>
+                        <TableHead className="text-xs">Nome</TableHead>
+                        <TableHead className="text-xs">Turma</TableHead>
+                        <TableHead className="text-xs">Mês/Ano</TableHead>
+                        <TableHead className="text-xs">Faturamento</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {previewData.slice(0, 5).map((row, index) => (
+                        <TableRow key={index}>
+                          <TableCell className="text-xs font-mono">{row.email}</TableCell>
+                          <TableCell className="text-xs">{row.nome_completo}</TableCell>
+                          <TableCell className="text-xs">{row.turma || "-"}</TableCell>
+                          <TableCell className="text-xs">{row.mes_ano}</TableCell>
+                          <TableCell className="text-xs">
+                            {row.faturamento_mensal ? `R$ ${parseFloat(row.faturamento_mensal).toLocaleString('pt-BR')}` : "-"}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+                {previewData.length > 5 && (
+                  <p className="text-xs text-muted-foreground text-center">
+                    ... e mais {previewData.length - 5} linha(s)
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
 
           {isImporting && (
             <div className="space-y-2">
