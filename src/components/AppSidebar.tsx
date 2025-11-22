@@ -88,8 +88,8 @@ export function AppSidebar() {
                         to={item.url} 
                         className={({ isActive }) =>
                           isActive 
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium hover:bg-sidebar-accent/80" 
-                            : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium hover:bg-sidebar-accent/80 border-l-4 border-primary" 
+                            : "text-sidebar-foreground hover:bg-sidebar-accent/50 border-l-4 border-transparent"
                         }
                       >
                         <item.icon className="h-4 w-4" />
@@ -147,8 +147,8 @@ export function AppSidebar() {
                   to="/configuracoes" 
                   className={({ isActive }) =>
                     isActive 
-                      ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium hover:bg-sidebar-accent/80" 
-                      : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+                      ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium hover:bg-sidebar-accent/80 border-l-4 border-primary" 
+                      : "text-sidebar-foreground hover:bg-sidebar-accent/50 border-l-4 border-transparent"
                   }
                 >
                   <Settings className="h-4 w-4" />
