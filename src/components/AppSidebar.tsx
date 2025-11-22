@@ -87,7 +87,9 @@ export function AppSidebar() {
                       <NavLink 
                         to={item.url} 
                         className={({ isActive }) =>
-                          isActive ? "bg-sidebar-accent text-white font-medium" : "text-white hover:bg-sidebar-accent/50"
+                          isActive 
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium hover:bg-sidebar-accent/80" 
+                            : "text-sidebar-foreground hover:bg-sidebar-accent/50"
                         }
                       >
                         <item.icon className="h-4 w-4" />
@@ -144,7 +146,9 @@ export function AppSidebar() {
                 <NavLink 
                   to="/configuracoes" 
                   className={({ isActive }) =>
-                    isActive ? "bg-sidebar-accent text-white font-medium" : "text-white hover:bg-sidebar-accent/50"
+                    isActive 
+                      ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium hover:bg-sidebar-accent/80" 
+                      : "text-sidebar-foreground hover:bg-sidebar-accent/50"
                   }
                 >
                   <Settings className="h-4 w-4" />
@@ -153,7 +157,7 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton onClick={handleLogout} className="text-white hover:text-white hover:bg-sidebar-accent/50">
+              <SidebarMenuButton onClick={handleLogout} className="text-sidebar-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50">
                 <LogOut className="h-4 w-4" />
                 {state !== "collapsed" && <span>Sair</span>}
               </SidebarMenuButton>
