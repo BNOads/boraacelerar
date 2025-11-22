@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { TrendingUp, Users, CheckCircle, ArrowUp, Trophy, UserPlus, Instagram, Youtube, Music, Target, Plus } from "lucide-react";
@@ -15,6 +15,8 @@ import { NovaMetaDialog } from "@/components/NovaMetaDialog";
 import { NovoObjetivoDialog } from "@/components/NovoObjetivoDialog";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { ResultadosAdmin } from "@/components/ResultadosAdmin";
+import { format, parse } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 interface DesempenhoData {
   mes_ano: string;
@@ -230,6 +232,22 @@ export default function Resultados() {
   const faturamentoTotal = historico.reduce((acc, item) => acc + (item.faturamento_mensal || 0), 0);
   const contratosTotal = historico.reduce((acc, item) => acc + (item.contratos_fechados || 0), 0);
   const faturamentoMedioMensal = historico.length > 0 ? faturamentoTotal / historico.length : 0;
+
+  // Formatar dados do histórico com nome do mês
+  const historicoFormatado = useMemo(() => {
+    return historico.map(item => ({
+      ...item,
+      mes_formatado: format(parse(item.mes_ano, 'yyyy-MM', new Date()), 'MMM yyyy', { locale: ptBR })
+    }));
+  }, [historico]);
+
+  // Formatar dados das métricas com nome do mês
+  const metricasFormatadas = useMemo(() => {
+    return metricasMensais.map(item => ({
+      ...item,
+      mes_formatado: format(parse(item.mes_ano, 'yyyy-MM', new Date()), 'MMM yyyy', { locale: ptBR })
+    }));
+  }, [metricasMensais]);
 
   const faixaAtual = faixas.find(f => 
     faturamentoMedioMensal >= f.min && (f.max === null || faturamentoMedioMensal <= f.max)
@@ -461,10 +479,10 @@ export default function Resultados() {
         <CardContent>
           {historico.length > 0 ? (
             <ResponsiveContainer width="100%" height={350}>
-              <LineChart data={historico}>
+              <LineChart data={historicoFormatado}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis 
-                  dataKey="mes_ano" 
+                  dataKey="mes_formatado" 
                   className="text-xs"
                   tick={{ fill: 'hsl(var(--muted-foreground))' }}
                 />
@@ -706,10 +724,10 @@ export default function Resultados() {
           {/* Gráfico de Métricas */}
           {metricasMensais.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={metricasMensais}>
+              <LineChart data={metricasFormatadas}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis 
-                  dataKey="mes_ano" 
+                  dataKey="mes_formatado" 
                   className="text-xs"
                   tick={{ fill: 'hsl(var(--muted-foreground))' }}
                 />
