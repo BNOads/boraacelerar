@@ -15,6 +15,7 @@ import Resultados from "./pages/Resultados";
 import Agenda from "./pages/Agenda";
 import Membros from "./pages/Membros";
 import Mentorados from "./pages/Mentorados";
+import MentoradoProfile from "./pages/MentoradoProfile";
 import Livraria from "./pages/Livraria";
 import Navegador from "./pages/Navegador";
 import Links from "./pages/Links";
@@ -64,6 +65,7 @@ const App = () => (
           <Route path="/agenda" element={<ProtectedRoute><Agenda /></ProtectedRoute>} />
           <Route path="/membros" element={<ProtectedRoute><Membros /></ProtectedRoute>} />
           <Route path="/mentorados" element={<ProtectedRoute><Mentorados /></ProtectedRoute>} />
+          <Route path="/mentorados/:id" element={<MentoradoProfile />} />
           <Route path="/livraria" element={<ProtectedRoute><Livraria /></ProtectedRoute>} />
           <Route path="/navegador" element={<ProtectedRoute><Navegador /></ProtectedRoute>} />
           <Route path="/links" element={<ProtectedRoute><Links /></ProtectedRoute>} />

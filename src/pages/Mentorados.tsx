@@ -9,7 +9,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, User, Edit, Save, X } from "lucide-react";
+import { Search, User, Edit, Save, X, ExternalLink } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -22,6 +23,7 @@ export default function Mentorados() {
   const [editingMentorado, setEditingMentorado] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   // Verificar se usuário é admin
   useEffect(() => {
@@ -168,7 +170,8 @@ export default function Mentorados() {
         {filteredMentorados?.map((mentorado) => (
           <Card
             key={mentorado.id}
-            className="border-border bg-card/50 backdrop-blur-sm hover:shadow-elegant transition-all duration-300"
+            className="border-border bg-card/50 backdrop-blur-sm hover:shadow-elegant transition-all duration-300 cursor-pointer"
+            onClick={() => navigate(`/mentorados/${mentorado.id}`)}
           >
             <CardHeader>
               <div className="flex items-start gap-4">
@@ -212,18 +215,35 @@ export default function Mentorados() {
                 </p>
               )}
               
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                    onClick={() => setEditingMentorado(mentorado)}
-                  >
-                    <Edit className="mr-2 h-4 w-4" />
-                    Editar
-                  </Button>
-                </DialogTrigger>
+              <div className="flex gap-2">
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="flex-1"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/mentorados/${mentorado.id}`);
+                  }}
+                >
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Ver Perfil
+                </Button>
+                
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingMentorado(mentorado);
+                      }}
+                    >
+                      <Edit className="mr-2 h-4 w-4" />
+                      Editar
+                    </Button>
+                  </DialogTrigger>
                 <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Editar Mentorado</DialogTitle>
@@ -348,6 +368,7 @@ export default function Mentorados() {
                   )}
                 </DialogContent>
               </Dialog>
+              </div>
             </CardContent>
           </Card>
         ))}
