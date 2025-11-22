@@ -13,6 +13,8 @@ import { CronometroTrimestral } from "@/components/CronometroTrimestral";
 import { MetaCard } from "@/components/MetaCard";
 import { NovaMetaDialog } from "@/components/NovaMetaDialog";
 import { NovoObjetivoDialog } from "@/components/NovoObjetivoDialog";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { ResultadosAdmin } from "@/components/ResultadosAdmin";
 
 interface DesempenhoData {
   mes_ano: string;
@@ -47,6 +49,7 @@ const faixas: FaixaPremiacao[] = [
 ];
 
 export default function Resultados() {
+  const { isAdmin, isLoading: loadingAdmin } = useIsAdmin();
   const [desempenhoAtual, setDesempenhoAtual] = useState<DesempenhoData | null>(null);
   const [historico, setHistorico] = useState<DesempenhoData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -208,7 +211,7 @@ export default function Resultados() {
     },
   ];
 
-  if (loading) {
+  if (loadingAdmin || loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-muted-foreground">Carregando...</div>
@@ -216,6 +219,12 @@ export default function Resultados() {
     );
   }
 
+  // Se for admin, mostrar painel administrativo
+  if (isAdmin) {
+    return <ResultadosAdmin />;
+  }
+
+  // Se for mentorado, mostrar seus resultados
   return (
     <div className="space-y-6 animate-slide-in">
       <div className="flex items-center gap-3">
