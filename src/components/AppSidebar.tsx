@@ -122,12 +122,12 @@ export function AppSidebar() {
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold text-white truncate">
+                    <p className="text-sm font-semibold text-sidebar-foreground truncate">
                       {userData.profile.apelido || userData.profile.nome_completo}
                     </p>
                     {isAdmin && <AdminBadge />}
                   </div>
-                  <p className="text-xs text-gray-300 truncate">
+                  <p className="text-xs text-sidebar-foreground/70 truncate">
                     {userData.user.email}
                   </p>
                 </div>
