@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
-import { TrendingUp, Users, CheckCircle, Target, ArrowUpDown, Search, ExternalLink } from "lucide-react";
+import { TrendingUp, Users, CheckCircle, Target, ArrowUpDown, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface MentoradoRanking {
@@ -394,7 +394,6 @@ export function ResultadosAdmin() {
                       <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                   </TableHead>
-                  <TableHead>Turma</TableHead>
                   <TableHead className="text-right">
                     <Button
                       variant="ghost"
@@ -450,36 +449,13 @@ export function ResultadosAdmin() {
                       <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                   </TableHead>
-                  <TableHead className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleSort('progressoMedioOKR')}
-                      className="hover:bg-muted float-right"
-                    >
-                      OKRs
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                  </TableHead>
-                  <TableHead className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleSort('notaMediaPilares')}
-                      className="hover:bg-muted float-right"
-                    >
-                      Pilares
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                  </TableHead>
                   <TableHead>Premiação</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {mentoradosPaginados.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={11} className="text-center text-muted-foreground py-8">
+                    <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                       Nenhum mentorado encontrado
                     </TableCell>
                   </TableRow>
@@ -487,25 +463,26 @@ export function ResultadosAdmin() {
                   mentoradosPaginados.map((mentorado) => (
                     <TableRow 
                       key={mentorado.id} 
-                      className="hover:bg-muted/50 cursor-pointer"
-                      onClick={() => navigate(`/mentorados/${mentorado.id}`)}
+                      className="hover:bg-muted/50"
                     >
                       <TableCell>
-                        <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => navigate(`/mentorados/${mentorado.id}`)}
+                          className="flex items-center gap-3 text-left hover:opacity-80 transition-opacity w-full"
+                        >
                           <Avatar className="h-10 w-10">
                             <AvatarImage src={mentorado.foto_url || undefined} />
                             <AvatarFallback>{mentorado.nome[0]}</AvatarFallback>
                           </Avatar>
                           <div>
-                            <div className="font-medium text-foreground">{mentorado.nome}</div>
+                            <div className="font-medium text-foreground hover:text-primary transition-colors">
+                              {mentorado.nome}
+                            </div>
                             {mentorado.apelido && (
                               <div className="text-sm text-muted-foreground">@{mentorado.apelido}</div>
                             )}
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{mentorado.turma || "N/A"}</Badge>
+                        </button>
                       </TableCell>
                       <TableCell className="text-right font-medium">
                         R$ {(mentorado.faturamentoTotal / 1000).toFixed(0)}k
@@ -520,32 +497,10 @@ export function ResultadosAdmin() {
                         </span>
                       </TableCell>
                       <TableCell className="text-right">{mentorado.clientesAtuais}</TableCell>
-                      <TableCell className="text-right">
-                        <span className={getPerformanceColor(mentorado.progressoMedioOKR)}>
-                          {mentorado.progressoMedioOKR.toFixed(0)}%
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <span className={getPerformanceColor(mentorado.notaMediaPilares)}>
-                          {mentorado.notaMediaPilares.toFixed(0)}
-                        </span>
-                      </TableCell>
                       <TableCell>
                         <Badge className={`${mentorado.faixa.cor} text-white`}>
                           {mentorado.faixa.emoji} {mentorado.faixa.nome}
                         </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/mentorados/${mentorado.id}`);
-                          }}
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                        </Button>
                       </TableCell>
                     </TableRow>
                   ))
