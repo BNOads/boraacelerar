@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { TrendingUp, Users, CheckCircle, ArrowUp, Trophy, UserPlus, Instagram, Youtube, Music } from "lucide-react";
+import { TrendingUp, Users, CheckCircle, ArrowUp, Trophy, UserPlus, Instagram, Youtube, Music, Target, Plus } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { CronometroTrimestral } from "@/components/CronometroTrimestral";
+import { MetaCard } from "@/components/MetaCard";
+import { NovaMetaDialog } from "@/components/NovaMetaDialog";
+import { NovoObjetivoDialog } from "@/components/NovoObjetivoDialog";
 
 interface DesempenhoData {
   mes_ano: string;
@@ -55,6 +59,11 @@ export default function Resultados() {
     seguidores_youtube: 0,
     seguidores_tiktok: 0,
   });
+  const [metas, setMetas] = useState<any[]>([]);
+  const [dialogNovaMetaAberto, setDialogNovaMetaAberto] = useState(false);
+  const [dialogNovoObjetivoAberto, setDialogNovoObjetivoAberto] = useState(false);
+  const [metaSelecionada, setMetaSelecionada] = useState<string | null>(null);
+  const [filtroStatus, setFiltroStatus] = useState<string>("ativa");
 
   useEffect(() => {
     const fetchDesempenho = async () => {
@@ -91,6 +100,9 @@ export default function Resultados() {
           if (metricasData) {
             setMetricasMensais(metricasData);
           }
+
+          // Buscar metas e objetivos
+          await carregarMetas(mentoradoData.id);
         }
       }
       setLoading(false);
@@ -98,6 +110,27 @@ export default function Resultados() {
 
     fetchDesempenho();
   }, []);
+
+  const carregarMetas = async (mentoradoIdParam?: string) => {
+    const idParaBuscar = mentoradoIdParam || mentoradoId;
+    if (!idParaBuscar) return;
+
+    const { data: metasData, error } = await supabase
+      .from("metas")
+      .select(`
+        *,
+        objetivos (*)
+      `)
+      .eq("mentorado_id", idParaBuscar)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Erro ao carregar metas:", error);
+      return;
+    }
+
+    setMetas(metasData || []);
+  };
 
   const handleSalvarMetricas = async () => {
     if (!mentoradoId) {
@@ -313,6 +346,92 @@ export default function Resultados() {
           )}
         </CardContent>
       </Card>
+
+      {/* Cronômetro Trimestral */}
+      {mentoradoId && <CronometroTrimestral mentoradoId={mentoradoId} />}
+
+      {/* Metas (OKRs) */}
+      <Card className="border-border bg-card shadow-card">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Target className="h-6 w-6 text-primary" />
+              <CardTitle className="text-foreground">Metas (OKRs)</CardTitle>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex gap-1">
+                {["ativa", "concluida", "arquivada"].map((status) => (
+                  <Button
+                    key={status}
+                    variant={filtroStatus === status ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setFiltroStatus(status)}
+                  >
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                  </Button>
+                ))}
+              </div>
+              <Button onClick={() => setDialogNovaMetaAberto(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Nova Meta
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {metas.filter(m => m.status === filtroStatus).length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>Nenhuma meta {filtroStatus} encontrada</p>
+              <Button
+                variant="link"
+                onClick={() => setDialogNovaMetaAberto(true)}
+                className="mt-2"
+              >
+                Criar sua primeira meta
+              </Button>
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2">
+              {metas
+                .filter(m => m.status === filtroStatus)
+                .map((meta) => (
+                  <MetaCard
+                    key={meta.id}
+                    meta={meta}
+                    onUpdate={() => carregarMetas()}
+                    onAddObjetivo={(metaId) => {
+                      setMetaSelecionada(metaId);
+                      setDialogNovoObjetivoAberto(true);
+                    }}
+                  />
+                ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Diálogos */}
+      {mentoradoId && (
+        <>
+          <NovaMetaDialog
+            open={dialogNovaMetaAberto}
+            onOpenChange={setDialogNovaMetaAberto}
+            mentoradoId={mentoradoId}
+            onSuccess={(metaId) => {
+              carregarMetas();
+              setMetaSelecionada(metaId);
+              setDialogNovoObjetivoAberto(true);
+            }}
+          />
+          <NovoObjetivoDialog
+            open={dialogNovoObjetivoAberto}
+            onOpenChange={setDialogNovoObjetivoAberto}
+            metaId={metaSelecionada}
+            onSuccess={() => carregarMetas()}
+          />
+        </>
+      )}
 
       {/* Métricas de Crescimento */}
       <Card className="border-border bg-card shadow-card">

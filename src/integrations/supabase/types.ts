@@ -165,6 +165,44 @@ export type Database = {
           },
         ]
       }
+      avaliacoes_pilares: {
+        Row: {
+          created_at: string
+          id: string
+          mentorado_id: string
+          nota: number
+          pilar: Database["public"]["Enums"]["pilar_avaliacao"]
+          trimestre: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mentorado_id: string
+          nota: number
+          pilar: Database["public"]["Enums"]["pilar_avaliacao"]
+          trimestre: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mentorado_id?: string
+          nota?: number
+          pilar?: Database["public"]["Enums"]["pilar_avaliacao"]
+          trimestre?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "avaliacoes_pilares_mentorado_id_fkey"
+            columns: ["mentorado_id"]
+            isOneToOne: false
+            referencedRelation: "mentorados"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conteudo_direcionado: {
         Row: {
           arquivo_id: string | null
@@ -552,6 +590,56 @@ export type Database = {
           },
         ]
       }
+      metas: {
+        Row: {
+          cor: string
+          created_at: string
+          data_fim: string | null
+          data_inicio: string
+          descricao: string | null
+          id: string
+          mentorado_id: string
+          progresso: number
+          status: Database["public"]["Enums"]["status_meta"]
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          cor?: string
+          created_at?: string
+          data_fim?: string | null
+          data_inicio?: string
+          descricao?: string | null
+          id?: string
+          mentorado_id: string
+          progresso?: number
+          status?: Database["public"]["Enums"]["status_meta"]
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          cor?: string
+          created_at?: string
+          data_fim?: string | null
+          data_inicio?: string
+          descricao?: string | null
+          id?: string
+          mentorado_id?: string
+          progresso?: number
+          status?: Database["public"]["Enums"]["status_meta"]
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "metas_mentorado_id_fkey"
+            columns: ["mentorado_id"]
+            isOneToOne: false
+            referencedRelation: "mentorados"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       metricas_mensais: {
         Row: {
           created_at: string
@@ -689,6 +777,62 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      objetivos: {
+        Row: {
+          concluido: boolean
+          created_at: string
+          descricao: string | null
+          id: string
+          meta_id: string
+          ordem: number
+          status: Database["public"]["Enums"]["status_objetivo"]
+          tipo: string
+          titulo: string
+          unidade: string | null
+          updated_at: string
+          valor_atual: number | null
+          valor_meta: number | null
+        }
+        Insert: {
+          concluido?: boolean
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          meta_id: string
+          ordem?: number
+          status?: Database["public"]["Enums"]["status_objetivo"]
+          tipo: string
+          titulo: string
+          unidade?: string | null
+          updated_at?: string
+          valor_atual?: number | null
+          valor_meta?: number | null
+        }
+        Update: {
+          concluido?: boolean
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          meta_id?: string
+          ordem?: number
+          status?: Database["public"]["Enums"]["status_objetivo"]
+          tipo?: string
+          titulo?: string
+          unidade?: string | null
+          updated_at?: string
+          valor_atual?: number | null
+          valor_meta?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "objetivos_meta_id_fkey"
+            columns: ["meta_id"]
+            isOneToOne: false
+            referencedRelation: "metas"
             referencedColumns: ["id"]
           },
         ]
@@ -968,6 +1112,16 @@ export type Database = {
       audience_type: "todos" | "turma" | "produto" | "mentorado"
       canal_atendimento: "WhatsApp" | "Ligação" | "Email"
       faixa_premiacao: "Bronze" | "Prata" | "Ouro" | "Platina" | "Diamante"
+      pilar_avaliacao:
+        | "eu_empreendedor"
+        | "estruturacao_empresa"
+        | "processos"
+        | "posicionamento"
+        | "marketing"
+        | "vendas"
+        | "construcao_equipe"
+        | "gestao_equipe"
+        | "experiencia_cliente"
       pilar_enum:
         | "Empreendedor"
         | "Estruturação"
@@ -977,6 +1131,8 @@ export type Database = {
         | "Finanças"
       status_atendimento: "Aberto" | "Resolvido" | "Pendente"
       status_mentorado: "ativo" | "inativo"
+      status_meta: "ativa" | "concluida" | "arquivada"
+      status_objetivo: "pendente" | "em_progresso" | "concluido"
       tipo_conteudo: "Vídeo" | "PDF" | "Link" | "Checklist"
       tipo_encontro: "Diagnóstico" | "Mentoria Livre" | "Imersão"
       tipo_material: "PDF" | "Vídeo" | "Planilha" | "Link"
@@ -1112,6 +1268,17 @@ export const Constants = {
       audience_type: ["todos", "turma", "produto", "mentorado"],
       canal_atendimento: ["WhatsApp", "Ligação", "Email"],
       faixa_premiacao: ["Bronze", "Prata", "Ouro", "Platina", "Diamante"],
+      pilar_avaliacao: [
+        "eu_empreendedor",
+        "estruturacao_empresa",
+        "processos",
+        "posicionamento",
+        "marketing",
+        "vendas",
+        "construcao_equipe",
+        "gestao_equipe",
+        "experiencia_cliente",
+      ],
       pilar_enum: [
         "Empreendedor",
         "Estruturação",
@@ -1122,6 +1289,8 @@ export const Constants = {
       ],
       status_atendimento: ["Aberto", "Resolvido", "Pendente"],
       status_mentorado: ["ativo", "inativo"],
+      status_meta: ["ativa", "concluida", "arquivada"],
+      status_objetivo: ["pendente", "em_progresso", "concluido"],
       tipo_conteudo: ["Vídeo", "PDF", "Link", "Checklist"],
       tipo_encontro: ["Diagnóstico", "Mentoria Livre", "Imersão"],
       tipo_material: ["PDF", "Vídeo", "Planilha", "Link"],
