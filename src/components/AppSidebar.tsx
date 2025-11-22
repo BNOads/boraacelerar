@@ -30,7 +30,6 @@ const menuItems = [
   { title: "Livraria BORA", url: "/livraria", icon: Library },
   { title: "Navegador", url: "/navegador", icon: UsersIcon },
   { title: "Links Úteis", url: "/links", icon: LinkIcon },
-  { title: "Notificações", url: "/notifications", icon: Bell },
   { title: "Mentorados", url: "/mentorados", icon: Users, adminOnly: true },
 ];
 
