@@ -48,6 +48,8 @@ export function AdminImportarMentoradosCompleto() {
   const [results, setResults] = useState<ImportResult[]>([]);
   const [previewData, setPreviewData] = useState<CSVRow[]>([]);
   const [showPreview, setShowPreview] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -58,6 +60,7 @@ export function AdminImportarMentoradosCompleto() {
       setResults([]);
       setPreviewData([]);
       setShowPreview(false);
+      setCurrentPage(1);
       
       // Parse CSV para preview
       Papa.parse<CSVRow>(selectedFile, {
@@ -264,6 +267,7 @@ export function AdminImportarMentoradosCompleto() {
     setProgress(0);
     setPreviewData([]);
     setShowPreview(false);
+    setCurrentPage(1);
     setOpen(false);
   };
 
@@ -274,6 +278,12 @@ export function AdminImportarMentoradosCompleto() {
     primeiraData: previewData[0]?.mes_ano,
     ultimaData: previewData[previewData.length - 1]?.mes_ano,
   } : null;
+
+  // Paginação
+  const totalPages = Math.ceil(previewData.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentPageData = previewData.slice(startIndex, endIndex);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -365,7 +375,32 @@ export function AdminImportarMentoradosCompleto() {
               </div>
 
               <div className="space-y-2">
-                <h5 className="text-sm font-medium">Preview (primeiros 5 registros):</h5>
+                <div className="flex items-center justify-between">
+                  <h5 className="text-sm font-medium">
+                    Preview dos Dados (mostrando {startIndex + 1}-{Math.min(endIndex, previewData.length)} de {previewData.length})
+                  </h5>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      Anterior
+                    </Button>
+                    <span className="text-sm text-muted-foreground">
+                      Página {currentPage} de {totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                      disabled={currentPage === totalPages}
+                    >
+                      Próximo
+                    </Button>
+                  </div>
+                </div>
                 <div className="border rounded-lg overflow-hidden">
                   <Table>
                     <TableHeader>
@@ -375,11 +410,13 @@ export function AdminImportarMentoradosCompleto() {
                         <TableHead className="text-xs">Turma</TableHead>
                         <TableHead className="text-xs">Mês/Ano</TableHead>
                         <TableHead className="text-xs">Faturamento</TableHead>
+                        <TableHead className="text-xs">Meta</TableHead>
+                        <TableHead className="text-xs">Contratos</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {previewData.slice(0, 5).map((row, index) => (
-                        <TableRow key={index}>
+                      {currentPageData.map((row, index) => (
+                        <TableRow key={startIndex + index}>
                           <TableCell className="text-xs font-mono">{row.email}</TableCell>
                           <TableCell className="text-xs">{row.nome_completo}</TableCell>
                           <TableCell className="text-xs">{row.turma || "-"}</TableCell>
@@ -387,16 +424,17 @@ export function AdminImportarMentoradosCompleto() {
                           <TableCell className="text-xs">
                             {row.faturamento_mensal ? `R$ ${parseFloat(row.faturamento_mensal).toLocaleString('pt-BR')}` : "-"}
                           </TableCell>
+                          <TableCell className="text-xs">
+                            {row.meta_mensal ? `R$ ${parseFloat(row.meta_mensal).toLocaleString('pt-BR')}` : "-"}
+                          </TableCell>
+                          <TableCell className="text-xs">
+                            {row.contratos_fechados || "-"}
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
                   </Table>
                 </div>
-                {previewData.length > 5 && (
-                  <p className="text-xs text-muted-foreground text-center">
-                    ... e mais {previewData.length - 5} linha(s)
-                  </p>
-                )}
               </div>
             </div>
           )}
