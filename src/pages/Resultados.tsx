@@ -295,81 +295,6 @@ export default function Resultados() {
         Acompanhe seu desempenho e evolução
       </p>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {kpis.map((kpi) => (
-          <Card key={kpi.title} className="border-border bg-card shadow-card">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <kpi.icon className="h-5 w-5 text-primary" />
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <ArrowUp className="h-3 w-3" />
-                  {kpi.change}
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold text-foreground mb-1">{kpi.value}</p>
-              <p className="text-sm text-muted-foreground">{kpi.title}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Prêmio Profissional Extraordinário */}
-      <Card className="border-border bg-card shadow-card">
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <Trophy className="h-6 w-6 text-primary" />
-            <CardTitle className="text-foreground">Prêmio Profissional Extraordinário</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="text-center space-y-2">
-            <div className="text-5xl mb-2">{faixaAtual.emoji}</div>
-            <Badge className={`${faixaAtual.cor} text-white text-lg px-4 py-1`}>
-              {faixaAtual.nome}
-            </Badge>
-            <p className="text-sm text-muted-foreground mt-2">
-              Faturamento médio mensal: R$ {faturamentoMedioMensal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </p>
-          </div>
-
-          {proximaFaixa && (
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Progresso para {proximaFaixa.nome}</span>
-                <span className="font-semibold">{progressoFaixa.toFixed(0)}%</span>
-              </div>
-              <Progress value={progressoFaixa} className="h-3" />
-              <p className="text-xs text-muted-foreground text-center">
-                Faltam R$ {(proximaFaixa.min - faturamentoMedioMensal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} 
-                {' '}de média mensal para atingir {proximaFaixa.nome}
-              </p>
-            </div>
-          )}
-
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 pt-4 border-t">
-            {faixas.map((faixa) => (
-              <div 
-                key={faixa.nome}
-                className={`p-3 rounded-lg text-center border-2 ${
-                  faixa.nome === faixaAtual.nome 
-                    ? 'border-primary bg-primary/10' 
-                    : 'border-border bg-muted/30'
-                }`}
-              >
-                <div className="text-2xl mb-1">{faixa.emoji}</div>
-                <div className="text-xs font-semibold">{faixa.nome}</div>
-                <div className="text-xs text-muted-foreground">
-                  R$ {(faixa.min / 1000).toFixed(0)}k{faixa.max ? ` - ${(faixa.max / 1000).toFixed(0)}k` : '+'}
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Formulário de Desempenho Mensal */}
       <Card className="border-border bg-card shadow-card">
         <CardHeader>
@@ -451,14 +376,91 @@ export default function Resultados() {
         </CardContent>
       </Card>
 
-      {/* Chart */}
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {kpis.map((kpi) => (
+          <Card key={kpi.title} className="border-border bg-card shadow-card">
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <kpi.icon className="h-5 w-5 text-primary" />
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <ArrowUp className="h-3 w-3" />
+                  {kpi.change}
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold text-foreground mb-1">{kpi.value}</p>
+              <p className="text-sm text-muted-foreground">{kpi.title}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Prêmio Profissional Extraordinário */}
       <Card className="border-border bg-card shadow-card">
         <CardHeader>
-          <CardTitle className="text-foreground">Evolução do Faturamento</CardTitle>
+          <div className="flex items-center gap-3">
+            <Trophy className="h-6 w-6 text-primary" />
+            <CardTitle className="text-foreground">Prêmio Profissional Extraordinário</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="text-center space-y-2">
+            <div className="text-5xl mb-2">{faixaAtual.emoji}</div>
+            <Badge className={`${faixaAtual.cor} text-white text-lg px-4 py-1`}>
+              {faixaAtual.nome}
+            </Badge>
+            <p className="text-sm text-muted-foreground mt-2">
+              Faturamento médio mensal: R$ {faturamentoMedioMensal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </p>
+          </div>
+
+          {proximaFaixa && (
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Progresso para {proximaFaixa.nome}</span>
+                <span className="font-semibold">{progressoFaixa.toFixed(0)}%</span>
+              </div>
+              <Progress value={progressoFaixa} className="h-3" />
+              <p className="text-xs text-muted-foreground text-center">
+                Faltam R$ {(proximaFaixa.min - faturamentoMedioMensal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} 
+                {' '}de média mensal para atingir {proximaFaixa.nome}
+              </p>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 pt-4 border-t">
+            {faixas.map((faixa) => (
+              <div 
+                key={faixa.nome}
+                className={`p-3 rounded-lg text-center border-2 ${
+                  faixa.nome === faixaAtual.nome 
+                    ? 'border-primary bg-primary/10' 
+                    : 'border-border bg-muted/30'
+                }`}
+              >
+                <div className="text-2xl mb-1">{faixa.emoji}</div>
+                <div className="text-xs font-semibold">{faixa.nome}</div>
+                <div className="text-xs text-muted-foreground">
+                  R$ {(faixa.min / 1000).toFixed(0)}k{faixa.max ? ` - ${(faixa.max / 1000).toFixed(0)}k` : '+'}
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Formulário de Desempenho Mensal - REMOVIDO DAQUI, JÁ ESTÁ NO TOPO */}
+
+      {/* Chart - Evolução Mensal */}
+      <Card className="border-border bg-card shadow-card">
+        <CardHeader>
+          <CardTitle className="text-foreground">Evolução Mensal</CardTitle>
         </CardHeader>
         <CardContent>
           {historico.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={350}>
               <LineChart data={historico}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis 
@@ -467,9 +469,16 @@ export default function Resultados() {
                   tick={{ fill: 'hsl(var(--muted-foreground))' }}
                 />
                 <YAxis 
+                  yAxisId="left"
                   className="text-xs"
                   tick={{ fill: 'hsl(var(--muted-foreground))' }}
                   tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`}
+                />
+                <YAxis 
+                  yAxisId="right"
+                  orientation="right"
+                  className="text-xs"
+                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
                 />
                 <Tooltip 
                   contentStyle={{
@@ -477,15 +486,47 @@ export default function Resultados() {
                     border: '1px solid hsl(var(--border))',
                     borderRadius: '8px',
                   }}
-                  formatter={(value: number) => [`R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 'Faturamento']}
+                  formatter={(value: number, name: string) => {
+                    if (name === 'faturamento_mensal') {
+                      return [`R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 'Faturamento'];
+                    }
+                    if (name === 'contratos_fechados') {
+                      return [value, 'Contratos'];
+                    }
+                    if (name === 'clientes_mes') {
+                      return [value, 'Clientes'];
+                    }
+                    return [value, name];
+                  }}
                 />
+                <Legend />
                 <Line 
+                  yAxisId="left"
                   type="monotone" 
-                  dataKey="faturamento_mensal" 
+                  dataKey="faturamento_mensal"
+                  name="Faturamento"
                   stroke="hsl(var(--primary))" 
                   strokeWidth={3}
                   dot={{ fill: 'hsl(var(--primary))', r: 4 }}
                   activeDot={{ r: 6 }}
+                />
+                <Line 
+                  yAxisId="right"
+                  type="monotone" 
+                  dataKey="contratos_fechados"
+                  name="Contratos"
+                  stroke="hsl(142, 76%, 36%)"
+                  strokeWidth={2}
+                  dot={{ fill: 'hsl(142, 76%, 36%)', r: 3 }}
+                />
+                <Line 
+                  yAxisId="right"
+                  type="monotone" 
+                  dataKey="clientes_mes"
+                  name="Clientes"
+                  stroke="hsl(221, 83%, 53%)"
+                  strokeWidth={2}
+                  dot={{ fill: 'hsl(221, 83%, 53%)', r: 3 }}
                 />
               </LineChart>
             </ResponsiveContainer>
