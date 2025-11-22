@@ -6,11 +6,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, Video, FileText, Clock, Play, BookOpen, ShoppingCart } from "lucide-react";
+import { Search, Video, FileText, Clock, Play, BookOpen, ShoppingCart, ExternalLink, Building2 } from "lucide-react";
 import { AdminMembrosDialog } from "@/components/AdminMembrosDialog";
 import { AdminImportarConteudoDialog } from "@/components/AdminImportarConteudoDialog";
 import { CadastrarLivroDialog } from "@/components/CadastrarLivroDialog";
 import { AdminImportarLivrosDialog } from "@/components/AdminImportarLivrosDialog";
+import { AdminPostoIpirangaDialog } from "@/components/AdminPostoIpirangaDialog";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 export default function Membros() {
@@ -101,6 +102,20 @@ export default function Membros() {
     },
   });
 
+  // Links do Posto Ipiranga
+  const { data: postoIpirangaLinks, isLoading: loadingPostoIpiranga, refetch: refetchPostoIpiranga } = useQuery({
+    queryKey: ["posto-ipiranga-links"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("posto_ipiranga_links")
+        .select("*")
+        .eq("ativo", true)
+        .order("ordem", { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const filteredEncontros = gravacoesEncontros?.filter(
     (g) =>
       g.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -165,6 +180,10 @@ export default function Membros() {
           <TabsTrigger value="gravacoes">Minhas Gravações</TabsTrigger>
           <TabsTrigger value="conteudo">Meu Conteúdo</TabsTrigger>
           <TabsTrigger value="livraria">Livraria BORA</TabsTrigger>
+          <TabsTrigger value="posto-ipiranga">
+            <Building2 className="h-4 w-4 mr-2" />
+            Posto Ipiranga
+          </TabsTrigger>
           <TabsTrigger value="recomendacoes">Recomendações</TabsTrigger>
         </TabsList>
 
@@ -433,6 +452,106 @@ export default function Membros() {
               </CardContent>
             </Card>
           )}
+        </TabsContent>
+
+        {/* Posto Ipiranga Tab */}
+        <TabsContent value="posto-ipiranga" className="space-y-6">
+          <Card className="border-border bg-card/50">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Building2 className="h-5 w-5" />
+                    Posto Ipiranga
+                  </CardTitle>
+                  <CardDescription>
+                    Recursos e materiais organizados por categoria para apoiar sua jornada
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="Empreededorismo" className="space-y-6">
+                <TabsList className="grid grid-cols-4 w-full">
+                  <TabsTrigger value="Empreededorismo">Empreededorismo</TabsTrigger>
+                  <TabsTrigger value="Gestão">Gestão</TabsTrigger>
+                  <TabsTrigger value="Projetos">Projetos</TabsTrigger>
+                  <TabsTrigger value="Obras">Obras</TabsTrigger>
+                </TabsList>
+
+                {["Empreededorismo", "Gestão", "Projetos", "Obras"].map((categoria) => (
+                  <TabsContent key={categoria} value={categoria} className="space-y-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <h3 className="text-lg font-semibold">{categoria}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {categoria === "Empreededorismo" && "Recursos para desenvolver sua mentalidade e visão empreendedora"}
+                          {categoria === "Gestão" && "Ferramentas e materiais para aprimorar sua gestão"}
+                          {categoria === "Projetos" && "Guias e templates para gerenciamento de projetos"}
+                          {categoria === "Obras" && "Materiais específicos para gestão de obras e construção"}
+                        </p>
+                      </div>
+                      {isAdmin && (
+                        <AdminPostoIpirangaDialog 
+                          categoria={categoria}
+                          onSuccess={() => refetchPostoIpiranga()}
+                        />
+                      )}
+                    </div>
+
+                    {loadingPostoIpiranga ? (
+                      <div className="flex justify-center py-8">
+                        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+                      </div>
+                    ) : (
+                      <div className="grid gap-4">
+                        {postoIpirangaLinks
+                          ?.filter((link) => link.categoria === categoria)
+                          .map((link) => (
+                            <Card key={link.id} className="border-border bg-card hover:shadow-md transition-shadow">
+                              <CardContent className="p-4">
+                                <div className="flex items-start justify-between gap-4">
+                                  <div className="flex-1">
+                                    <h4 className="font-semibold text-foreground mb-1">{link.titulo}</h4>
+                                    {link.descricao && (
+                                      <p className="text-sm text-muted-foreground mb-3">{link.descricao}</p>
+                                    )}
+                                    <a
+                                      href={link.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
+                                    >
+                                      Acessar recurso
+                                      <ExternalLink className="h-4 w-4" />
+                                    </a>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        {(!postoIpirangaLinks?.some((link) => link.categoria === categoria)) && (
+                          <Card className="border-border bg-muted/30">
+                            <CardContent className="flex flex-col items-center justify-center py-8 text-center">
+                              <FileText className="h-12 w-12 text-muted-foreground mb-2" />
+                              <p className="text-muted-foreground">
+                                Nenhum recurso disponível nesta categoria ainda.
+                              </p>
+                              {isAdmin && (
+                                <p className="text-sm text-muted-foreground mt-2">
+                                  Clique em "Adicionar Link" para começar.
+                                </p>
+                              )}
+                            </CardContent>
+                          </Card>
+                        )}
+                      </div>
+                    )}
+                  </TabsContent>
+                ))}
+              </Tabs>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="recomendacoes">
