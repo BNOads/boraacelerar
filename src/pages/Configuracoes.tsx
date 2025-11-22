@@ -7,10 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import { User, Mail, Instagram, Phone, Save, Upload, Lock, Eye, EyeOff } from "lucide-react";
+import { useTheme } from "next-themes";
+import { User, Mail, Instagram, Phone, Save, Upload, Lock, Eye, EyeOff, Sun, Moon } from "lucide-react";
 
 export default function Configuracoes() {
   const queryClient = useQueryClient();
+  const { theme, setTheme } = useTheme();
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -505,10 +507,43 @@ export default function Configuracoes() {
         )}
       </Card>
 
+      {/* Aparência */}
+      <Card className="border-border bg-card/50 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle className="text-2xl">Aparência</CardTitle>
+          <CardDescription>
+            Personalize a aparência do sistema
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Modo de Cor</Label>
+            <div className="flex gap-2">
+              <Button
+                variant={theme === "dark" ? "default" : "outline"}
+                onClick={() => setTheme("dark")}
+                className={theme === "dark" ? "bg-primary hover:bg-primary/90" : ""}
+              >
+                <Moon className="mr-2 h-4 w-4" />
+                Modo Escuro
+              </Button>
+              <Button
+                variant={theme === "light" ? "default" : "outline"}
+                onClick={() => setTheme("light")}
+                className={theme === "light" ? "bg-primary hover:bg-primary/90" : ""}
+              >
+                <Sun className="mr-2 h-4 w-4" />
+                Modo Claro
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Informações da Conta */}
       <Card className="border-border bg-card/50 backdrop-blur-sm">
         <CardHeader>
-          <CardTitle>Informações da Conta</CardTitle>
+          <CardTitle className="text-2xl">Informações da Conta</CardTitle>
           <CardDescription>Detalhes da sua conta no BORA Acelerar</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
