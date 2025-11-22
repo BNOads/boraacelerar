@@ -62,6 +62,13 @@ export default function Resultados() {
     seguidores_youtube: 0,
     seguidores_tiktok: 0,
   });
+  const [novoDesempenho, setNovoDesempenho] = useState({
+    mes_ano: new Date().toISOString().slice(0, 7),
+    faturamento_mensal: 0,
+    contratos_fechados: 0,
+    clientes_mes: 0,
+    qtd_propostas: 0,
+  });
   const [metas, setMetas] = useState<any[]>([]);
   const [dialogNovaMetaAberto, setDialogNovaMetaAberto] = useState(false);
   const [dialogNovoObjetivoAberto, setDialogNovoObjetivoAberto] = useState(false);
@@ -164,6 +171,59 @@ export default function Resultados() {
       if (metricasData) {
         setMetricasMensais(metricasData);
       }
+    }
+  };
+
+  const handleSalvarDesempenho = async () => {
+    if (!mentoradoId) {
+      toast.error("Erro ao identificar mentorado");
+      return;
+    }
+
+    // Validação básica
+    if (novoDesempenho.faturamento_mensal < 0 || novoDesempenho.contratos_fechados < 0 || 
+        novoDesempenho.clientes_mes < 0 || novoDesempenho.qtd_propostas < 0) {
+      toast.error("Os valores não podem ser negativos");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("desempenho_mensal")
+      .upsert({
+        mentorado_id: mentoradoId,
+        mes_ano: novoDesempenho.mes_ano,
+        faturamento_mensal: novoDesempenho.faturamento_mensal,
+        contratos_fechados: novoDesempenho.contratos_fechados,
+        clientes_mes: novoDesempenho.clientes_mes,
+        qtd_propostas: novoDesempenho.qtd_propostas,
+      });
+
+    if (error) {
+      toast.error("Erro ao salvar desempenho");
+      console.error(error);
+    } else {
+      toast.success("Desempenho salvo com sucesso!");
+      
+      // Atualizar lista
+      const { data: allData } = await supabase
+        .from("desempenho_mensal")
+        .select("*")
+        .eq("mentorado_id", mentoradoId)
+        .order("mes_ano", { ascending: true });
+
+      if (allData && allData.length > 0) {
+        setHistorico(allData);
+        setDesempenhoAtual(allData[allData.length - 1]);
+      }
+
+      // Reset do formulário
+      setNovoDesempenho({
+        mes_ano: new Date().toISOString().slice(0, 7),
+        faturamento_mensal: 0,
+        contratos_fechados: 0,
+        clientes_mes: 0,
+        qtd_propostas: 0,
+      });
     }
   };
 
@@ -306,6 +366,87 @@ export default function Resultados() {
                 </div>
               </div>
             ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Formulário de Desempenho Mensal */}
+      <Card className="border-border bg-card shadow-card">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <TrendingUp className="h-6 w-6 text-primary" />
+            <CardTitle className="text-foreground">Registrar Desempenho Mensal</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 p-4 bg-muted/30 rounded-lg">
+            <div className="space-y-2">
+              <Label htmlFor="desempenho_mes_ano">Mês/Ano</Label>
+              <Input
+                id="desempenho_mes_ano"
+                type="month"
+                value={novoDesempenho.mes_ano}
+                onChange={(e) => setNovoDesempenho({ ...novoDesempenho, mes_ano: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="faturamento" className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                Faturamento (R$)
+              </Label>
+              <Input
+                id="faturamento"
+                type="number"
+                value={novoDesempenho.faturamento_mensal}
+                onChange={(e) => setNovoDesempenho({ ...novoDesempenho, faturamento_mensal: parseFloat(e.target.value) || 0 })}
+                min="0"
+                step="0.01"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="contratos" className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                Contratos Fechados
+              </Label>
+              <Input
+                id="contratos"
+                type="number"
+                value={novoDesempenho.contratos_fechados}
+                onChange={(e) => setNovoDesempenho({ ...novoDesempenho, contratos_fechados: parseInt(e.target.value) || 0 })}
+                min="0"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="clientes" className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Clientes
+              </Label>
+              <Input
+                id="clientes"
+                type="number"
+                value={novoDesempenho.clientes_mes}
+                onChange={(e) => setNovoDesempenho({ ...novoDesempenho, clientes_mes: parseInt(e.target.value) || 0 })}
+                min="0"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="propostas" className="flex items-center gap-2">
+                <Target className="h-4 w-4" />
+                Propostas
+              </Label>
+              <Input
+                id="propostas"
+                type="number"
+                value={novoDesempenho.qtd_propostas}
+                onChange={(e) => setNovoDesempenho({ ...novoDesempenho, qtd_propostas: parseInt(e.target.value) || 0 })}
+                min="0"
+              />
+            </div>
+            <div className="flex items-end">
+              <Button onClick={handleSalvarDesempenho} className="w-full">
+                Salvar Desempenho
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
