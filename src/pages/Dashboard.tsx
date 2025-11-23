@@ -8,18 +8,15 @@ import { Link } from "react-router-dom";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-
 interface Profile {
   nome_completo: string;
   apelido: string | null;
 }
-
 interface AcelerometroData {
   clientes_atuais: number;
   faturamento_acumulado: number;
   maior_faturamento: number;
 }
-
 interface AdminStats {
   total_mentorados: number;
   faturamento_medio_mensal: number;
@@ -31,7 +28,6 @@ interface AdminStats {
     max_faturamento: number | null;
   }[];
 }
-
 interface AgendaItem {
   id: string;
   titulo: string;
@@ -40,7 +36,6 @@ interface AgendaItem {
   link_zoom: string | null;
   descricao: string | null;
 }
-
 interface Notification {
   id: string;
   title: string;
@@ -49,9 +44,10 @@ interface Notification {
   priority: string;
   created_at: string;
 }
-
 export default function Dashboard() {
-  const { isAdmin } = useIsAdmin();
+  const {
+    isAdmin
+  } = useIsAdmin();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [acelerometro, setAcelerometro] = useState<AcelerometroData | null>(null);
   const [adminStats, setAdminStats] = useState<AdminStats | null>(null);
@@ -60,51 +56,46 @@ export default function Dashboard() {
   const [paginaNotificacoes, setPaginaNotificacoes] = useState(1);
   const [totalNotificacoes, setTotalNotificacoes] = useState(0);
   const [loading, setLoading] = useState(true);
-  
   const NOTIFICACOES_POR_PAGINA = 3;
-
   useEffect(() => {
     const fetchData = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: {
+          user
+        }
+      } = await supabase.auth.getUser();
       if (user) {
-        const { data: profileData } = await supabase
-          .from("profiles")
-          .select("nome_completo, apelido")
-          .eq("id", user.id)
-          .single();
-        
+        const {
+          data: profileData
+        } = await supabase.from("profiles").select("nome_completo, apelido").eq("id", user.id).single();
         setProfile(profileData);
 
         // Buscar próximos encontros da agenda
-        const { data: agendaData } = await supabase
-          .from("agenda_mentoria")
-          .select("*")
-          .gte("data_hora", new Date().toISOString())
-          .order("data_hora", { ascending: true })
-          .limit(3);
-        
+        const {
+          data: agendaData
+        } = await supabase.from("agenda_mentoria").select("*").gte("data_hora", new Date().toISOString()).order("data_hora", {
+          ascending: true
+        }).limit(3);
         if (agendaData) {
           setProximosEncontros(agendaData);
         }
-
         if (isAdmin) {
           // Buscar estatísticas para admin
-          
+
           // Total de mentorados ativos
-          const { count: totalMentorados } = await supabase
-            .from("mentorados")
-            .select("*", { count: "exact", head: true })
-            .eq("status", "ativo");
+          const {
+            count: totalMentorados
+          } = await supabase.from("mentorados").select("*", {
+            count: "exact",
+            head: true
+          }).eq("status", "ativo");
 
           // Faturamento total e médio
-          const { data: allDesempenho } = await supabase
-            .from("desempenho_mensal")
-            .select("faturamento_mensal, mentorado_id");
-
+          const {
+            data: allDesempenho
+          } = await supabase.from("desempenho_mensal").select("faturamento_mensal, mentorado_id");
           let faturamentoTotal = 0;
           let countRegistros = 0;
-          
           if (allDesempenho) {
             allDesempenho.forEach(item => {
               if (item.faturamento_mensal) {
@@ -113,39 +104,32 @@ export default function Dashboard() {
               }
             });
           }
-
           const faturamentoMedio = countRegistros > 0 ? faturamentoTotal / countRegistros : 0;
 
           // Buscar faixas de premiação
-          const { data: premiacoes } = await supabase
-            .from("premiacoes")
-            .select("*")
-            .order("min_faturamento", { ascending: true });
+          const {
+            data: premiacoes
+          } = await supabase.from("premiacoes").select("*").order("min_faturamento", {
+            ascending: true
+          });
 
           // Para cada mentorado, pegar o faturamento mais recente
-          const { data: mentoradosAtivos } = await supabase
-            .from("mentorados")
-            .select("id")
-            .eq("status", "ativo");
-
+          const {
+            data: mentoradosAtivos
+          } = await supabase.from("mentorados").select("id").eq("status", "ativo");
           const distribuicaoFaixas: Record<string, number> = {};
-          
           if (premiacoes) {
             premiacoes.forEach(p => {
               distribuicaoFaixas[p.faixa] = 0;
             });
           }
-
           if (mentoradosAtivos && premiacoes) {
             for (const mentorado of mentoradosAtivos) {
-              const { data: ultimoDesempenho } = await supabase
-                .from("desempenho_mensal")
-                .select("faturamento_mensal")
-                .eq("mentorado_id", mentorado.id)
-                .order("mes_ano", { ascending: false })
-                .limit(1)
-                .maybeSingle();
-
+              const {
+                data: ultimoDesempenho
+              } = await supabase.from("desempenho_mensal").select("faturamento_mensal").eq("mentorado_id", mentorado.id).order("mes_ano", {
+                ascending: false
+              }).limit(1).maybeSingle();
               const faturamento = ultimoDesempenho?.faturamento_mensal || 0;
 
               // Encontrar faixa correspondente
@@ -154,55 +138,41 @@ export default function Dashboard() {
                 const abaixoDe = p.max_faturamento === null || faturamento <= p.max_faturamento;
                 return acimaDe && abaixoDe;
               });
-
               if (faixa) {
                 distribuicaoFaixas[faixa.faixa]++;
               }
             }
           }
-
           const distribuicaoArray = premiacoes?.map(p => ({
             faixa: p.faixa,
             quantidade: distribuicaoFaixas[p.faixa] || 0,
             min_faturamento: p.min_faturamento,
-            max_faturamento: p.max_faturamento,
+            max_faturamento: p.max_faturamento
           })) || [];
-
           setAdminStats({
             total_mentorados: totalMentorados || 0,
             faturamento_medio_mensal: faturamentoMedio,
             faturamento_acumulado_total: faturamentoTotal,
-            distribuicao_faixas: distribuicaoArray,
+            distribuicao_faixas: distribuicaoArray
           });
         } else {
           // Buscar mentorado_id
-          const { data: mentoradoData } = await supabase
-            .from("mentorados")
-            .select("id, meta_clientes")
-            .eq("user_id", user.id)
-            .maybeSingle();
-
+          const {
+            data: mentoradoData
+          } = await supabase.from("mentorados").select("id, meta_clientes").eq("user_id", user.id).maybeSingle();
           if (mentoradoData) {
             // Buscar dados de desempenho
-            const { data: desempenhoData } = await supabase
-              .from("desempenho_mensal")
-              .select("faturamento_mensal, clientes_mes")
-              .eq("mentorado_id", mentoradoData.id);
-
+            const {
+              data: desempenhoData
+            } = await supabase.from("desempenho_mensal").select("faturamento_mensal, clientes_mes").eq("mentorado_id", mentoradoData.id);
             if (desempenhoData && desempenhoData.length > 0) {
-              const faturamentoAcumulado = desempenhoData.reduce(
-                (acc, item) => acc + (item.faturamento_mensal || 0),
-                0
-              );
-              const maiorFaturamento = Math.max(
-                ...desempenhoData.map(item => item.faturamento_mensal || 0)
-              );
+              const faturamentoAcumulado = desempenhoData.reduce((acc, item) => acc + (item.faturamento_mensal || 0), 0);
+              const maiorFaturamento = Math.max(...desempenhoData.map(item => item.faturamento_mensal || 0));
               const clientesAtuais = desempenhoData[desempenhoData.length - 1]?.clientes_mes || 0;
-
               setAcelerometro({
                 clientes_atuais: clientesAtuais,
                 faturamento_acumulado: faturamentoAcumulado,
-                maior_faturamento: maiorFaturamento,
+                maior_faturamento: maiorFaturamento
               });
             }
           }
@@ -210,44 +180,33 @@ export default function Dashboard() {
       }
       setLoading(false);
     };
-
     fetchData();
     fetchNotificacoes();
   }, [isAdmin]);
-
   useEffect(() => {
     fetchNotificacoes();
   }, [paginaNotificacoes]);
-
   const fetchNotificacoes = async () => {
     // Contar total de notificações
-    const { count } = await supabase
-      .from("notifications")
-      .select("*", { count: "exact", head: true })
-      .eq("is_active", true)
-      .eq("visible_to", "all");
-
+    const {
+      count
+    } = await supabase.from("notifications").select("*", {
+      count: "exact",
+      head: true
+    }).eq("is_active", true).eq("visible_to", "all");
     setTotalNotificacoes(count || 0);
 
     // Buscar notificações da página atual
-    const { data: notifData } = await supabase
-      .from("notifications")
-      .select("*")
-      .eq("is_active", true)
-      .eq("visible_to", "all")
-      .order("created_at", { ascending: false })
-      .range(
-        (paginaNotificacoes - 1) * NOTIFICACOES_POR_PAGINA,
-        paginaNotificacoes * NOTIFICACOES_POR_PAGINA - 1
-      );
-
+    const {
+      data: notifData
+    } = await supabase.from("notifications").select("*").eq("is_active", true).eq("visible_to", "all").order("created_at", {
+      ascending: false
+    }).range((paginaNotificacoes - 1) * NOTIFICACOES_POR_PAGINA, paginaNotificacoes * NOTIFICACOES_POR_PAGINA - 1);
     if (notifData) {
       setNotificacoes(notifData);
     }
   };
-
   const totalPaginasNotificacoes = Math.ceil(totalNotificacoes / NOTIFICACOES_POR_PAGINA);
-
   const getNotificationColor = (type: string) => {
     switch (type) {
       case "urgente":
@@ -259,24 +218,33 @@ export default function Dashboard() {
         return "bg-primary text-primary-foreground";
     }
   };
-
-  const quickAccessCards = [
-    { title: "Próximo Encontro", icon: Calendar, link: "/agenda", color: "from-primary/20 to-primary/5" },
-    { title: "Trilha de Aceleração", icon: BookOpen, link: "/trilha", color: "from-primary/20 to-primary/5" },
-    { title: "Meus Resultados", icon: TrendingUp, link: "/resultados", color: "from-primary/20 to-primary/5" },
-    { title: "Prêmio Profissional", icon: Trophy, link: "/premio", color: "from-primary/20 to-primary/5" },
-  ];
-
+  const quickAccessCards = [{
+    title: "Próximo Encontro",
+    icon: Calendar,
+    link: "/agenda",
+    color: "from-primary/20 to-primary/5"
+  }, {
+    title: "Trilha de Aceleração",
+    icon: BookOpen,
+    link: "/trilha",
+    color: "from-primary/20 to-primary/5"
+  }, {
+    title: "Meus Resultados",
+    icon: TrendingUp,
+    link: "/resultados",
+    color: "from-primary/20 to-primary/5"
+  }, {
+    title: "Prêmio Profissional",
+    icon: Trophy,
+    link: "/premio",
+    color: "from-primary/20 to-primary/5"
+  }];
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
+    return <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-muted-foreground">Carregando...</div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="space-y-6 animate-slide-in">
+  return <div className="space-y-6 animate-slide-in">
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-card to-card/50 border border-border rounded-lg p-8 shadow-glow">
         <div className="flex items-center gap-3 mb-2">
@@ -291,22 +259,7 @@ export default function Dashboard() {
       </div>
 
       {/* Quick Access Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {quickAccessCards.map((card) => (
-          <Link key={card.title} to={card.link}>
-            <Card className="hover:scale-105 transition-transform duration-300 cursor-pointer bg-gradient-to-br border-border shadow-card hover:shadow-glow">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <card.icon className="h-8 w-8 text-primary" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <CardTitle className="text-lg text-foreground">{card.title}</CardTitle>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
-      </div>
+      
 
       {/* Acelerômetro Preview - Admin ou Mentorado */}
       <Card className="border-border bg-card shadow-card">
@@ -317,8 +270,7 @@ export default function Dashboard() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {isAdmin && adminStats ? (
-            <>
+          {isAdmin && adminStats ? <>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="text-center p-6 bg-muted/30 rounded-lg">
                   <p className="text-4xl font-bold text-primary mb-2">{adminStats.total_mentorados}</p>
@@ -326,7 +278,9 @@ export default function Dashboard() {
                 </div>
                 <div className="text-center p-6 bg-muted/30 rounded-lg">
                   <p className="text-4xl font-bold text-primary mb-2">
-                    R$ {adminStats.faturamento_acumulado_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    R$ {adminStats.faturamento_acumulado_total.toLocaleString('pt-BR', {
+                  minimumFractionDigits: 2
+                })}
                   </p>
                   <p className="text-sm text-muted-foreground">Faturamento Acumulado da Mentoria</p>
                 </div>
@@ -339,23 +293,25 @@ export default function Dashboard() {
                   </Button>
                 </Link>
               </div>
-            </>
-          ) : (
-            <>
+            </> : <>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="text-center p-6 bg-muted/30 rounded-lg">
                   <p className="text-4xl font-bold text-primary mb-2">{acelerometro?.clientes_atuais || 0}</p>
                   <p className="text-sm text-muted-foreground">Clientes Atuais</p>
                 </div>
                 <div className="text-center p-6 bg-muted/30 rounded-lg">
-                  <p className="text-4xl font-bold text-primary mb-2">
-                    R$ {acelerometro?.maior_faturamento?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}
+                  <p className="font-bold text-primary mb-2 text-5xl font-serif">
+                    R$ {acelerometro?.maior_faturamento?.toLocaleString('pt-BR', {
+                  minimumFractionDigits: 2
+                }) || '0,00'}
                   </p>
                   <p className="text-sm text-muted-foreground">Maior Faturamento Mensal</p>
                 </div>
                 <div className="text-center p-6 bg-muted/30 rounded-lg">
                   <p className="text-4xl font-bold text-primary mb-2">
-                    R$ {acelerometro?.faturamento_acumulado?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}
+                    R$ {acelerometro?.faturamento_acumulado?.toLocaleString('pt-BR', {
+                  minimumFractionDigits: 2
+                }) || '0,00'}
                   </p>
                   <p className="text-sm text-muted-foreground">Faturamento Acumulado</p>
                 </div>
@@ -367,8 +323,7 @@ export default function Dashboard() {
                   </Button>
                 </Link>
               </div>
-            </>
-          )}
+            </>}
         </CardContent>
       </Card>
 
@@ -381,13 +336,8 @@ export default function Dashboard() {
           </div>
         </CardHeader>
         <CardContent>
-          {proximosEncontros.length > 0 ? (
-            <div className="space-y-3">
-              {proximosEncontros.map((encontro) => (
-                <div
-                  key={encontro.id}
-                  className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
-                >
+          {proximosEncontros.length > 0 ? <div className="space-y-3">
+              {proximosEncontros.map(encontro => <div key={encontro.id} className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
@@ -396,26 +346,23 @@ export default function Dashboard() {
                         </Badge>
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
                           <Clock className="h-3 w-3" />
-                          {format(new Date(encontro.data_hora), "dd 'de' MMMM 'às' HH:mm", { locale: ptBR })}
+                          {format(new Date(encontro.data_hora), "dd 'de' MMMM 'às' HH:mm", {
+                      locale: ptBR
+                    })}
                         </div>
                       </div>
                       <h4 className="font-semibold text-foreground mb-1">{encontro.titulo}</h4>
-                      {encontro.descricao && (
-                        <p className="text-sm text-muted-foreground line-clamp-2">
+                      {encontro.descricao && <p className="text-sm text-muted-foreground line-clamp-2">
                           {encontro.descricao}
-                        </p>
-                      )}
+                        </p>}
                     </div>
-                    {encontro.link_zoom && (
-                      <Button size="sm" asChild>
+                    {encontro.link_zoom && <Button size="sm" asChild>
                         <a href={encontro.link_zoom} target="_blank" rel="noopener noreferrer">
                           Acessar
                         </a>
-                      </Button>
-                    )}
+                      </Button>}
                   </div>
-                </div>
-              ))}
+                </div>)}
               <div className="pt-2">
                 <Link to="/agenda">
                   <Button variant="outline" className="w-full">
@@ -423,12 +370,9 @@ export default function Dashboard() {
                   </Button>
                 </Link>
               </div>
-            </div>
-          ) : (
-            <p className="text-muted-foreground text-center py-4">
+            </div> : <p className="text-muted-foreground text-center py-4">
               Nenhum encontro agendado no momento.
-            </p>
-          )}
+            </p>}
         </CardContent>
       </Card>
 
@@ -441,14 +385,9 @@ export default function Dashboard() {
           </div>
         </CardHeader>
         <CardContent>
-          {notificacoes.length > 0 ? (
-            <div className="space-y-4">
+          {notificacoes.length > 0 ? <div className="space-y-4">
               <div className="space-y-3">
-                {notificacoes.map((notif) => (
-                  <div
-                    key={notif.id}
-                    className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
-                  >
+                {notificacoes.map(notif => <div key={notif.id} className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
                     <div className="flex items-start gap-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
@@ -456,50 +395,35 @@ export default function Dashboard() {
                             {notif.type}
                           </Badge>
                           <span className="text-xs text-muted-foreground">
-                            {format(new Date(notif.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                            {format(new Date(notif.created_at), "dd/MM/yyyy 'às' HH:mm", {
+                        locale: ptBR
+                      })}
                           </span>
                         </div>
                         <h4 className="font-semibold text-foreground mb-1">{notif.title}</h4>
                         <p className="text-sm text-muted-foreground">{notif.message}</p>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  </div>)}
               </div>
 
-              {totalPaginasNotificacoes > 1 && (
-                <div className="flex items-center justify-between pt-2 border-t">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPaginaNotificacoes(prev => Math.max(1, prev - 1))}
-                    disabled={paginaNotificacoes === 1}
-                  >
+              {totalPaginasNotificacoes > 1 && <div className="flex items-center justify-between pt-2 border-t">
+                  <Button variant="outline" size="sm" onClick={() => setPaginaNotificacoes(prev => Math.max(1, prev - 1))} disabled={paginaNotificacoes === 1}>
                     <ChevronLeft className="h-4 w-4 mr-1" />
                     Anterior
                   </Button>
                   <span className="text-sm text-muted-foreground">
                     Página {paginaNotificacoes} de {totalPaginasNotificacoes}
                   </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPaginaNotificacoes(prev => Math.min(totalPaginasNotificacoes, prev + 1))}
-                    disabled={paginaNotificacoes === totalPaginasNotificacoes}
-                  >
+                  <Button variant="outline" size="sm" onClick={() => setPaginaNotificacoes(prev => Math.min(totalPaginasNotificacoes, prev + 1))} disabled={paginaNotificacoes === totalPaginasNotificacoes}>
                     Próxima
                     <ChevronRight className="h-4 w-4 ml-1" />
                   </Button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <p className="text-muted-foreground text-center py-4">
+                </div>}
+            </div> : <p className="text-muted-foreground text-center py-4">
               Nenhuma novidade no momento.
-            </p>
-          )}
+            </p>}
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 }
