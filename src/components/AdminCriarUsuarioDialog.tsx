@@ -35,11 +35,19 @@ export function AdminCriarUsuarioDialog() {
 
   const criarUsuarioMutation = useMutation({
     mutationFn: async () => {
+      const email = formData.email.trim();
+      const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+      if (!emailRegex.test(email)) {
+        throw new Error("Email inválido. Verifique o endereço informado.");
+      }
+
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Não autenticado");
 
+      const payload = { ...formData, email };
+
       const { data, error } = await supabase.functions.invoke('criar-usuario', {
-        body: formData,
+        body: payload,
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },

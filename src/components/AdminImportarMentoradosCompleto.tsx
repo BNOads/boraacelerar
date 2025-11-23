@@ -95,13 +95,14 @@ export function AdminImportarMentoradosCompleto() {
         complete: async (parseResult) => {
           const rows = parseResult.data;
           
-          // Agrupar linhas por email
+          // Agrupar linhas por email (normalizando espaços)
           const mentoradosMap = new Map<string, CSVRow[]>();
           rows.forEach((row) => {
-            if (!row.email) return;
-            const existing = mentoradosMap.get(row.email) || [];
+            const email = row.email?.trim();
+            if (!email) return;
+            const existing = mentoradosMap.get(email) || [];
             existing.push(row);
-            mentoradosMap.set(row.email, existing);
+            mentoradosMap.set(email, existing);
           });
 
           const totalMentorados = mentoradosMap.size;
@@ -112,14 +113,15 @@ export function AdminImportarMentoradosCompleto() {
           for (const [email, mentoradoRows] of mentoradosMap.entries()) {
             try {
               const firstRow = mentoradoRows[0];
+              const emailLimpo = email.trim();
               
               // Validar email
-              const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-              if (!email || !emailRegex.test(email)) {
+              const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+              if (!emailLimpo || !emailRegex.test(emailLimpo)) {
                 importResults.push({
-                  email: email || "(vazio)",
+                  email: emailLimpo || "(vazio)",
                   status: "error",
-                  message: "Email inválido ou não informado",
+                  message: "Email inválido ou não informado (ajuste no CSV)",
                 });
                 processedMentorados++;
                 setProgress((processedMentorados / totalMentorados) * 100);
@@ -129,7 +131,7 @@ export function AdminImportarMentoradosCompleto() {
               // Validar dados obrigatórios (apenas nome)
               if (!firstRow.nome_completo) {
                 importResults.push({
-                  email,
+                  email: emailLimpo,
                   status: "error",
                   message: "Nome completo obrigatório",
                 });
@@ -142,7 +144,7 @@ export function AdminImportarMentoradosCompleto() {
               const { data: existingMentorado } = await supabase
                 .from("mentorados")
                 .select("id, user_id")
-                .eq("email", email)
+                .eq("email", emailLimpo)
                 .maybeSingle();
 
               let mentoradoId = existingMentorado?.id;
@@ -154,8 +156,8 @@ export function AdminImportarMentoradosCompleto() {
                   "criar-usuario",
                   {
                     body: {
-                      email: email,
-                      password: email, // Senha = email
+                      email: emailLimpo,
+                      password: emailLimpo, // Senha = email
                       nome_completo: firstRow.nome_completo,
                       apelido: firstRow.apelido || "",
                       role: "mentorado",
@@ -175,7 +177,7 @@ export function AdminImportarMentoradosCompleto() {
                 const { data: newMentorado } = await supabase
                   .from("mentorados")
                   .select("id")
-                  .eq("email", email)
+                  .eq("email", emailLimpo)
                   .single();
 
                 mentoradoId = newMentorado?.id;
@@ -234,7 +236,7 @@ export function AdminImportarMentoradosCompleto() {
               }
 
               importResults.push({
-                email,
+                email: emailLimpo,
                 status: existingMentorado ? "warning" : "success",
                 message: `${monthsImported} mês(es) de dados importados`,
                 action,
@@ -291,8 +293,9 @@ export function AdminImportarMentoradosCompleto() {
     primeiraData: previewData[0]?.mes_ano,
     ultimaData: previewData[previewData.length - 1]?.mes_ano,
     emailsInvalidos: previewData.filter(row => {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return !row.email || !emailRegex.test(row.email);
+      const email = row.email?.trim() || "";
+      const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+      return !email || !emailRegex.test(email);
     }).length,
   } : null;
 
@@ -443,8 +446,9 @@ export function AdminImportarMentoradosCompleto() {
                     </TableHeader>
                     <TableBody>
                       {currentPageData.map((row, index) => {
-                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                        const isInvalidEmail = !row.email || !emailRegex.test(row.email);
+                        const email = row.email?.trim() || "";
+                        const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+                        const isInvalidEmail = !email || !emailRegex.test(email);
                         
                         return (
                           <TableRow key={startIndex + index} className={isInvalidEmail ? "bg-destructive/10" : ""}>
