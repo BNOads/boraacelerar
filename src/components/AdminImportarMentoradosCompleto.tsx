@@ -113,7 +113,20 @@ export function AdminImportarMentoradosCompleto() {
             try {
               const firstRow = mentoradoRows[0];
               
-              // Validar dados obrigatórios (apenas email e nome)
+              // Validar email
+              const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+              if (!email || !emailRegex.test(email)) {
+                importResults.push({
+                  email: email || "(vazio)",
+                  status: "error",
+                  message: "Email inválido ou não informado",
+                });
+                processedMentorados++;
+                setProgress((processedMentorados / totalMentorados) * 100);
+                continue;
+              }
+              
+              // Validar dados obrigatórios (apenas nome)
               if (!firstRow.nome_completo) {
                 importResults.push({
                   email,
@@ -277,6 +290,10 @@ export function AdminImportarMentoradosCompleto() {
     mentoradosUnicos: new Set(previewData.map(row => row.email)).size,
     primeiraData: previewData[0]?.mes_ano,
     ultimaData: previewData[previewData.length - 1]?.mes_ano,
+    emailsInvalidos: previewData.filter(row => {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return !row.email || !emailRegex.test(row.email);
+    }).length,
   } : null;
 
   // Paginação
@@ -374,6 +391,16 @@ export function AdminImportarMentoradosCompleto() {
                 </div>
               </div>
 
+              {previewStats.emailsInvalidos > 0 && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>{previewStats.emailsInvalidos} email(s) inválido(s)</strong> encontrado(s) no arquivo. 
+                    Estes registros serão ignorados na importação.
+                  </AlertDescription>
+                </Alert>
+              )}
+
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <h5 className="text-sm font-medium">
@@ -415,23 +442,31 @@ export function AdminImportarMentoradosCompleto() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {currentPageData.map((row, index) => (
-                        <TableRow key={startIndex + index}>
-                          <TableCell className="text-xs font-mono">{row.email}</TableCell>
-                          <TableCell className="text-xs">{row.nome_completo}</TableCell>
-                          <TableCell className="text-xs">{row.turma || "-"}</TableCell>
-                          <TableCell className="text-xs">{row.mes_ano}</TableCell>
-                          <TableCell className="text-xs">
-                            {row.faturamento_mensal ? `R$ ${parseFloat(row.faturamento_mensal).toLocaleString('pt-BR')}` : "-"}
-                          </TableCell>
-                          <TableCell className="text-xs">
-                            {row.meta_mensal ? `R$ ${parseFloat(row.meta_mensal).toLocaleString('pt-BR')}` : "-"}
-                          </TableCell>
-                          <TableCell className="text-xs">
-                            {row.contratos_fechados || "-"}
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {currentPageData.map((row, index) => {
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        const isInvalidEmail = !row.email || !emailRegex.test(row.email);
+                        
+                        return (
+                          <TableRow key={startIndex + index} className={isInvalidEmail ? "bg-destructive/10" : ""}>
+                            <TableCell className="text-xs font-mono">
+                              {row.email || "(vazio)"}
+                              {isInvalidEmail && <span className="ml-2 text-destructive">⚠️</span>}
+                            </TableCell>
+                            <TableCell className="text-xs">{row.nome_completo}</TableCell>
+                            <TableCell className="text-xs">{row.turma || "-"}</TableCell>
+                            <TableCell className="text-xs">{row.mes_ano}</TableCell>
+                            <TableCell className="text-xs">
+                              {row.faturamento_mensal ? `R$ ${parseFloat(row.faturamento_mensal).toLocaleString('pt-BR')}` : "-"}
+                            </TableCell>
+                            <TableCell className="text-xs">
+                              {row.meta_mensal ? `R$ ${parseFloat(row.meta_mensal).toLocaleString('pt-BR')}` : "-"}
+                            </TableCell>
+                            <TableCell className="text-xs">
+                              {row.contratos_fechados || "-"}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 </div>
