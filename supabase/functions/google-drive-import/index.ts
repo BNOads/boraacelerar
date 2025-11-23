@@ -37,6 +37,31 @@ function findMentoradoByFileName(fileName: string, mentorados: any[]): string | 
   return null;
 }
 
+async function listDriveFolderFiles(folderId: string, accessToken: string) {
+  const query = `'${folderId}' in parents and trashed = false`;
+  const fields = 'files(id,name,mimeType,size,createdTime,webViewLink,thumbnailLink)';
+  const url = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=${fields}&supportsAllDrives=true&includeItemsFromAllDrives=true`;
+
+  const response = await fetch(url, {
+    headers: { 'Authorization': `Bearer ${accessToken}` },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('Google Drive API error:', response.status, errorText);
+    throw new Error(`Google Drive API error (${response.status})`);
+  }
+
+  const data = await response.json();
+  const files = data.files || [];
+
+  if (!Array.isArray(files)) {
+    throw new Error('Invalid response from Google Drive API');
+  }
+
+  return files;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -66,20 +91,7 @@ serve(async (req) => {
     const { access_token } = await tokenResponse.json();
 
     if (action === 'list') {
-      // List files in the folder
-      const filesResponse = await fetch(
-        `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+mimeType+contains+'video'&fields=files(id,name,mimeType,size,createdTime,webViewLink,thumbnailLink)`,
-        {
-          headers: { 'Authorization': `Bearer ${access_token}` },
-        }
-      );
-
-      const responseData = await filesResponse.json();
-      const files = responseData.files || [];
-      
-      if (!Array.isArray(files)) {
-        throw new Error('Invalid response from Google Drive API');
-      }
+      const files = await listDriveFolderFiles(folderId!, access_token);
 
       return new Response(JSON.stringify({ files }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -100,20 +112,7 @@ serve(async (req) => {
 
       if (mentoradosError) throw mentoradosError;
 
-      // List all files
-      const filesResponse = await fetch(
-        `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+mimeType+contains+'video'&fields=files(id,name,mimeType,size,createdTime,webViewLink,thumbnailLink)`,
-        {
-          headers: { 'Authorization': `Bearer ${access_token}` },
-        }
-      );
-
-      const filesData = await filesResponse.json();
-      const files = filesData.files || [];
-      
-      if (!Array.isArray(files)) {
-        throw new Error('Invalid response from Google Drive API');
-      }
+       const files = await listDriveFolderFiles(folderId!, access_token);
 
       const results: { imported: number; skipped: number; errors: string[] } = { 
         imported: 0, 
@@ -174,12 +173,12 @@ serve(async (req) => {
 
     if (action === 'import' && fileId && mentoradoId) {
       // Get file details
-      const fileResponse = await fetch(
-        `https://www.googleapis.com/drive/v3/files/${fileId}?fields=id,name,mimeType,size,createdTime,webViewLink,thumbnailLink`,
-        {
-          headers: { 'Authorization': `Bearer ${access_token}` },
-        }
-      );
+       const fileResponse = await fetch(
+         `https://www.googleapis.com/drive/v3/files/${fileId}?fields=id,name,mimeType,size,createdTime,webViewLink,thumbnailLink&supportsAllDrives=true&includeItemsFromAllDrives=true`,
+         {
+           headers: { 'Authorization': `Bearer ${access_token}` },
+         }
+       );
 
       const file = await fileResponse.json();
 
@@ -215,21 +214,8 @@ serve(async (req) => {
       });
     }
 
-    // List encontros videos
     if (action === 'list-encontros') {
-      const filesResponse = await fetch(
-        `https://www.googleapis.com/drive/v3/files?q='${encontrosFolderId}'+in+parents+and+mimeType+contains+'video'&fields=files(id,name,mimeType,size,createdTime,webViewLink,thumbnailLink)`,
-        {
-          headers: { 'Authorization': `Bearer ${access_token}` },
-        }
-      );
-
-      const responseData = await filesResponse.json();
-      const files = responseData.files || [];
-      
-      if (!Array.isArray(files)) {
-        throw new Error('Invalid response from Google Drive API');
-      }
+      const files = await listDriveFolderFiles(encontrosFolderId!, access_token);
 
       return new Response(JSON.stringify({ files }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -242,20 +228,7 @@ serve(async (req) => {
       const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
       const supabase = createClient(supabaseUrl, supabaseKey);
 
-      // List all files
-      const filesResponse = await fetch(
-        `https://www.googleapis.com/drive/v3/files?q='${encontrosFolderId}'+in+parents+and+mimeType+contains+'video'&fields=files(id,name,mimeType,size,createdTime,webViewLink,thumbnailLink)`,
-        {
-          headers: { 'Authorization': `Bearer ${access_token}` },
-        }
-      );
-
-      const filesData = await filesResponse.json();
-      const files = filesData.files || [];
-      
-      if (!Array.isArray(files)) {
-        throw new Error('Invalid response from Google Drive API');
-      }
+       const files = await listDriveFolderFiles(encontrosFolderId!, access_token);
 
       const results = { 
         imported: [] as string[], 
@@ -325,12 +298,12 @@ serve(async (req) => {
 
     // Import specific encontro
     if (action === 'import-encontro' && fileId && encontroId) {
-      const fileResponse = await fetch(
-        `https://www.googleapis.com/drive/v3/files/${fileId}?fields=id,name,mimeType,size,createdTime,webViewLink,thumbnailLink`,
-        {
-          headers: { 'Authorization': `Bearer ${access_token}` },
-        }
-      );
+       const fileResponse = await fetch(
+         `https://www.googleapis.com/drive/v3/files/${fileId}?fields=id,name,mimeType,size,createdTime,webViewLink,thumbnailLink&supportsAllDrives=true&includeItemsFromAllDrives=true`,
+         {
+           headers: { 'Authorization': `Bearer ${access_token}` },
+         }
+       );
 
       const file = await fileResponse.json();
 
