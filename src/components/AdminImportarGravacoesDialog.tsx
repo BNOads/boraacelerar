@@ -64,15 +64,23 @@ export const AdminImportarGravacoesDialog = () => {
   });
 
   const handleAutoImport = async () => {
+    console.log("Starting auto import...");
     setAutoImporting(true);
     try {
+      console.log("Calling google-drive-import function with action: auto-import");
       const { data, error } = await supabase.functions.invoke("google-drive-import", {
         body: { action: "auto-import" },
       });
 
-      if (error) throw error;
+      console.log("Function response:", { data, error });
+
+      if (error) {
+        console.error("Function error:", error);
+        throw error;
+      }
 
       const results = data as { imported: number; skipped: number; errors: string[] };
+      console.log("Import results:", results);
       
       if (results.imported > 0) {
         toast.success(`${results.imported} gravações importadas com sucesso!`);
