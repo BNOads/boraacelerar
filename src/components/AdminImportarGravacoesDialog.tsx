@@ -34,6 +34,7 @@ export const AdminImportarGravacoesDialog = () => {
   const [open, setOpen] = useState(false);
   const [selectedMentorado, setSelectedMentorado] = useState<string>("");
   const [importing, setImporting] = useState<string | null>(null);
+  const [autoImporting, setAutoImporting] = useState(false);
 
   const { data: mentorados } = useQuery({
     queryKey: ["mentorados-for-import"],
@@ -61,6 +62,39 @@ export const AdminImportarGravacoesDialog = () => {
     },
     enabled: open,
   });
+
+  const handleAutoImport = async () => {
+    setAutoImporting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("google-drive-import", {
+        body: { action: "auto-import" },
+      });
+
+      if (error) throw error;
+
+      const results = data as { imported: number; skipped: number; errors: string[] };
+      
+      if (results.imported > 0) {
+        toast.success(`${results.imported} gravações importadas com sucesso!`);
+      }
+      
+      if (results.skipped > 0) {
+        toast.info(`${results.skipped} gravações já existiam no sistema`);
+      }
+      
+      if (results.errors.length > 0) {
+        console.error("Import errors:", results.errors);
+        toast.error(`${results.errors.length} erros durante importação`);
+      }
+
+      refetch();
+    } catch (error) {
+      console.error("Error auto-importing:", error);
+      toast.error("Erro ao importar gravações automaticamente");
+    } finally {
+      setAutoImporting(false);
+    }
+  };
 
   const handleImport = async (fileId: string) => {
     if (!selectedMentorado) {
@@ -102,11 +136,37 @@ export const AdminImportarGravacoesDialog = () => {
         <DialogHeader>
           <DialogTitle>Importar Gravações do Google Drive</DialogTitle>
           <DialogDescription>
-            Selecione um mentorado e clique em importar nas gravações desejadas
+            Importe automaticamente ou selecione manualmente por mentorado
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
+          <div className="flex gap-2">
+            <Button
+              onClick={handleAutoImport}
+              disabled={autoImporting || loadingFiles}
+              className="flex-1"
+            >
+              {autoImporting ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="mr-2 h-4 w-4" />
+              )}
+              Importar Tudo Automaticamente
+            </Button>
+          </div>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Ou importar manualmente
+              </span>
+            </div>
+          </div>
+
           <Select value={selectedMentorado} onValueChange={setSelectedMentorado}>
             <SelectTrigger>
               <SelectValue placeholder="Selecione o mentorado" />
