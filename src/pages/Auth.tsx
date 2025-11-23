@@ -16,10 +16,8 @@ const authSchema = z.object({
 });
 
 export default function Auth() {
-  const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [nomeCompleto, setNomeCompleto] = useState("");
   const [loading, setLoading] = useState(false);
   const [isRecovery, setIsRecovery] = useState(false);
   const [userEmailFromSession, setUserEmailFromSession] = useState<string | null>(null);
@@ -58,51 +56,23 @@ export default function Auth() {
     setLoading(true);
 
     try {
-      const validationData = isSignUp 
-        ? { email, password, nome_completo: nomeCompleto }
-        : { email, password };
-      
-      authSchema.parse(validationData);
+      authSchema.parse({ email, password });
 
-      if (isSignUp) {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/dashboard`,
-            data: {
-              nome_completo: nomeCompleto,
-            },
-          },
-        });
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-        if (error) {
-          if (error.message.includes("already registered") || error.message.includes("User already registered")) {
-            toast.error("Este email já está cadastrado");
-          } else {
-            toast.error(error.message);
-          }
+      if (error) {
+        if (error.message.includes("Invalid login credentials")) {
+          toast.error("Email ou senha incorretos");
+        } else if (error.message.includes("Database error")) {
+          toast.error("Erro ao acessar o sistema. Por favor, tente novamente.");
         } else {
-          toast.success("Conta criada! Você já pode fazer login 🚀");
-          setIsSignUp(false);
+          toast.error(error.message);
         }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (error) {
-          if (error.message.includes("Invalid login credentials")) {
-            toast.error("Email ou senha incorretos");
-          } else if (error.message.includes("Database error")) {
-            toast.error("Erro ao acessar o sistema. Por favor, tente novamente.");
-          } else {
-            toast.error(error.message);
-          }
-        } else {
-          toast.success("Bem-vindo de volta! 🎉");
-        }
+        toast.success("Bem-vindo de volta!");
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -113,26 +83,6 @@ export default function Auth() {
     }
   };
   
-  const handleMagicLink = async () => {
-    if (!email) {
-      toast.error("Informe seu email");
-      return;
-    }
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: { emailRedirectTo: `${window.location.origin}/dashboard` },
-      });
-      if (error) {
-        toast.error(error.message);
-      } else {
-        toast.success("Enviamos um link de acesso para seu email.");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleResetPassword = async () => {
     if (!email) {
@@ -184,12 +134,12 @@ export default function Auth() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md border-border bg-card shadow-lg">
         <CardHeader className="text-center space-y-4">
-          <img src={logo} alt="BORA Acelerar" className="h-16 mx-auto" />
+          <img src={logo} alt="BORA Acelerar" className="h-20 mx-auto" />
           <CardTitle className="text-2xl font-bold text-foreground">
-            {isSignUp ? "Criar Conta" : "Bem-vindo de volta"}
+            Bem-vindo de volta
           </CardTitle>
           <CardDescription className="text-muted-foreground">
-            {isSignUp ? "Junte-se à Mentoria BORA Acelerar" : "Entre para continuar sua jornada"}
+            Entre para continuar sua jornada
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -208,20 +158,6 @@ export default function Auth() {
             </div>
           ) : (
             <form onSubmit={handleAuth} className="space-y-4">
-              {isSignUp && (
-                <div className="space-y-2">
-                  <Label htmlFor="nome">Nome Completo</Label>
-                  <Input
-                    id="nome"
-                    type="text"
-                    placeholder="Seu nome completo"
-                    value={nomeCompleto}
-                    onChange={(e) => setNomeCompleto(e.target.value)}
-                    required
-                    className="bg-background border-input"
-                  />
-                </div>
-              )}
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -251,22 +187,11 @@ export default function Auth() {
                 className="w-full"
                 disabled={loading}
               >
-                {loading ? "Carregando..." : isSignUp ? "Criar Conta" : "Entrar"}
+                {loading ? "Carregando..." : "Entrar"}
               </Button>
-              {!isSignUp && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full mt-2"
-                  onClick={handleMagicLink}
-                  disabled={loading || !email}
-                >
-                  Entrar com link mágico
-                </Button>
-              )}
             </form>
           )}
-          <div className="mt-4 text-center space-y-2">
+          <div className="mt-4 text-center">
             <button
               type="button"
               onClick={handleResetPassword}
@@ -274,15 +199,6 @@ export default function Auth() {
             >
               Esqueci minha senha
             </button>
-            <div>
-              <button
-                type="button"
-                onClick={() => setIsSignUp(!isSignUp)}
-                className="text-sm text-muted-foreground hover:text-primary transition-colors"
-              >
-                {isSignUp ? "Já tem uma conta? Entrar" : "Não tem conta? Criar uma"}
-              </button>
-            </div>
           </div>
         </CardContent>
       </Card>
