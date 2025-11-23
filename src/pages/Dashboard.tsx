@@ -234,50 +234,23 @@ export default function Dashboard() {
         <CardContent>
           {isAdmin && adminStats ? (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="text-center p-6 bg-muted/30 rounded-lg">
                   <p className="text-4xl font-bold text-primary mb-2">{adminStats.total_mentorados}</p>
-                  <p className="text-sm text-muted-foreground">Total de Mentorados</p>
-                </div>
-                <div className="text-center p-6 bg-muted/30 rounded-lg">
-                  <p className="text-4xl font-bold text-primary mb-2">
-                    R$ {adminStats.faturamento_medio_mensal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Faturamento Médio Mensal</p>
+                  <p className="text-sm text-muted-foreground">Mentorados Ativos</p>
                 </div>
                 <div className="text-center p-6 bg-muted/30 rounded-lg">
                   <p className="text-4xl font-bold text-primary mb-2">
                     R$ {adminStats.faturamento_acumulado_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </p>
-                  <p className="text-sm text-muted-foreground">Faturamento Acumulado Total</p>
-                </div>
-              </div>
-
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold text-foreground mb-4">Distribuição por Faixa de Faturamento</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {adminStats.distribuicao_faixas.map((faixa) => (
-                    <div key={faixa.faixa} className="p-4 bg-muted/20 rounded-lg border border-border">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-semibold text-foreground">{faixa.faixa}</span>
-                        <Trophy className="h-5 w-5 text-primary" />
-                      </div>
-                      <p className="text-2xl font-bold text-primary mb-1">{faixa.quantidade}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {faixa.max_faturamento 
-                          ? `R$ ${faixa.min_faturamento.toLocaleString('pt-BR')} - R$ ${faixa.max_faturamento.toLocaleString('pt-BR')}`
-                          : `Acima de R$ ${faixa.min_faturamento.toLocaleString('pt-BR')}`
-                        }
-                      </p>
-                    </div>
-                  ))}
+                  <p className="text-sm text-muted-foreground">Faturamento Acumulado da Mentoria</p>
                 </div>
               </div>
 
               <div className="mt-6 text-center">
-                <Link to="/mentorados">
+                <Link to="/resultados">
                   <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                    Ver Todos os Mentorados
+                    Ver Resultados da Mentoria
                   </Button>
                 </Link>
               </div>
