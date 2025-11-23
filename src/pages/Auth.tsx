@@ -6,7 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import logo from "@/assets/logo-bora.png";
+import { useTheme } from "next-themes";
+import logoDark from "@/assets/logo-bora.png";
+import logoLight from "@/assets/logo-bora-light.png";
 import { z } from "zod";
 
 const authSchema = z.object({
@@ -23,6 +25,9 @@ export default function Auth() {
   const [userEmailFromSession, setUserEmailFromSession] = useState<string | null>(null);
   const [updatingPassword, setUpdatingPassword] = useState(false);
   const navigate = useNavigate();
+  const { theme } = useTheme();
+  
+  const logo = theme === "light" ? logoLight : logoDark;
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
