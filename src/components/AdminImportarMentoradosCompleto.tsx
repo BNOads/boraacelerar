@@ -113,7 +113,7 @@ export function AdminImportarMentoradosCompleto() {
             try {
               const firstRow = mentoradoRows[0];
               
-              // Validar dados obrigatórios
+              // Validar dados obrigatórios (apenas email e nome)
               if (!firstRow.nome_completo) {
                 importResults.push({
                   email,
