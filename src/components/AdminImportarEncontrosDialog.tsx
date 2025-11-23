@@ -69,8 +69,10 @@ export function AdminImportarEncontrosDialog() {
   });
 
   const handleAutoImport = async () => {
+    console.log("Starting auto import encontros...");
     setAutoImporting(true);
     try {
+      console.log("Calling google-drive-import function with action: auto-import-encontros");
       const { data, error } = await supabase.functions.invoke(
         "google-drive-import",
         {
@@ -78,9 +80,15 @@ export function AdminImportarEncontrosDialog() {
         }
       );
 
-      if (error) throw error;
+      console.log("Function response:", { data, error });
+
+      if (error) {
+        console.error("Function error:", error);
+        throw error;
+      }
 
       const { imported, skipped, errors } = data;
+      console.log("Import results:", { imported, skipped, errors });
 
       if (imported.length > 0) {
         toast.success(
@@ -91,6 +99,7 @@ export function AdminImportarEncontrosDialog() {
         toast.info(`${skipped.length} gravações já existiam e foram puladas`);
       }
       if (errors.length > 0) {
+        console.error("Import errors:", errors);
         toast.error(`${errors.length} erros ao importar gravações`);
       }
 
