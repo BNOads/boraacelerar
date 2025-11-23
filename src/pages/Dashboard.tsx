@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Calendar, TrendingUp, Trophy, BookOpen, Rocket, Users, Clock, Bell, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
-import { format } from "date-fns";
+import { format, differenceInDays, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 interface Profile {
   nome_completo: string;
@@ -207,6 +207,24 @@ export default function Dashboard() {
     }
   };
   const totalPaginasNotificacoes = Math.ceil(totalNotificacoes / NOTIFICACOES_POR_PAGINA);
+  const getDaysUntilMeeting = (dataHora: string) => {
+    const today = startOfDay(new Date());
+    const meetingDate = startOfDay(new Date(dataHora));
+    return differenceInDays(meetingDate, today);
+  };
+
+  const getCountdownBadge = (days: number) => {
+    if (days === 0) {
+      return <Badge className="bg-green-500 text-white font-bold">HOJE!</Badge>;
+    } else if (days === 1) {
+      return <Badge className="bg-yellow-500 text-white font-bold">AMANHÃ</Badge>;
+    } else if (days <= 7) {
+      return <Badge variant="outline" className="font-semibold">{days} dias</Badge>;
+    } else {
+      return <Badge variant="secondary">{days} dias</Badge>;
+    }
+  };
+
   const getNotificationColor = (type: string) => {
     switch (type) {
       case "urgente":
@@ -337,13 +355,16 @@ export default function Dashboard() {
         </CardHeader>
         <CardContent>
           {proximosEncontros.length > 0 ? <div className="space-y-3">
-              {proximosEncontros.map(encontro => <div key={encontro.id} className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
+              {proximosEncontros.map(encontro => {
+                const daysUntil = getDaysUntilMeeting(encontro.data_hora);
+                return <div key={encontro.id} className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
                         <Badge variant="outline" className="text-xs">
                           {encontro.tipo}
                         </Badge>
+                        {getCountdownBadge(daysUntil)}
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
                           <Clock className="h-3 w-3" />
                           {format(new Date(encontro.data_hora), "dd 'de' MMMM 'às' HH:mm", {
@@ -362,7 +383,8 @@ export default function Dashboard() {
                         </a>
                       </Button>}
                   </div>
-                </div>)}
+                </div>;
+              })}
               <div className="pt-2">
                 <Link to="/agenda">
                   <Button variant="outline" className="w-full">

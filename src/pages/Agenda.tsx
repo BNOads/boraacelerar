@@ -3,14 +3,34 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, Video } from "lucide-react";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, differenceInDays, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { Badge } from "@/components/ui/badge";
 import { AdminAgendaDialog } from "@/components/AdminAgendaDialog";
 import { AdminImportarAgendaDialog } from "@/components/AdminImportarAgendaDialog";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 export default function Agenda() {
   const { isAdmin } = useIsAdmin();
+
+  const getDaysUntilMeeting = (dataHora: string) => {
+    const today = startOfDay(new Date());
+    const meetingDate = startOfDay(new Date(dataHora));
+    return differenceInDays(meetingDate, today);
+  };
+
+  const getCountdownBadge = (days: number) => {
+    if (days === 0) {
+      return <Badge className="bg-green-500 text-white font-bold">HOJE!</Badge>;
+    } else if (days === 1) {
+      return <Badge className="bg-yellow-500 text-white font-bold">AMANHÃ</Badge>;
+    } else if (days <= 7) {
+      return <Badge variant="outline" className="font-semibold">{days} dias</Badge>;
+    } else {
+      return <Badge variant="secondary">{days} dias</Badge>;
+    }
+  };
+
   const { data: encontros, isLoading } = useQuery({
     queryKey: ["agenda"],
     queryFn: async () => {
@@ -63,19 +83,24 @@ export default function Agenda() {
         
         {proximosEncontros && proximosEncontros.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {proximosEncontros.map((encontro) => (
+            {proximosEncontros.map((encontro) => {
+              const daysUntil = getDaysUntilMeeting(encontro.data_hora);
+              return (
               <Card
                 key={encontro.id}
                 className="border-border bg-card/50 backdrop-blur-sm hover:shadow-elegant hover:scale-[1.02] transition-all duration-300"
               >
                 <CardHeader>
-                  <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-start justify-between gap-2 flex-wrap">
                     <CardTitle className="text-lg text-foreground">
                       {encontro.titulo}
                     </CardTitle>
-                    <span className="shrink-0 px-2 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full">
-                      {encontro.tipo}
-                    </span>
+                    <div className="flex gap-2 shrink-0">
+                      {getCountdownBadge(daysUntil)}
+                      <span className="px-2 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full">
+                        {encontro.tipo}
+                      </span>
+                    </div>
                   </div>
                   <CardDescription>{encontro.descricao}</CardDescription>
                 </CardHeader>
@@ -107,7 +132,8 @@ export default function Agenda() {
                   )}
                 </CardContent>
               </Card>
-            ))}
+            );
+            })}
           </div>
         ) : (
           <Card className="border-border bg-card/50 backdrop-blur-sm">
