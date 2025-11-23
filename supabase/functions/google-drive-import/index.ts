@@ -43,12 +43,13 @@ serve(async (req) => {
   }
 
   try {
-    const { action, fileId, mentoradoId, autoImport } = await req.json();
+    const { action, fileId, mentoradoId, encontroId } = await req.json();
     
     const clientId = Deno.env.get('GOOGLE_DRIVE_CLIENT_ID');
     const clientSecret = Deno.env.get('GOOGLE_DRIVE_CLIENT_SECRET');
     const refreshToken = Deno.env.get('GOOGLE_DRIVE_REFRESH_TOKEN');
     const folderId = Deno.env.get('GOOGLE_DRIVE_FOLDER_ID');
+    const encontrosFolderId = Deno.env.get('GOOGLE_DRIVE_ENCONTROS_FOLDER_ID');
 
     // Get access token
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
@@ -191,6 +192,142 @@ serve(async (req) => {
 
       if (error) {
         console.error('Error importing recording:', error);
+        return new Response(JSON.stringify({ error: error.message }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      return new Response(JSON.stringify({ success: true, data }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // List encontros videos
+    if (action === 'list-encontros') {
+      const filesResponse = await fetch(
+        `https://www.googleapis.com/drive/v3/files?q='${encontrosFolderId}'+in+parents+and+mimeType+contains+'video'&fields=files(id,name,mimeType,size,createdTime,webViewLink,thumbnailLink)`,
+        {
+          headers: { 'Authorization': `Bearer ${access_token}` },
+        }
+      );
+
+      const files = await filesResponse.json();
+      return new Response(JSON.stringify(files), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Auto-import encontros
+    if (action === 'auto-import-encontros') {
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+      const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+      const supabase = createClient(supabaseUrl, supabaseKey);
+
+      // List all files
+      const filesResponse = await fetch(
+        `https://www.googleapis.com/drive/v3/files?q='${encontrosFolderId}'+in+parents+and+mimeType+contains+'video'&fields=files(id,name,mimeType,size,createdTime,webViewLink,thumbnailLink)`,
+        {
+          headers: { 'Authorization': `Bearer ${access_token}` },
+        }
+      );
+
+      const { files } = await filesResponse.json();
+      const results = { 
+        imported: [] as string[], 
+        skipped: [] as string[], 
+        errors: [] as string[] 
+      };
+
+      // Process each file
+      for (const file of files) {
+        try {
+          // Check if already imported
+          const { data: existing } = await supabase
+            .from('gravacoes_encontros')
+            .select('id')
+            .eq('url_video', file.webViewLink)
+            .maybeSingle();
+
+          if (existing) {
+            results.skipped.push(file.name);
+            continue;
+          }
+
+          // Create encontro
+          const { data: encontro, error: encontroError } = await supabase
+            .from('encontros')
+            .insert({
+              titulo: file.name.replace(/\.[^/.]+$/, ''),
+              data_hora: file.createdTime,
+              tipo: 'Mentoria Livre',
+              descricao: 'Importado automaticamente do Google Drive'
+            })
+            .select()
+            .single();
+
+          if (encontroError || !encontro) {
+            results.errors.push(`Erro ao criar encontro para ${file.name}: ${encontroError?.message}`);
+            continue;
+          }
+
+          // Insert gravacao
+          const { error: gravacaoError } = await supabase
+            .from('gravacoes_encontros')
+            .insert({
+              encontro_id: encontro.id,
+              titulo: file.name.replace(/\.[^/.]+$/, ''),
+              url_video: file.webViewLink,
+              thumbnail_url: file.thumbnailLink,
+              data_publicacao: file.createdTime,
+              ativo: true,
+            });
+
+          if (gravacaoError) {
+            results.errors.push(`Erro ao importar gravação ${file.name}: ${gravacaoError.message}`);
+          } else {
+            results.imported.push(file.name);
+          }
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          results.errors.push(`Erro processando ${file.name}: ${errorMessage}`);
+        }
+      }
+
+      return new Response(JSON.stringify(results), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Import specific encontro
+    if (action === 'import-encontro' && fileId && encontroId) {
+      const fileResponse = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${fileId}?fields=id,name,mimeType,size,createdTime,webViewLink,thumbnailLink`,
+        {
+          headers: { 'Authorization': `Bearer ${access_token}` },
+        }
+      );
+
+      const file = await fileResponse.json();
+
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+      const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+      const supabase = createClient(supabaseUrl, supabaseKey);
+
+      const { data, error } = await supabase
+        .from('gravacoes_encontros')
+        .insert({
+          encontro_id: encontroId,
+          titulo: file.name.replace(/\.[^/.]+$/, ''),
+          url_video: file.webViewLink,
+          thumbnail_url: file.thumbnailLink,
+          data_publicacao: file.createdTime,
+          ativo: true,
+        })
+        .select()
+        .single();
+
+      if (error) {
         return new Response(JSON.stringify({ error: error.message }), {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
