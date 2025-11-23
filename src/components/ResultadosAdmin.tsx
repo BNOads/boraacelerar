@@ -12,6 +12,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
 import { TrendingUp, Users, CheckCircle, Target, ArrowUpDown, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { format, parse } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 interface MentoradoRanking {
   id: string;
@@ -69,6 +72,45 @@ export function ResultadosAdmin() {
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; order: SortOrder }>({
     key: 'faturamentoMedio',
     order: 'desc'
+  });
+
+  // Query para dados de evolução temporal
+  const { data: evolucaoTemporal } = useQuery({
+    queryKey: ["evolucao-temporal"],
+    queryFn: async () => {
+      // Buscar todos os dados de desempenho mensal
+      const { data: desempenhoData, error } = await supabase
+        .from("desempenho_mensal")
+        .select("mes_ano, faturamento_mensal, mentorado_id")
+        .order("mes_ano", { ascending: true });
+
+      if (error) throw error;
+      if (!desempenhoData) return [];
+
+      // Agrupar por mês
+      const dadosPorMes = desempenhoData.reduce((acc, item) => {
+        if (!acc[item.mes_ano]) {
+          acc[item.mes_ano] = {
+            mes_ano: item.mes_ano,
+            mentorados_unicos: new Set(),
+            faturamento_total: 0,
+          };
+        }
+        acc[item.mes_ano].mentorados_unicos.add(item.mentorado_id);
+        acc[item.mes_ano].faturamento_total += item.faturamento_mensal || 0;
+        return acc;
+      }, {} as Record<string, { mes_ano: string; mentorados_unicos: Set<string>; faturamento_total: number; }>);
+
+      // Converter para array e formatar
+      const resultado = Object.values(dadosPorMes).map(item => ({
+        mes_ano: item.mes_ano,
+        mes_formatado: format(parse(item.mes_ano, 'yyyy-MM', new Date()), 'MMM yyyy', { locale: ptBR }),
+        total_mentorados: item.mentorados_unicos.size,
+        faturamento_total: item.faturamento_total,
+      }));
+
+      return resultado;
+    },
   });
 
   const { data: mentoradosRanking, isLoading } = useQuery({
@@ -271,6 +313,83 @@ export function ResultadosAdmin() {
           <p className="text-muted-foreground text-lg">Visão consolidada de performance de todos os mentorados</p>
         </div>
       </div>
+
+      {/* Gráfico de Evolução */}
+      {evolucaoTemporal && evolucaoTemporal.length > 0 && (
+        <Card className="border-border bg-card shadow-card">
+          <CardHeader>
+            <CardTitle className="text-foreground">Evolução da Mentoria ao Longo do Tempo</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={400}>
+              <LineChart data={evolucaoTemporal}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis 
+                  dataKey="mes_formatado" 
+                  className="text-xs"
+                  stroke="hsl(var(--muted-foreground))"
+                />
+                <YAxis 
+                  yAxisId="left"
+                  className="text-xs"
+                  stroke="hsl(var(--muted-foreground))"
+                  label={{ 
+                    value: 'Mentorados Ativos', 
+                    angle: -90, 
+                    position: 'insideLeft',
+                    style: { fill: 'hsl(var(--muted-foreground))' }
+                  }}
+                />
+                <YAxis 
+                  yAxisId="right"
+                  orientation="right"
+                  className="text-xs"
+                  stroke="hsl(var(--muted-foreground))"
+                  label={{ 
+                    value: 'Faturamento Total (R$)', 
+                    angle: 90, 
+                    position: 'insideRight',
+                    style: { fill: 'hsl(var(--muted-foreground))' }
+                  }}
+                  tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`}
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px'
+                  }}
+                  formatter={(value: any, name: string) => {
+                    if (name === 'Faturamento Total') {
+                      return [`R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, name];
+                    }
+                    return [value, name];
+                  }}
+                />
+                <Legend />
+                <Line 
+                  yAxisId="left"
+                  type="monotone" 
+                  dataKey="total_mentorados" 
+                  stroke="hsl(var(--primary))" 
+                  strokeWidth={2}
+                  name="Mentorados Ativos"
+                  dot={{ fill: 'hsl(var(--primary))' }}
+                />
+                <Line 
+                  yAxisId="right"
+                  type="monotone" 
+                  dataKey="faturamento_total" 
+                  stroke="hsl(var(--chart-2))" 
+                  strokeWidth={2}
+                  name="Faturamento Total"
+                  dot={{ fill: 'hsl(var(--chart-2))' }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      )}
 
       {/* KPIs Agregados */}
       {kpisAgregados && (
