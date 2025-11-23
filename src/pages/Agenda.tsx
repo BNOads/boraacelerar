@@ -8,6 +8,7 @@ import { ptBR } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
 import { AdminAgendaDialog } from "@/components/AdminAgendaDialog";
 import { AdminImportarAgendaDialog } from "@/components/AdminImportarAgendaDialog";
+import { AdminImportarEncontrosDialog } from "@/components/AdminImportarEncontrosDialog";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 export default function Agenda() {
@@ -70,6 +71,7 @@ export default function Agenda() {
           </div>
           {isAdmin && (
             <div className="flex gap-2">
+              <AdminImportarEncontrosDialog />
               <AdminImportarAgendaDialog />
               <AdminAgendaDialog />
             </div>
