@@ -74,14 +74,27 @@ Deno.serve(async (req) => {
     }
 
     const requestData: CreateUserRequest = await req.json()
-    console.log('Criando usuário:', { email: requestData.email, role: requestData.role })
 
-    // Criar usuário usando o admin API
+    // Normalizar e validar email
+    const email = (requestData.email || '').trim()
+    const password = (requestData.password || '').trim()
+    const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/
+
+    if (!email || !emailRegex.test(email)) {
+      console.error('Email inválido recebido na função criar-usuario:', requestData.email)
+      throw new Error(`Email inválido: ${requestData.email}`)
+    }
+
+    if (!password) {
+      throw new Error('Senha é obrigatória')
+    }
+
+    console.log('Criando usuário:', { email, role: requestData.role })
 
     // Criar o usuário no auth
     const { data: newUser, error: createUserError } = await supabaseAdmin.auth.admin.createUser({
-      email: requestData.email,
-      password: requestData.password,
+      email,
+      password,
       email_confirm: true,
       user_metadata: {
         nome_completo: requestData.nome_completo,
