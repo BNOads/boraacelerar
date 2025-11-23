@@ -17,35 +17,52 @@ export type Database = {
       agenda_mentoria: {
         Row: {
           created_at: string
+          data_fim_recorrencia: string | null
           data_hora: string
           descricao: string | null
+          evento_pai_id: string | null
           id: string
           link_zoom: string | null
+          recorrencia: string
           tipo: Database["public"]["Enums"]["tipo_mentoria"]
           titulo: string
           updated_at: string
         }
         Insert: {
           created_at?: string
+          data_fim_recorrencia?: string | null
           data_hora: string
           descricao?: string | null
+          evento_pai_id?: string | null
           id?: string
           link_zoom?: string | null
+          recorrencia?: string
           tipo: Database["public"]["Enums"]["tipo_mentoria"]
           titulo: string
           updated_at?: string
         }
         Update: {
           created_at?: string
+          data_fim_recorrencia?: string | null
           data_hora?: string
           descricao?: string | null
+          evento_pai_id?: string | null
           id?: string
           link_zoom?: string | null
+          recorrencia?: string
           tipo?: Database["public"]["Enums"]["tipo_mentoria"]
           titulo?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "agenda_mentoria_evento_pai_id_fkey"
+            columns: ["evento_pai_id"]
+            isOneToOne: false
+            referencedRelation: "agenda_mentoria"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       atendimentos_navegador: {
         Row: {
