@@ -74,8 +74,14 @@ serve(async (req) => {
         }
       );
 
-      const files = await filesResponse.json();
-      return new Response(JSON.stringify(files), {
+      const responseData = await filesResponse.json();
+      const files = responseData.files || [];
+      
+      if (!Array.isArray(files)) {
+        throw new Error('Invalid response from Google Drive API');
+      }
+
+      return new Response(JSON.stringify({ files }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -102,7 +108,13 @@ serve(async (req) => {
         }
       );
 
-      const { files } = await filesResponse.json();
+      const filesData = await filesResponse.json();
+      const files = filesData.files || [];
+      
+      if (!Array.isArray(files)) {
+        throw new Error('Invalid response from Google Drive API');
+      }
+
       const results: { imported: number; skipped: number; errors: string[] } = { 
         imported: 0, 
         skipped: 0, 
@@ -212,8 +224,14 @@ serve(async (req) => {
         }
       );
 
-      const files = await filesResponse.json();
-      return new Response(JSON.stringify(files), {
+      const responseData = await filesResponse.json();
+      const files = responseData.files || [];
+      
+      if (!Array.isArray(files)) {
+        throw new Error('Invalid response from Google Drive API');
+      }
+
+      return new Response(JSON.stringify({ files }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -232,7 +250,13 @@ serve(async (req) => {
         }
       );
 
-      const { files } = await filesResponse.json();
+      const filesData = await filesResponse.json();
+      const files = filesData.files || [];
+      
+      if (!Array.isArray(files)) {
+        throw new Error('Invalid response from Google Drive API');
+      }
+
       const results = { 
         imported: [] as string[], 
         skipped: [] as string[], 
