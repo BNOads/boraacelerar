@@ -13,6 +13,8 @@ import { CadastrarLivroDialog } from "@/components/CadastrarLivroDialog";
 import { AdminImportarLivrosDialog } from "@/components/AdminImportarLivrosDialog";
 import { AdminPostoIpirangaDialog } from "@/components/AdminPostoIpirangaDialog";
 import { EditarPostoIpirangaDialog } from "@/components/EditarPostoIpirangaDialog";
+import { AdminImportarGravacoesDialog } from "@/components/AdminImportarGravacoesDialog";
+import { AdminImportarEncontrosDialog } from "@/components/AdminImportarEncontrosDialog";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 export default function Membros() {
@@ -158,6 +160,8 @@ export default function Membros() {
           </div>
           {isAdmin && (
             <div className="flex gap-2">
+              <AdminImportarGravacoesDialog />
+              <AdminImportarEncontrosDialog />
               <AdminImportarConteudoDialog />
               <AdminMembrosDialog />
             </div>

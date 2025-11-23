@@ -50,15 +50,15 @@ export const AdminImportarGravacoesDialog = () => {
     },
   });
 
+  // Buscar arquivos do Google Drive
   const { data: driveFiles, isLoading: loadingFiles, refetch } = useQuery({
     queryKey: ["drive-files"],
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke("google-drive-import", {
         body: { action: "list" },
       });
-
       if (error) throw error;
-      return data.files as DriveFile[];
+      return (data.files || []) as DriveFile[];
     },
     enabled: open,
   });

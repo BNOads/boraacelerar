@@ -63,7 +63,7 @@ export function AdminImportarEncontrosDialog() {
       );
 
       if (error) throw error;
-      return data as DriveFile[];
+      return (data.files || []) as DriveFile[];
     },
     enabled: open,
   });
