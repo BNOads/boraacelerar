@@ -67,12 +67,36 @@ export function AdminImportarUsuariosDialog() {
           const row = rows[i];
           
           try {
+            const email = row.email?.trim() || "";
+            const senha = row.senha?.trim() || "";
+
             // Validar dados obrigatórios
-            if (!row.email || !row.senha || !row.nome_completo || !row.role) {
+            if (!email || !senha || !row.nome_completo || !row.role) {
               importResults.push({
-                email: row.email || `Linha ${i + 1}`,
+                email: email || `Linha ${i + 1}`,
                 status: "error",
                 message: "Dados obrigatórios faltando (email, senha, nome_completo, role)",
+              });
+              continue;
+            }
+
+            // Validar formato do email
+            const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+            if (!emailRegex.test(email)) {
+              importResults.push({
+                email,
+                status: "error",
+                message: "Email inválido. Verifique o endereço no CSV.",
+              });
+              continue;
+            }
+
+            // Validar força mínima da senha
+            if (senha.length < 6) {
+              importResults.push({
+                email,
+                status: "error",
+                message: "Senha muito curta (mínimo 6 caracteres).",
               });
               continue;
             }
@@ -80,7 +104,7 @@ export function AdminImportarUsuariosDialog() {
             // Validar role
             if (!["mentorado", "navegador", "admin"].includes(row.role)) {
               importResults.push({
-                email: row.email,
+                email,
                 status: "error",
                 message: "Role inválido. Use: mentorado, navegador ou admin",
               });
@@ -89,8 +113,8 @@ export function AdminImportarUsuariosDialog() {
 
             // Preparar dados para criar usuário
             const userData: any = {
-              email: row.email.trim(),
-              password: row.senha.trim(),
+              email,
+              password: senha,
               nome_completo: row.nome_completo.trim(),
               apelido: row.apelido?.trim(),
               role: row.role,
@@ -105,19 +129,21 @@ export function AdminImportarUsuariosDialog() {
             }
 
             // Chamar edge function para criar usuário
-            const { error } = await supabase.functions.invoke("criar-usuario", {
+            const { data, error } = await supabase.functions.invoke("criar-usuario", {
               body: userData,
             });
 
-            if (error) {
+            const functionError = (data as any)?.error as string | undefined;
+
+            if (error || functionError) {
               importResults.push({
-                email: row.email,
+                email,
                 status: "error",
-                message: error.message || "Erro ao criar usuário",
+                message: functionError || error?.message || "Erro ao criar usuário",
               });
             } else {
               importResults.push({
-                email: row.email,
+                email,
                 status: "success",
                 message: "Usuário criado com sucesso",
               });
