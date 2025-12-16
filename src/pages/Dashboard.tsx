@@ -212,7 +212,6 @@ export default function Dashboard() {
     const meetingDate = startOfDay(new Date(dataHora));
     return differenceInDays(meetingDate, today);
   };
-
   const getCountdownBadge = (days: number) => {
     if (days === 0) {
       return <Badge className="bg-green-500 text-white font-bold">HOJE!</Badge>;
@@ -224,7 +223,6 @@ export default function Dashboard() {
       return <Badge variant="secondary">{days} dias</Badge>;
     }
   };
-
   const getNotificationColor = (type: string) => {
     switch (type) {
       case "urgente":
@@ -318,7 +316,7 @@ export default function Dashboard() {
                   <p className="text-sm text-muted-foreground">Clientes Atuais</p>
                 </div>
                 <div className="text-center p-6 bg-muted/30 rounded-lg">
-                  <p className="font-bold text-primary mb-2 text-5xl font-serif">
+                  <p className="font-bold text-primary mb-2 text-4xl font-sans">
                     R$ {acelerometro?.maior_faturamento?.toLocaleString('pt-BR', {
                   minimumFractionDigits: 2
                 }) || '0,00'}
@@ -356,8 +354,8 @@ export default function Dashboard() {
         <CardContent>
           {proximosEncontros.length > 0 ? <div className="space-y-3">
               {proximosEncontros.map(encontro => {
-                const daysUntil = getDaysUntilMeeting(encontro.data_hora);
-                return <div key={encontro.id} className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
+            const daysUntil = getDaysUntilMeeting(encontro.data_hora);
+            return <div key={encontro.id} className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2 flex-wrap">
@@ -368,8 +366,8 @@ export default function Dashboard() {
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
                           <Clock className="h-3 w-3" />
                           {format(new Date(encontro.data_hora), "dd 'de' MMMM 'às' HH:mm", {
-                      locale: ptBR
-                    })}
+                        locale: ptBR
+                      })}
                         </div>
                       </div>
                       <h4 className="font-semibold text-foreground mb-1">{encontro.titulo}</h4>
@@ -384,7 +382,7 @@ export default function Dashboard() {
                       </Button>}
                   </div>
                 </div>;
-              })}
+          })}
               <div className="pt-2">
                 <Link to="/agenda">
                   <Button variant="outline" className="w-full">
