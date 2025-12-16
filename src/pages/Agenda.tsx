@@ -52,9 +52,16 @@ export default function Agenda() {
     );
   }
 
+  const now = new Date();
+  
   const proximosEncontros = encontros?.filter(
-    (e) => new Date(e.data_hora) >= new Date()
+    (e) => new Date(e.data_hora) >= now
   );
+
+  const encontrosPassados = encontros
+    ?.filter((e) => new Date(e.data_hora) < now)
+    .sort((a, b) => new Date(b.data_hora).getTime() - new Date(a.data_hora).getTime())
+    .slice(0, 6);
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -148,6 +155,58 @@ export default function Agenda() {
           </Card>
         )}
       </div>
+
+      {/* Últimos Encontros */}
+      {encontrosPassados && encontrosPassados.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-foreground">Últimos Encontros</h2>
+          
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {encontrosPassados.map((encontro) => (
+              <Card
+                key={encontro.id}
+                className="border-border bg-card/30 backdrop-blur-sm hover:shadow-md transition-all duration-300 opacity-80"
+              >
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-between gap-2 flex-wrap">
+                    <CardTitle className="text-base text-foreground">
+                      {encontro.titulo}
+                    </CardTitle>
+                    <span className="px-2 py-1 text-xs font-medium bg-muted text-muted-foreground rounded-full">
+                      {encontro.tipo}
+                    </span>
+                  </div>
+                  {encontro.descricao && (
+                    <CardDescription className="text-sm line-clamp-2">
+                      {encontro.descricao}
+                    </CardDescription>
+                  )}
+                </CardHeader>
+                <CardContent className="pt-2">
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="h-3.5 w-3.5" />
+                      <span>
+                        {format(parseISO(encontro.data_hora), "dd/MM/yyyy", {
+                          locale: ptBR,
+                        })}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-3.5 w-3.5" />
+                      <span>
+                        {format(parseISO(encontro.data_hora), "HH:mm", {
+                          locale: ptBR,
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
