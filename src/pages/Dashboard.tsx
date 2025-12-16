@@ -80,20 +80,20 @@ export default function Dashboard() {
           setProximosEncontros(agendaData);
         }
         if (isAdmin) {
-          // Buscar estatísticas para admin
+          // Buscar estatísticas para admin - queries paralelas para performance
+          const [
+            { count: totalMentorados },
+            { data: allDesempenho },
+            { data: premiacoes },
+            { data: mentoradosAtivos }
+          ] = await Promise.all([
+            supabase.from("mentorados").select("*", { count: "exact", head: true }).eq("status", "ativo"),
+            supabase.from("desempenho_mensal").select("faturamento_mensal, mentorado_id, mes_ano"),
+            supabase.from("premiacoes").select("*").order("min_faturamento", { ascending: true }),
+            supabase.from("mentorados").select("id").eq("status", "ativo")
+          ]);
 
-          // Total de mentorados ativos
-          const {
-            count: totalMentorados
-          } = await supabase.from("mentorados").select("*", {
-            count: "exact",
-            head: true
-          }).eq("status", "ativo");
-
-          // Faturamento total e médio
-          const {
-            data: allDesempenho
-          } = await supabase.from("desempenho_mensal").select("faturamento_mensal, mentorado_id");
+          // Calcular faturamento total
           let faturamentoTotal = 0;
           let countRegistros = 0;
           if (allDesempenho) {
@@ -106,49 +106,50 @@ export default function Dashboard() {
           }
           const faturamentoMedio = countRegistros > 0 ? faturamentoTotal / countRegistros : 0;
 
-          // Buscar faixas de premiação
-          const {
-            data: premiacoes
-          } = await supabase.from("premiacoes").select("*").order("min_faturamento", {
-            ascending: true
-          });
-
-          // Para cada mentorado, pegar o faturamento mais recente
-          const {
-            data: mentoradosAtivos
-          } = await supabase.from("mentorados").select("id").eq("status", "ativo");
+          // Calcular distribuição de faixas usando dados já carregados
           const distribuicaoFaixas: Record<string, number> = {};
           if (premiacoes) {
             premiacoes.forEach(p => {
               distribuicaoFaixas[p.faixa] = 0;
             });
           }
-          if (mentoradosAtivos && premiacoes) {
-            for (const mentorado of mentoradosAtivos) {
-              const {
-                data: ultimoDesempenho
-              } = await supabase.from("desempenho_mensal").select("faturamento_mensal").eq("mentorado_id", mentorado.id).order("mes_ano", {
-                ascending: false
-              }).limit(1).maybeSingle();
-              const faturamento = ultimoDesempenho?.faturamento_mensal || 0;
 
-              // Encontrar faixa correspondente
+          if (mentoradosAtivos && premiacoes && allDesempenho) {
+            // Agrupar por mentorado e pegar o mais recente
+            const ultimosPorMentorado: Record<string, { mes_ano: string; faturamento: number }> = {};
+            allDesempenho.forEach(item => {
+              const current = ultimosPorMentorado[item.mentorado_id];
+              if (!current || item.mes_ano > current.mes_ano) {
+                ultimosPorMentorado[item.mentorado_id] = {
+                  mes_ano: item.mes_ano,
+                  faturamento: item.faturamento_mensal || 0
+                };
+              }
+            });
+
+            // Calcular faixas apenas para mentorados ativos
+            const mentoradosAtivosIds = new Set(mentoradosAtivos.map(m => m.id));
+            Object.entries(ultimosPorMentorado).forEach(([mentoradoId, data]) => {
+              if (!mentoradosAtivosIds.has(mentoradoId)) return;
+              
               const faixa = premiacoes.find(p => {
-                const acimaDe = faturamento >= p.min_faturamento;
-                const abaixoDe = p.max_faturamento === null || faturamento <= p.max_faturamento;
+                const acimaDe = data.faturamento >= p.min_faturamento;
+                const abaixoDe = p.max_faturamento === null || data.faturamento <= p.max_faturamento;
                 return acimaDe && abaixoDe;
               });
               if (faixa) {
                 distribuicaoFaixas[faixa.faixa]++;
               }
-            }
+            });
           }
+
           const distribuicaoArray = premiacoes?.map(p => ({
             faixa: p.faixa,
             quantidade: distribuicaoFaixas[p.faixa] || 0,
             min_faturamento: p.min_faturamento,
             max_faturamento: p.max_faturamento
           })) || [];
+
           setAdminStats({
             total_mentorados: totalMentorados || 0,
             faturamento_medio_mensal: faturamentoMedio,
