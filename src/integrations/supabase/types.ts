@@ -665,6 +665,7 @@ export type Database = {
           mes_ano: string
           qtd_colaboradores: number | null
           seguidores_instagram: number | null
+          seguidores_linkedin: number | null
           seguidores_tiktok: number | null
           seguidores_youtube: number | null
           updated_at: string
@@ -676,6 +677,7 @@ export type Database = {
           mes_ano: string
           qtd_colaboradores?: number | null
           seguidores_instagram?: number | null
+          seguidores_linkedin?: number | null
           seguidores_tiktok?: number | null
           seguidores_youtube?: number | null
           updated_at?: string
@@ -687,6 +689,7 @@ export type Database = {
           mes_ano?: string
           qtd_colaboradores?: number | null
           seguidores_instagram?: number | null
+          seguidores_linkedin?: number | null
           seguidores_tiktok?: number | null
           seguidores_youtube?: number | null
           updated_at?: string
