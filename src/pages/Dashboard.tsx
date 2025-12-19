@@ -3,11 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, TrendingUp, Trophy, BookOpen, Rocket, Users, Clock, Bell, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, TrendingUp, Trophy, BookOpen, Rocket, Users, Clock, Video, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { format, differenceInDays, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { AdminAgendaDialog } from "@/components/AdminAgendaDialog";
+import { AdminImportarAgendaDialog } from "@/components/AdminImportarAgendaDialog";
+import { AdminImportarEncontrosDialog } from "@/components/AdminImportarEncontrosDialog";
 interface Profile {
   nome_completo: string;
   apelido: string | null;
@@ -36,14 +39,6 @@ interface AgendaItem {
   link_zoom: string | null;
   descricao: string | null;
 }
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  type: string;
-  priority: string;
-  created_at: string;
-}
 export default function Dashboard() {
   const {
     isAdmin
@@ -52,11 +47,9 @@ export default function Dashboard() {
   const [acelerometro, setAcelerometro] = useState<AcelerometroData | null>(null);
   const [adminStats, setAdminStats] = useState<AdminStats | null>(null);
   const [proximosEncontros, setProximosEncontros] = useState<AgendaItem[]>([]);
-  const [notificacoes, setNotificacoes] = useState<Notification[]>([]);
-  const [paginaNotificacoes, setPaginaNotificacoes] = useState(1);
-  const [totalNotificacoes, setTotalNotificacoes] = useState(0);
+  const [encontrosPassados, setEncontrosPassados] = useState<AgendaItem[]>([]);
+  const [filtroAgenda, setFiltroAgenda] = useState<'proximos' | 'passados' | 'todos'>('proximos');
   const [loading, setLoading] = useState(true);
-  const NOTIFICACOES_POR_PAGINA = 3;
   useEffect(() => {
     const fetchData = async () => {
       const {
@@ -70,14 +63,23 @@ export default function Dashboard() {
         } = await supabase.from("profiles").select("nome_completo, apelido").eq("id", user.id).single();
         setProfile(profileData);
 
-        // Buscar próximos encontros da agenda
+        // Buscar todos os encontros da agenda
+        const now = new Date().toISOString();
         const {
-          data: agendaData
-        } = await supabase.from("agenda_mentoria").select("*").gte("data_hora", new Date().toISOString()).order("data_hora", {
+          data: agendaFutura
+        } = await supabase.from("agenda_mentoria").select("*").gte("data_hora", now).order("data_hora", {
           ascending: true
-        }).limit(3);
-        if (agendaData) {
-          setProximosEncontros(agendaData);
+        });
+        const {
+          data: agendaPassada
+        } = await supabase.from("agenda_mentoria").select("*").lt("data_hora", now).order("data_hora", {
+          ascending: false
+        });
+        if (agendaFutura) {
+          setProximosEncontros(agendaFutura);
+        }
+        if (agendaPassada) {
+          setEncontrosPassados(agendaPassada);
         }
         if (isAdmin) {
           // Buscar estatísticas para admin - queries paralelas para performance
@@ -182,32 +184,7 @@ export default function Dashboard() {
       setLoading(false);
     };
     fetchData();
-    fetchNotificacoes();
   }, [isAdmin]);
-  useEffect(() => {
-    fetchNotificacoes();
-  }, [paginaNotificacoes]);
-  const fetchNotificacoes = async () => {
-    // Contar total de notificações
-    const {
-      count
-    } = await supabase.from("notifications").select("*", {
-      count: "exact",
-      head: true
-    }).eq("is_active", true).eq("visible_to", "all");
-    setTotalNotificacoes(count || 0);
-
-    // Buscar notificações da página atual
-    const {
-      data: notifData
-    } = await supabase.from("notifications").select("*").eq("is_active", true).eq("visible_to", "all").order("created_at", {
-      ascending: false
-    }).range((paginaNotificacoes - 1) * NOTIFICACOES_POR_PAGINA, paginaNotificacoes * NOTIFICACOES_POR_PAGINA - 1);
-    if (notifData) {
-      setNotificacoes(notifData);
-    }
-  };
-  const totalPaginasNotificacoes = Math.ceil(totalNotificacoes / NOTIFICACOES_POR_PAGINA);
   const getDaysUntilMeeting = (dataHora: string) => {
     const today = startOfDay(new Date());
     const meetingDate = startOfDay(new Date(dataHora));
@@ -222,17 +199,6 @@ export default function Dashboard() {
       return <Badge variant="outline" className="font-semibold">{days} dias</Badge>;
     } else {
       return <Badge variant="secondary">{days} dias</Badge>;
-    }
-  };
-  const getNotificationColor = (type: string) => {
-    switch (type) {
-      case "urgente":
-        return "bg-destructive text-destructive-foreground";
-      case "aviso":
-        return "bg-yellow-500 text-white";
-      case "informacao":
-      default:
-        return "bg-primary text-primary-foreground";
     }
   };
   const quickAccessCards = [{
@@ -344,107 +310,113 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      {/* Próximos Encontros */}
+      {/* Agenda Completa */}
       <Card className="border-border bg-card shadow-card">
         <CardHeader>
-          <div className="flex items-center gap-3">
-            <Calendar className="h-6 w-6 text-primary" />
-            <CardTitle className="text-foreground">Próximos Encontros</CardTitle>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Calendar className="h-6 w-6 text-primary" />
+              <CardTitle className="text-foreground">Agenda de Mentorias</CardTitle>
+            </div>
+            <div className="flex items-center gap-2">
+              {isAdmin && (
+                <div className="flex gap-2">
+                  <AdminImportarEncontrosDialog />
+                  <AdminImportarAgendaDialog />
+                  <AdminAgendaDialog />
+                </div>
+              )}
+            </div>
           </div>
         </CardHeader>
         <CardContent>
-          {proximosEncontros.length > 0 ? <div className="space-y-3">
-              {proximosEncontros.map(encontro => {
-            const daysUntil = getDaysUntilMeeting(encontro.data_hora);
-            return <div key={encontro.id} className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <Badge variant="outline" className="text-xs">
-                          {encontro.tipo}
-                        </Badge>
-                        {getCountdownBadge(daysUntil)}
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                          <Clock className="h-3 w-3" />
-                          {format(new Date(encontro.data_hora), "dd 'de' MMMM 'às' HH:mm", {
-                        locale: ptBR
-                      })}
-                        </div>
-                      </div>
-                      <h4 className="font-semibold text-foreground mb-1">{encontro.titulo}</h4>
-                      {encontro.descricao && <p className="text-sm text-muted-foreground line-clamp-2">
-                          {encontro.descricao}
-                        </p>}
-                    </div>
-                    {encontro.link_zoom && <Button size="sm" asChild>
-                        <a href={encontro.link_zoom} target="_blank" rel="noopener noreferrer">
-                          Acessar
-                        </a>
-                      </Button>}
-                  </div>
-                </div>;
-          })}
-              <div className="pt-2">
-                <Link to="/agenda">
-                  <Button variant="outline" className="w-full">
-                    Ver Agenda Completa
-                  </Button>
-                </Link>
-              </div>
-            </div> : <p className="text-muted-foreground text-center py-4">
-              Nenhum encontro agendado no momento.
-            </p>}
-        </CardContent>
-      </Card>
-
-      {/* Feed de Novidades */}
-      <Card className="border-border bg-card shadow-card">
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <Bell className="h-6 w-6 text-primary" />
-            <CardTitle className="text-foreground">Novidades</CardTitle>
+          {/* Filtros */}
+          <div className="flex gap-2 mb-4 flex-wrap">
+            <Button
+              variant={filtroAgenda === 'proximos' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFiltroAgenda('proximos')}
+            >
+              Próximos ({proximosEncontros.length})
+            </Button>
+            <Button
+              variant={filtroAgenda === 'passados' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFiltroAgenda('passados')}
+            >
+              Passados ({encontrosPassados.length})
+            </Button>
+            <Button
+              variant={filtroAgenda === 'todos' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFiltroAgenda('todos')}
+            >
+              Todos ({proximosEncontros.length + encontrosPassados.length})
+            </Button>
           </div>
-        </CardHeader>
-        <CardContent>
-          {notificacoes.length > 0 ? <div className="space-y-4">
-              <div className="space-y-3">
-                {notificacoes.map(notif => <div key={notif.id} className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
-                    <div className="flex items-start gap-3">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge className={getNotificationColor(notif.type)}>
-                            {notif.type}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground">
-                            {format(new Date(notif.created_at), "dd/MM/yyyy 'às' HH:mm", {
-                        locale: ptBR
-                      })}
-                          </span>
+
+          {/* Lista de Encontros */}
+          {(() => {
+            const encontrosExibir =
+              filtroAgenda === 'proximos' ? proximosEncontros :
+              filtroAgenda === 'passados' ? encontrosPassados :
+              [...proximosEncontros, ...encontrosPassados].sort((a, b) =>
+                new Date(b.data_hora).getTime() - new Date(a.data_hora).getTime()
+              );
+
+            return encontrosExibir.length > 0 ? (
+              <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
+                {encontrosExibir.map(encontro => {
+                  const daysUntil = getDaysUntilMeeting(encontro.data_hora);
+                  const isPast = new Date(encontro.data_hora) < new Date();
+
+                  return (
+                    <div
+                      key={encontro.id}
+                      className={`p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors ${isPast ? 'opacity-75' : ''}`}
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2 flex-wrap">
+                            <Badge variant="outline" className="text-xs">
+                              {encontro.tipo}
+                            </Badge>
+                            {!isPast && getCountdownBadge(daysUntil)}
+                            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                              <Clock className="h-3 w-3" />
+                              {format(new Date(encontro.data_hora), "dd 'de' MMMM 'às' HH:mm", {
+                                locale: ptBR
+                              })}
+                            </div>
+                          </div>
+                          <h4 className="font-semibold text-foreground mb-1">{encontro.titulo}</h4>
+                          {encontro.descricao && (
+                            <p className="text-sm text-muted-foreground line-clamp-2">
+                              {encontro.descricao}
+                            </p>
+                          )}
                         </div>
-                        <h4 className="font-semibold text-foreground mb-1">{notif.title}</h4>
-                        <p className="text-sm text-muted-foreground">{notif.message}</p>
+                        {encontro.link_zoom && !isPast && (
+                          <Button size="sm" asChild>
+                            <a href={encontro.link_zoom} target="_blank" rel="noopener noreferrer">
+                              <Video className="h-4 w-4 mr-1" />
+                              Acessar
+                            </a>
+                          </Button>
+                        )}
                       </div>
                     </div>
-                  </div>)}
+                  );
+                })}
               </div>
-
-              {totalPaginasNotificacoes > 1 && <div className="flex items-center justify-between pt-2 border-t">
-                  <Button variant="outline" size="sm" onClick={() => setPaginaNotificacoes(prev => Math.max(1, prev - 1))} disabled={paginaNotificacoes === 1}>
-                    <ChevronLeft className="h-4 w-4 mr-1" />
-                    Anterior
-                  </Button>
-                  <span className="text-sm text-muted-foreground">
-                    Página {paginaNotificacoes} de {totalPaginasNotificacoes}
-                  </span>
-                  <Button variant="outline" size="sm" onClick={() => setPaginaNotificacoes(prev => Math.min(totalPaginasNotificacoes, prev + 1))} disabled={paginaNotificacoes === totalPaginasNotificacoes}>
-                    Próxima
-                    <ChevronRight className="h-4 w-4 ml-1" />
-                  </Button>
-                </div>}
-            </div> : <p className="text-muted-foreground text-center py-4">
-              Nenhuma novidade no momento.
-            </p>}
+            ) : (
+              <p className="text-muted-foreground text-center py-8">
+                Nenhum encontro encontrado.
+              </p>
+            );
+          })()}
         </CardContent>
       </Card>
+
     </div>;
 }

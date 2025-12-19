@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { TrendingUp, Users, CheckCircle, ArrowUp, Trophy, UserPlus, Instagram, Youtube, Music, Target, Plus } from "lucide-react";
+import { TrendingUp, Users, CheckCircle, ArrowUp, Trophy, UserPlus, Instagram, Youtube, Music, Target, Plus, FileText, Percent, Linkedin } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -40,6 +40,7 @@ interface MetricasMensais {
   seguidores_instagram: number;
   seguidores_youtube: number;
   seguidores_tiktok: number;
+  seguidores_linkedin: number;
 }
 
 const faixas: FaixaPremiacao[] = [
@@ -63,6 +64,7 @@ export default function Resultados() {
     seguidores_instagram: 0,
     seguidores_youtube: 0,
     seguidores_tiktok: 0,
+    seguidores_linkedin: 0,
   });
   const [novoDesempenho, setNovoDesempenho] = useState({
     mes_ano: new Date().toISOString().slice(0, 7),
@@ -231,6 +233,8 @@ export default function Resultados() {
 
   const faturamentoTotal = historico.reduce((acc, item) => acc + (item.faturamento_mensal || 0), 0);
   const contratosTotal = historico.reduce((acc, item) => acc + (item.contratos_fechados || 0), 0);
+  const propostasTotal = historico.reduce((acc, item) => acc + (item.qtd_propostas || 0), 0);
+  const taxaConversao = propostasTotal > 0 ? (contratosTotal / propostasTotal) * 100 : 0;
   const faturamentoMedioMensal = historico.length > 0 ? faturamentoTotal / historico.length : 0;
 
   // Formatar dados do histórico com nome do mês
@@ -281,11 +285,25 @@ export default function Resultados() {
       positive: true,
     },
     {
+      title: "Propostas Enviadas (Total)",
+      value: propostasTotal,
+      icon: FileText,
+      change: "Desde o início",
+      positive: true,
+    },
+    {
       title: "Contratos Fechados (Total)",
       value: contratosTotal,
       icon: CheckCircle,
       change: "Desde o início",
       positive: true,
+    },
+    {
+      title: "Taxa de Conversão",
+      value: `${taxaConversao.toFixed(1)}%`,
+      icon: Percent,
+      change: `${contratosTotal} de ${propostasTotal}`,
+      positive: taxaConversao >= 20,
     },
   ];
 
@@ -395,14 +413,18 @@ export default function Resultados() {
       </Card>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {kpis.map((kpi) => (
           <Card key={kpi.title} className="border-border bg-card shadow-card">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <kpi.icon className="h-5 w-5 text-primary" />
                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <ArrowUp className="h-3 w-3" />
+                  {kpi.positive ? (
+                    <ArrowUp className="h-3 w-3 text-green-500" />
+                  ) : (
+                    <ArrowUp className="h-3 w-3 text-muted-foreground rotate-180" />
+                  )}
                   {kpi.change}
                 </div>
               </div>
@@ -471,90 +493,132 @@ export default function Resultados() {
 
       {/* Formulário de Desempenho Mensal - REMOVIDO DAQUI, JÁ ESTÁ NO TOPO */}
 
-      {/* Chart - Evolução Mensal */}
-      <Card className="border-border bg-card shadow-card">
-        <CardHeader>
-          <CardTitle className="text-foreground">Evolução Mensal</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {historico.length > 0 ? (
-            <ResponsiveContainer width="100%" height={350}>
-              <LineChart data={historicoFormatado}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis 
-                  dataKey="mes_formatado" 
-                  className="text-xs"
-                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                />
-                <YAxis 
-                  yAxisId="left"
-                  className="text-xs"
-                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                  tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`}
-                />
-                <YAxis 
-                  yAxisId="right"
-                  orientation="right"
-                  className="text-xs"
-                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                />
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px',
-                  }}
-                  formatter={(value: number, name: string) => {
-                    if (name === 'faturamento_mensal') {
-                      return [`R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 'Faturamento'];
-                    }
-                    if (name === 'contratos_fechados') {
-                      return [value, 'Contratos'];
-                    }
-                    if (name === 'clientes_mes') {
-                      return [value, 'Clientes'];
-                    }
-                    return [value, name];
-                  }}
-                />
-                <Legend />
-                <Line 
-                  yAxisId="left"
-                  type="monotone" 
-                  dataKey="faturamento_mensal"
-                  name="Faturamento"
-                  stroke="hsl(var(--primary))" 
-                  strokeWidth={3}
-                  dot={{ fill: 'hsl(var(--primary))', r: 4 }}
-                  activeDot={{ r: 6 }}
-                />
-                <Line 
-                  yAxisId="right"
-                  type="monotone" 
-                  dataKey="contratos_fechados"
-                  name="Contratos"
-                  stroke="hsl(142, 76%, 36%)"
-                  strokeWidth={2}
-                  dot={{ fill: 'hsl(142, 76%, 36%)', r: 3 }}
-                />
-                <Line 
-                  yAxisId="right"
-                  type="monotone" 
-                  dataKey="clientes_mes"
-                  name="Clientes"
-                  stroke="hsl(221, 83%, 53%)"
-                  strokeWidth={2}
-                  dot={{ fill: 'hsl(221, 83%, 53%)', r: 3 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-64 flex items-center justify-center bg-muted/30 rounded-lg">
-              <p className="text-muted-foreground">Dados insuficientes</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* Charts - Evolução Mensal */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Gráfico de Faturamento */}
+        <Card className="border-border bg-card shadow-card">
+          <CardHeader>
+            <CardTitle className="text-foreground flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-primary" />
+              Evolução do Faturamento
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {historico.length > 0 ? (
+              <ResponsiveContainer width="100%" height={350}>
+                <LineChart data={historicoFormatado}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis
+                    dataKey="mes_formatado"
+                    className="text-xs"
+                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  />
+                  <YAxis
+                    className="text-xs"
+                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                    tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                    }}
+                    formatter={(value: number) => [`R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 'Faturamento']}
+                  />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="faturamento_mensal"
+                    name="Faturamento Mensal"
+                    stroke="hsl(var(--primary))"
+                    strokeWidth={3}
+                    dot={{ fill: 'hsl(var(--primary))', r: 4 }}
+                    activeDot={{ r: 6 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[350px] flex items-center justify-center bg-muted/30 rounded-lg">
+                <p className="text-muted-foreground">Dados insuficientes</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Gráfico de Métricas Operacionais */}
+        <Card className="border-border bg-card shadow-card">
+          <CardHeader>
+            <CardTitle className="text-foreground flex items-center gap-2">
+              <Users className="h-5 w-5 text-primary" />
+              Métricas Operacionais
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {historico.length > 0 ? (
+              <ResponsiveContainer width="100%" height={350}>
+                <LineChart data={historicoFormatado}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis
+                    dataKey="mes_formatado"
+                    className="text-xs"
+                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  />
+                  <YAxis
+                    className="text-xs"
+                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                    }}
+                    formatter={(value: number, name: string) => {
+                      if (name === 'qtd_propostas') return [value, 'Propostas'];
+                      if (name === 'contratos_fechados') return [value, 'Contratos'];
+                      if (name === 'clientes_mes') return [value, 'Clientes'];
+                      return [value, name];
+                    }}
+                  />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="qtd_propostas"
+                    name="Propostas"
+                    stroke="hsl(280, 83%, 53%)"
+                    strokeWidth={2}
+                    dot={{ fill: 'hsl(280, 83%, 53%)', r: 4 }}
+                    activeDot={{ r: 6 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="contratos_fechados"
+                    name="Contratos"
+                    stroke="hsl(142, 76%, 36%)"
+                    strokeWidth={2}
+                    dot={{ fill: 'hsl(142, 76%, 36%)', r: 4 }}
+                    activeDot={{ r: 6 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="clientes_mes"
+                    name="Clientes"
+                    stroke="hsl(221, 83%, 53%)"
+                    strokeWidth={2}
+                    dot={{ fill: 'hsl(221, 83%, 53%)', r: 4 }}
+                    activeDot={{ r: 6 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[350px] flex items-center justify-center bg-muted/30 rounded-lg">
+                <p className="text-muted-foreground">Dados insuficientes</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Cronômetro Trimestral */}
       {mentoradoId && <CronometroTrimestral mentoradoId={mentoradoId} />}
@@ -652,7 +716,7 @@ export default function Resultados() {
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Formulário */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 p-4 bg-muted/30 rounded-lg">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 p-4 bg-muted/30 rounded-lg">
             <div className="space-y-2">
               <Label htmlFor="mes_ano">Mês/Ano</Label>
               <Input
@@ -714,7 +778,20 @@ export default function Resultados() {
                 min="0"
               />
             </div>
-            <div className="md:col-span-2 lg:col-span-5 flex justify-end">
+            <div className="space-y-2">
+              <Label htmlFor="linkedin" className="flex items-center gap-2">
+                <Linkedin className="h-4 w-4" />
+                LinkedIn
+              </Label>
+              <Input
+                id="linkedin"
+                type="number"
+                value={novaMetrica.seguidores_linkedin}
+                onChange={(e) => setNovaMetrica({ ...novaMetrica, seguidores_linkedin: parseInt(e.target.value) || 0 })}
+                min="0"
+              />
+            </div>
+            <div className="md:col-span-2 lg:col-span-6 flex justify-end">
               <Button onClick={handleSalvarMetricas} className="w-full md:w-auto">
                 Salvar Métricas
               </Button>
@@ -764,11 +841,18 @@ export default function Resultados() {
                   stroke="#ff0000" 
                   strokeWidth={2}
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="seguidores_tiktok" 
+                <Line
+                  type="monotone"
+                  dataKey="seguidores_tiktok"
                   name="TikTok"
-                  stroke="#00f2ea" 
+                  stroke="#00f2ea"
+                  strokeWidth={2}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="seguidores_linkedin"
+                  name="LinkedIn"
+                  stroke="#0077b5"
                   strokeWidth={2}
                 />
               </LineChart>

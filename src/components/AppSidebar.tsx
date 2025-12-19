@@ -27,7 +27,6 @@ const menuItems = [
   { title: "Início", url: "/dashboard", icon: Home },
   { title: "Trilha & Conteúdo", url: "/trilha", icon: BookOpen },
   { title: "Resultados", url: "/resultados", icon: TrendingUp },
-  { title: "Agenda", url: "/agenda", icon: Calendar },
   { title: "Área de Membros", url: "/membros", icon: Video },
   { title: "Navegador", url: "/navegador", icon: UsersIcon },
   { title: "Links Úteis", url: "/links", icon: LinkIcon },
@@ -73,10 +72,10 @@ export function AppSidebar() {
       <SidebarContent className="bg-sidebar">
         {state !== "collapsed" && (
           <div className="p-6 flex justify-center">
-            <img 
-              src={theme === "light" ? logoLight : logo} 
-              alt="BORA Acelerar" 
-              className="h-20 w-auto" 
+            <img
+              src={theme === "light" ? logoLight : logo}
+              alt="BORA Acelerar"
+              className="h-32 w-auto"
             />
           </div>
         )}
@@ -120,15 +119,17 @@ export function AppSidebar() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold text-sidebar-foreground truncate">
-                      {userData.profile.apelido || userData.profile.nome_completo}
-                    </p>
-                    {isAdmin && <AdminBadge />}
-                  </div>
+                  <p className="text-sm font-semibold text-sidebar-foreground truncate">
+                    {userData.profile.apelido || userData.profile.nome_completo}
+                  </p>
                   <p className="text-xs text-sidebar-foreground/70 truncate">
                     {userData.user.email}
                   </p>
+                  {isAdmin && (
+                    <div className="mt-1">
+                      <AdminBadge />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

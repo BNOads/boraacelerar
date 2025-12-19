@@ -139,7 +139,7 @@ export default function Auth() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md border-border bg-card shadow-lg">
         <CardHeader className="text-center space-y-4">
-          <img src={logo} alt="BORA Acelerar" className="h-20 mx-auto" />
+          <img src={logo} alt="BORA Acelerar" className="h-32 mx-auto" />
           <CardTitle className="text-2xl font-bold text-foreground">
             Bem-vindo de volta
           </CardTitle>

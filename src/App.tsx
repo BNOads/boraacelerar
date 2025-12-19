@@ -13,7 +13,6 @@ import UpdatePassword from "./pages/UpdatePassword";
 import Dashboard from "./pages/Dashboard";
 import Trilha from "./pages/Trilha";
 import Resultados from "./pages/Resultados";
-import Agenda from "./pages/Agenda";
 import Membros from "./pages/Membros";
 import Mentorados from "./pages/Mentorados";
 import MentoradoProfile from "./pages/MentoradoProfile";
@@ -64,7 +63,7 @@ const App = () => (
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/trilha" element={<ProtectedRoute><Trilha /></ProtectedRoute>} />
           <Route path="/resultados" element={<ProtectedRoute><Resultados /></ProtectedRoute>} />
-          <Route path="/agenda" element={<ProtectedRoute><Agenda /></ProtectedRoute>} />
+          <Route path="/agenda" element={<Navigate to="/dashboard" replace />} />
           <Route path="/membros" element={<ProtectedRoute><Membros /></ProtectedRoute>} />
           <Route path="/mentorados" element={<ProtectedRoute><Mentorados /></ProtectedRoute>} />
           <Route path="/mentorados/:id" element={<ProtectedRoute><MentoradoProfile /></ProtectedRoute>} />
