@@ -19,6 +19,7 @@ import MentoradoProfile from "./pages/MentoradoProfile";
 import Livraria from "./pages/Livraria";
 import Navegador from "./pages/Navegador";
 import Links from "./pages/Links";
+import Loja from "./pages/Loja";
 import Notifications from "./pages/Notifications";
 import AdminNotifications from "./pages/AdminNotifications";
 import Configuracoes from "./pages/Configuracoes";
@@ -70,6 +71,7 @@ const App = () => (
           <Route path="/livraria" element={<ProtectedRoute><Livraria /></ProtectedRoute>} />
           <Route path="/navegador" element={<ProtectedRoute><Navegador /></ProtectedRoute>} />
           <Route path="/links" element={<ProtectedRoute><Links /></ProtectedRoute>} />
+          <Route path="/loja" element={<ProtectedRoute><Loja /></ProtectedRoute>} />
           <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
           <Route path="/admin/notifications/create" element={<ProtectedRoute><AdminNotifications /></ProtectedRoute>} />
           <Route path="/configuracoes" element={<ProtectedRoute><Configuracoes /></ProtectedRoute>} />
