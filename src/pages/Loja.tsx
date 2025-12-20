@@ -62,7 +62,7 @@ export default function Loja() {
     }
 
     return (
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid gap-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
         {produtosFiltrados.map((produto) => (
           <Card
             key={produto.id}
@@ -82,19 +82,19 @@ export default function Loja() {
                 />
               ) : (
                 <div className="flex items-center justify-center h-full">
-                  <Package className="h-16 w-16 text-muted-foreground" />
+                  <Package className="h-8 w-8 text-muted-foreground" />
                 </div>
               )}
             </div>
 
-            <CardHeader>
-              <div className="flex items-start justify-between gap-2">
-                <CardTitle className="text-lg line-clamp-2 flex-1">
+            <CardHeader className="p-3">
+              <div className="flex items-start justify-between gap-1">
+                <CardTitle className="text-xs line-clamp-2 flex-1">
                   {produto.nome}
                 </CardTitle>
-                <div className="flex gap-2 items-center">
+                <div className="flex gap-1 items-center">
                   {!produto.ativo && (
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge variant="secondary" className="text-[10px] px-1 py-0">
                       Inativo
                     </Badge>
                   )}
@@ -102,37 +102,39 @@ export default function Loja() {
                     <Button
                       size="sm"
                       variant="ghost"
+                      className="h-6 w-6 p-0"
                       onClick={(e) => {
                         e.stopPropagation();
                         setEditingProduto(produto);
                       }}
                     >
-                      <Edit className="h-4 w-4" />
+                      <Edit className="h-3 w-3" />
                     </Button>
                   )}
                 </div>
               </div>
-              <Badge variant="outline" className="w-fit">
+              <Badge variant="outline" className="w-fit text-[10px] px-1 py-0">
                 {categoriaLabels[produto.categoria as keyof typeof categoriaLabels]}
               </Badge>
             </CardHeader>
 
-            <CardContent className="space-y-3">
+            <CardContent className="p-3 pt-0 space-y-2">
               {produto.descricao && (
-                <p className="text-sm text-muted-foreground line-clamp-3">
+                <p className="text-[10px] text-muted-foreground line-clamp-2">
                   {produto.descricao}
                 </p>
               )}
               {produto.url_compra && (
                 <Button
-                  className="w-full bg-primary hover:bg-primary/90"
+                  size="sm"
+                  className="w-full bg-primary hover:bg-primary/90 h-7 text-[10px]"
                   onClick={(e) => {
                     e.stopPropagation();
                     window.open(produto.url_compra, "_blank");
                   }}
                 >
-                  <ShoppingCart className="mr-2 h-4 w-4" />
-                  Comprar Agora
+                  <ShoppingCart className="mr-1 h-3 w-3" />
+                  Comprar
                 </Button>
               )}
             </CardContent>
