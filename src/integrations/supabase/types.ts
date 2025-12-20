@@ -971,6 +971,7 @@ export type Database = {
           imagem_url: string | null
           nome: string
           updated_at: string
+          url_compra: string | null
         }
         Insert: {
           ativo?: boolean
@@ -981,6 +982,7 @@ export type Database = {
           imagem_url?: string | null
           nome: string
           updated_at?: string
+          url_compra?: string | null
         }
         Update: {
           ativo?: boolean
@@ -991,6 +993,7 @@ export type Database = {
           imagem_url?: string | null
           nome?: string
           updated_at?: string
+          url_compra?: string | null
         }
         Relationships: []
       }
