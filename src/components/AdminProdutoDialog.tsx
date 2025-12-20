@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tantml:parameter>
-<invoke name="supabase } from "@/integrations/supabase/client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
   DialogContent,
@@ -37,13 +37,14 @@ export function AdminProdutoDialog() {
 
   const addProdutoMutation = useMutation({
     mutationFn: async () => {
+      if (!formData.categoria) throw new Error("Categoria é obrigatória");
       const { error } = await supabase
         .from("produtos")
         .insert([{
           nome: formData.nome,
           descricao: formData.descricao,
           imagem_url: formData.imagem_url,
-          categoria: formData.categoria,
+          categoria: formData.categoria as CategoriaProduto,
           ativo: true,
         }]);
       if (error) throw error;
