@@ -16,7 +16,6 @@ import Resultados from "./pages/Resultados";
 import Membros from "./pages/Membros";
 import Mentorados from "./pages/Mentorados";
 import MentoradoProfile from "./pages/MentoradoProfile";
-import Livraria from "./pages/Livraria";
 import Navegador from "./pages/Navegador";
 import Links from "./pages/Links";
 import Loja from "./pages/Loja";
@@ -68,7 +67,6 @@ const App = () => (
           <Route path="/membros" element={<ProtectedRoute><Membros /></ProtectedRoute>} />
           <Route path="/mentorados" element={<ProtectedRoute><Mentorados /></ProtectedRoute>} />
           <Route path="/mentorados/:id" element={<ProtectedRoute><MentoradoProfile /></ProtectedRoute>} />
-          <Route path="/livraria" element={<ProtectedRoute><Livraria /></ProtectedRoute>} />
           <Route path="/navegador" element={<ProtectedRoute><Navegador /></ProtectedRoute>} />
           <Route path="/links" element={<ProtectedRoute><Links /></ProtectedRoute>} />
           <Route path="/loja" element={<ProtectedRoute><Loja /></ProtectedRoute>} />

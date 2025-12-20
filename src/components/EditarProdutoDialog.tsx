@@ -52,6 +52,7 @@ export function EditarProdutoDialog({
     nome: "",
     descricao: "",
     imagem_url: "",
+    url_compra: "",
     categoria: "" as CategoriaProduto | "",
     ativo: true,
   });
@@ -62,6 +63,7 @@ export function EditarProdutoDialog({
         nome: produto.nome || "",
         descricao: produto.descricao || "",
         imagem_url: produto.imagem_url || "",
+        url_compra: produto.url_compra || "",
         categoria: produto.categoria || "",
         ativo: produto.ativo ?? true,
       });
@@ -77,6 +79,7 @@ export function EditarProdutoDialog({
           nome: formData.nome,
           descricao: formData.descricao,
           imagem_url: formData.imagem_url,
+          url_compra: formData.url_compra,
           categoria: formData.categoria as CategoriaProduto,
           ativo: formData.ativo,
         })
@@ -171,6 +174,17 @@ export function EditarProdutoDialog({
                 type="url"
                 value={formData.imagem_url}
                 onChange={(e) => setFormData({ ...formData, imagem_url: e.target.value })}
+                placeholder="https://..."
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="url_compra">URL de Compra</Label>
+              <Input
+                id="url_compra"
+                type="url"
+                value={formData.url_compra}
+                onChange={(e) => setFormData({ ...formData, url_compra: e.target.value })}
                 placeholder="https://..."
               />
             </div>

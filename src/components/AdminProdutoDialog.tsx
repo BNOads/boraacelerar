@@ -32,6 +32,7 @@ export function AdminProdutoDialog() {
     nome: "",
     descricao: "",
     imagem_url: "",
+    url_compra: "",
     categoria: "" as CategoriaProduto | "",
   });
 
@@ -44,6 +45,7 @@ export function AdminProdutoDialog() {
           nome: formData.nome,
           descricao: formData.descricao,
           imagem_url: formData.imagem_url,
+          url_compra: formData.url_compra,
           categoria: formData.categoria as CategoriaProduto,
           ativo: true,
         }]);
@@ -57,6 +59,7 @@ export function AdminProdutoDialog() {
         nome: "",
         descricao: "",
         imagem_url: "",
+        url_compra: "",
         categoria: "",
       });
     },
@@ -129,6 +132,20 @@ export function AdminProdutoDialog() {
               onChange={(e) => setFormData({ ...formData, imagem_url: e.target.value })}
               placeholder="https://..."
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="url_compra">URL de Compra</Label>
+            <Input
+              id="url_compra"
+              type="url"
+              value={formData.url_compra}
+              onChange={(e) => setFormData({ ...formData, url_compra: e.target.value })}
+              placeholder="https://..."
+            />
+            <p className="text-xs text-muted-foreground">
+              Link externo para compra do produto
+            </p>
           </div>
         </div>
 
