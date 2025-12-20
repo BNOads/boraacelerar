@@ -70,13 +70,14 @@ export function EditarProdutoDialog({
 
   const updateProdutoMutation = useMutation({
     mutationFn: async () => {
+      if (!formData.categoria) throw new Error("Categoria é obrigatória");
       const { error } = await supabase
         .from("produtos")
         .update({
           nome: formData.nome,
           descricao: formData.descricao,
           imagem_url: formData.imagem_url,
-          categoria: formData.categoria,
+          categoria: formData.categoria as CategoriaProduto,
           ativo: formData.ativo,
         })
         .eq("id", produto.id);

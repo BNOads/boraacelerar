@@ -961,6 +961,39 @@ export type Database = {
         }
         Relationships: []
       }
+      produtos: {
+        Row: {
+          ativo: boolean
+          categoria: Database["public"]["Enums"]["categoria_produto"]
+          created_at: string
+          descricao: string | null
+          id: string
+          imagem_url: string | null
+          nome: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          categoria: Database["public"]["Enums"]["categoria_produto"]
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          imagem_url?: string | null
+          nome: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          categoria?: Database["public"]["Enums"]["categoria_produto"]
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          imagem_url?: string | null
+          nome?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           apelido: string | null
@@ -1167,6 +1200,7 @@ export type Database = {
       app_role: "admin" | "navegador" | "mentorado"
       audience_type: "todos" | "turma" | "produto" | "mentorado"
       canal_atendimento: "WhatsApp" | "Ligação" | "Email"
+      categoria_produto: "livros" | "vestuario" | "acessorios" | "canecas"
       faixa_premiacao: "Bronze" | "Prata" | "Ouro" | "Platina" | "Diamante"
       pilar_avaliacao:
         | "eu_empreendedor"
@@ -1323,6 +1357,7 @@ export const Constants = {
       app_role: ["admin", "navegador", "mentorado"],
       audience_type: ["todos", "turma", "produto", "mentorado"],
       canal_atendimento: ["WhatsApp", "Ligação", "Email"],
+      categoria_produto: ["livros", "vestuario", "acessorios", "canecas"],
       faixa_premiacao: ["Bronze", "Prata", "Ouro", "Platina", "Diamante"],
       pilar_avaliacao: [
         "eu_empreendedor",
