@@ -96,7 +96,7 @@ export function AppSidebar() {
                         className={({ isActive }) =>
                           isActive
                             ? "bg-primary/20 text-primary font-semibold rounded-r-lg border-l-4 border-primary [&>svg]:text-primary pl-3 shadow-md"
-                            : "text-foreground [&>svg]:text-muted-foreground hover:bg-primary/10 hover:text-primary [&>svg]:hover:text-primary rounded-lg transition-colors pl-4"
+                            : "text-foreground [&>svg]:text-foreground hover:bg-primary/10 hover:text-primary [&>svg]:hover:text-primary rounded-lg transition-colors pl-4"
                         }
                       >
                         <item.icon className="h-4 w-4" />
@@ -157,7 +157,7 @@ export function AppSidebar() {
                   className={({ isActive }) =>
                     isActive
                       ? "bg-primary/20 text-primary font-semibold rounded-r-lg border-l-4 border-primary [&>svg]:text-primary pl-3 shadow-md"
-                      : "text-foreground [&>svg]:text-muted-foreground hover:bg-primary/10 hover:text-primary [&>svg]:hover:text-primary rounded-lg transition-colors pl-4"
+                      : "text-foreground [&>svg]:text-foreground hover:bg-primary/10 hover:text-primary [&>svg]:hover:text-primary rounded-lg transition-colors pl-4"
                   }
                 >
                   <Settings className="h-4 w-4" />
@@ -166,7 +166,7 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton onClick={handleLogout} className="text-foreground [&>svg]:text-muted-foreground hover:bg-primary/10 hover:text-primary [&>svg]:hover:text-primary rounded-lg transition-colors pl-4">
+              <SidebarMenuButton onClick={handleLogout} className="text-foreground [&>svg]:text-foreground hover:bg-primary/10 hover:text-primary [&>svg]:hover:text-primary rounded-lg transition-colors pl-4">
                 <LogOut className="h-5 w-5 transition-colors" strokeWidth={1.5} />
                 {state !== "collapsed" && <span>Sair</span>}
               </SidebarMenuButton>
