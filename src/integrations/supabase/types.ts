@@ -521,6 +521,47 @@ export type Database = {
         }
         Relationships: []
       }
+      marketing_metrics: {
+        Row: {
+          created_at: string | null
+          id: string
+          investimento_marketing: number
+          leads_qualificados: number
+          leads_totais: number
+          mentorado_id: string
+          mes_ano: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          investimento_marketing?: number
+          leads_qualificados?: number
+          leads_totais?: number
+          mentorado_id: string
+          mes_ano: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          investimento_marketing?: number
+          leads_qualificados?: number
+          leads_totais?: number
+          mentorado_id?: string
+          mes_ano?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_metrics_mentorado_id_fkey"
+            columns: ["mentorado_id"]
+            isOneToOne: false
+            referencedRelation: "mentorados"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       materiais_complementares: {
         Row: {
           created_at: string
@@ -697,47 +738,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "metricas_mensais_mentorado_id_fkey"
-            columns: ["mentorado_id"]
-            isOneToOne: false
-            referencedRelation: "mentorados"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      marketing_metrics: {
-        Row: {
-          created_at: string
-          id: string
-          investimento_marketing: number
-          leads_qualificados: number
-          leads_totais: number
-          mentorado_id: string
-          mes_ano: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          investimento_marketing: number
-          leads_qualificados: number
-          leads_totais: number
-          mentorado_id: string
-          mes_ano: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          investimento_marketing?: number
-          leads_qualificados?: number
-          leads_totais?: number
-          mentorado_id?: string
-          mes_ano?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "marketing_metrics_mentorado_id_fkey"
             columns: ["mentorado_id"]
             isOneToOne: false
             referencedRelation: "mentorados"
