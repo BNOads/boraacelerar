@@ -219,11 +219,11 @@ export default function Metas() {
                 <MetaCard
                   key={meta.id}
                   meta={meta}
-                  onAdicionarObjetivo={(metaId) => {
+                  onAddObjetivo={(metaId) => {
                     setMetaSelecionada(metaId);
                     setDialogNovoObjetivoAberto(true);
                   }}
-                  onMetaAtualizada={carregarMetas}
+                  onUpdate={carregarMetas}
                 />
               ))}
             </div>
@@ -232,18 +232,20 @@ export default function Metas() {
       </Card>
 
       {/* Dialogs */}
-      <NovaMetaDialog
-        open={dialogNovaMetaAberto}
-        onOpenChange={setDialogNovaMetaAberto}
-        mentoradoId={mentoradoId}
-        onMetaCriada={carregarMetas}
-      />
+      {mentoradoId && (
+        <NovaMetaDialog
+          open={dialogNovaMetaAberto}
+          onOpenChange={setDialogNovaMetaAberto}
+          mentoradoId={mentoradoId}
+          onSuccess={carregarMetas}
+        />
+      )}
 
       <NovoObjetivoDialog
         open={dialogNovoObjetivoAberto}
         onOpenChange={setDialogNovoObjetivoAberto}
         metaId={metaSelecionada}
-        onObjetivoCriado={carregarMetas}
+        onSuccess={carregarMetas}
       />
     </div>
   );
