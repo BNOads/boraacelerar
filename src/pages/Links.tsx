@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Edit, Link2 } from "lucide-react";
+import { ExternalLink, Edit } from "lucide-react";
 import { AdminLinksDialog } from "@/components/AdminLinksDialog";
 import { AdminImportarLinksDialog } from "@/components/AdminImportarLinksDialog";
 import { EditarLinkDialog } from "@/components/EditarLinkDialog";
@@ -48,9 +48,8 @@ export default function Links() {
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
-              <Link2 className="h-8 w-8 text-secondary" strokeWidth={1.5} />
-              Links Úteis
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+              🔗 Links Úteis
             </h1>
             <p className="text-muted-foreground">
               Acesso rápido às ferramentas e recursos essenciais da plataforma
@@ -96,7 +95,11 @@ export default function Links() {
               </CardHeader>
               <CardContent>
                 <Button
+<<<<<<< HEAD
                   className="w-full bg-secondary hover:bg-secondary/90 text-white"
+=======
+                  className="w-full bg-primary hover:bg-primary/90"
+>>>>>>> 486f461a9dafad709f4a63825cc535b9b4f24deb
                   onClick={() => window.open(link.url_zoom, "_blank")}
                 >
                   Acessar

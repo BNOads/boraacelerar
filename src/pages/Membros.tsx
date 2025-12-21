@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, Video, FileText, Clock, Play, ExternalLink, Edit, Trash2, Users } from "lucide-react";
+import { Search, Video, FileText, Clock, Play, ExternalLink, Edit, Trash2 } from "lucide-react";
 import { AdminMembrosDialog } from "@/components/AdminMembrosDialog";
 import { AdminImportarConteudoDialog } from "@/components/AdminImportarConteudoDialog";
 import { AdminPostoIpirangaDialog } from "@/components/AdminPostoIpirangaDialog";
@@ -129,9 +129,14 @@ export default function Membros() {
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <div>
+<<<<<<< HEAD
             <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
               <Users className="h-8 w-8 text-secondary" strokeWidth={1.5} />
               Área de Membros
+=======
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+              🎥 Área de Membros
+>>>>>>> 486f461a9dafad709f4a63825cc535b9b4f24deb
             </h1>
             <p className="text-muted-foreground">
               Acesse suas gravações, conteúdos direcionados e recomendações personalizadas
@@ -199,7 +204,11 @@ export default function Membros() {
                       )}
                       <Button
                         size="icon"
+<<<<<<< HEAD
                         className="absolute bottom-2 right-2 bg-secondary hover:bg-secondary/90 text-white"
+=======
+                        className="absolute bottom-2 right-2 bg-primary hover:bg-primary/90"
+>>>>>>> 486f461a9dafad709f4a63825cc535b9b4f24deb
                         onClick={() => window.open(gravacao.url_video, "_blank")}
                       >
                         <Play className="h-4 w-4" />
@@ -268,7 +277,11 @@ export default function Membros() {
                       )}
                       <Button
                         size="icon"
+<<<<<<< HEAD
                         className="absolute bottom-2 right-2 bg-secondary hover:bg-secondary/90 text-white"
+=======
+                        className="absolute bottom-2 right-2 bg-primary hover:bg-primary/90"
+>>>>>>> 486f461a9dafad709f4a63825cc535b9b4f24deb
                         onClick={() => window.open(gravacao.url_video, "_blank")}
                       >
                         <Play className="h-4 w-4" />

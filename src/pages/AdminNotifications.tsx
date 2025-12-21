@@ -154,7 +154,11 @@ export default function AdminNotifications() {
 
           <div className="flex gap-3 pt-4">
             <Button
+<<<<<<< HEAD
               className="flex-1 bg-secondary hover:bg-secondary/90 text-white"
+=======
+              className="flex-1 bg-primary hover:bg-primary/90"
+>>>>>>> 486f461a9dafad709f4a63825cc535b9b4f24deb
               onClick={() => createNotificationMutation.mutate()}
               disabled={
                 !formData.title ||

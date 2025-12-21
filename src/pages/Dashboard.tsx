@@ -202,9 +202,13 @@ export default function Dashboard() {
   }
   return <div className="space-y-6 animate-slide-in">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-card to-card/50 border border-border rounded-lg p-8 shadow-card">
+      <div className="bg-gradient-to-r from-card to-card/50 border border-border rounded-lg p-8 shadow-glow">
         <div className="flex items-center gap-3 mb-2">
+<<<<<<< HEAD
           <Rocket className="h-8 w-8 text-secondary" strokeWidth={1.5} />
+=======
+          <Rocket className="h-8 w-8 text-primary animate-glow-pulse" />
+>>>>>>> 486f461a9dafad709f4a63825cc535b9b4f24deb
           <h1 className="text-4xl font-bold text-foreground">
             Bem-vindo(a), {profile?.apelido || profile?.nome_completo?.split(' ')[0]}! 🚀
           </h1>
@@ -244,7 +248,7 @@ export default function Dashboard() {
 
             <div className="mt-6 text-center">
               <Link to="/resultados">
-                <Button className="bg-secondary hover:bg-secondary/90 text-secondary-foreground">
+                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
                   Ver Resultados da Mentoria
                 </Button>
               </Link>

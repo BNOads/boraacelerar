@@ -113,9 +113,14 @@ export default function Metas() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
+<<<<<<< HEAD
           <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
             <Target className="h-8 w-8 text-secondary" strokeWidth={1.5} />
             Metas e Resultados Chave
+=======
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+            🎯 Metas e Resultados Chave
+>>>>>>> 486f461a9dafad709f4a63825cc535b9b4f24deb
           </h1>
           <p className="text-muted-foreground">
             Acompanhe seu progresso e conquistas ao longo do tempo

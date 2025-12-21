@@ -122,7 +122,11 @@ export default function Notifications() {
           </div>
           {isAdmin && (
             <Button
+<<<<<<< HEAD
               className="bg-secondary hover:bg-secondary/90 text-white"
+=======
+              className="bg-primary hover:bg-primary/90"
+>>>>>>> 486f461a9dafad709f4a63825cc535b9b4f24deb
               onClick={() => navigate("/admin/notifications/create")}
             >
               <Plus className="mr-2 h-4 w-4" />
