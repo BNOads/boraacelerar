@@ -15,11 +15,6 @@ interface Profile {
   nome_completo: string;
   apelido: string | null;
 }
-interface AcelerometroData {
-  clientes_atuais: number;
-  faturamento_acumulado: number;
-  maior_faturamento: number;
-}
 interface AdminStats {
   total_mentorados: number;
   faturamento_medio_mensal: number;
@@ -44,7 +39,6 @@ export default function Dashboard() {
     isAdmin
   } = useIsAdmin();
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [acelerometro, setAcelerometro] = useState<AcelerometroData | null>(null);
   const [adminStats, setAdminStats] = useState<AdminStats | null>(null);
   const [proximosEncontros, setProximosEncontros] = useState<AgendaItem[]>([]);
   const [encontrosPassados, setEncontrosPassados] = useState<AgendaItem[]>([]);
@@ -158,27 +152,6 @@ export default function Dashboard() {
             faturamento_acumulado_total: faturamentoTotal,
             distribuicao_faixas: distribuicaoArray
           });
-        } else {
-          // Buscar mentorado_id
-          const {
-            data: mentoradoData
-          } = await supabase.from("mentorados").select("id, meta_clientes").eq("user_id", user.id).maybeSingle();
-          if (mentoradoData) {
-            // Buscar dados de desempenho
-            const {
-              data: desempenhoData
-            } = await supabase.from("desempenho_mensal").select("faturamento_mensal, clientes_mes").eq("mentorado_id", mentoradoData.id);
-            if (desempenhoData && desempenhoData.length > 0) {
-              const faturamentoAcumulado = desempenhoData.reduce((acc, item) => acc + (item.faturamento_mensal || 0), 0);
-              const maiorFaturamento = Math.max(...desempenhoData.map(item => item.faturamento_mensal || 0));
-              const clientesAtuais = desempenhoData[desempenhoData.length - 1]?.clientes_mes || 0;
-              setAcelerometro({
-                clientes_atuais: clientesAtuais,
-                faturamento_acumulado: faturamentoAcumulado,
-                maior_faturamento: maiorFaturamento
-              });
-            }
-          }
         }
       }
       setLoading(false);
@@ -242,73 +215,43 @@ export default function Dashboard() {
       </div>
 
       {/* Quick Access Cards */}
-      
 
-      {/* Acelerômetro Preview - Admin ou Mentorado */}
-      <Card className="border-border bg-card shadow-card">
-        <CardHeader>
-          <CardTitle className="text-2xl text-foreground flex items-center gap-2">
-            {isAdmin ? <Users className="h-6 w-6 text-primary" /> : <TrendingUp className="h-6 w-6 text-primary" />}
-            {isAdmin ? "Estatísticas da Mentoria" : "Acelerômetro"}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isAdmin && adminStats ? <>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="text-center p-6 bg-muted/30 rounded-lg">
-                  <p className="text-4xl font-bold text-primary mb-2">{adminStats.total_mentorados}</p>
-                  <p className="text-sm text-muted-foreground">Mentorados Ativos</p>
-                </div>
-                <div className="text-center p-6 bg-muted/30 rounded-lg">
-                  <p className="text-4xl font-bold text-primary mb-2">
-                    R$ {adminStats.faturamento_acumulado_total.toLocaleString('pt-BR', {
-                  minimumFractionDigits: 2
-                })}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Faturamento Acumulado da Mentoria</p>
-                </div>
-              </div>
 
-              <div className="mt-6 text-center">
-                <Link to="/resultados">
-                  <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                    Ver Resultados da Mentoria
-                  </Button>
-                </Link>
+      {/* Estatísticas da Mentoria - Admin Only */}
+      {isAdmin && adminStats && (
+        <Card className="border-border bg-card shadow-card">
+          <CardHeader>
+            <CardTitle className="text-2xl text-foreground flex items-center gap-2">
+              <Users className="h-6 w-6 text-primary" />
+              Estatísticas da Mentoria
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="text-center p-6 bg-muted/30 rounded-lg">
+                <p className="text-4xl font-bold text-primary mb-2">{adminStats.total_mentorados}</p>
+                <p className="text-sm text-muted-foreground">Mentorados Ativos</p>
               </div>
-            </> : <>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="text-center p-6 bg-muted/30 rounded-lg">
-                  <p className="text-4xl font-bold text-primary mb-2">{acelerometro?.clientes_atuais || 0}</p>
-                  <p className="text-sm text-muted-foreground">Clientes Atuais</p>
-                </div>
-                <div className="text-center p-6 bg-muted/30 rounded-lg">
-                  <p className="font-bold text-primary mb-2 text-4xl font-sans">
-                    R$ {acelerometro?.maior_faturamento?.toLocaleString('pt-BR', {
-                  minimumFractionDigits: 2
-                }) || '0,00'}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Maior Faturamento Mensal</p>
-                </div>
-                <div className="text-center p-6 bg-muted/30 rounded-lg">
-                  <p className="text-4xl font-bold text-primary mb-2">
-                    R$ {acelerometro?.faturamento_acumulado?.toLocaleString('pt-BR', {
-                  minimumFractionDigits: 2
-                }) || '0,00'}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Faturamento Acumulado</p>
-                </div>
+              <div className="text-center p-6 bg-muted/30 rounded-lg">
+                <p className="text-4xl font-bold text-primary mb-2">
+                  R$ {adminStats.faturamento_acumulado_total.toLocaleString('pt-BR', {
+                minimumFractionDigits: 2
+              })}
+                </p>
+                <p className="text-sm text-muted-foreground">Faturamento Acumulado da Mentoria</p>
               </div>
-              <div className="mt-6 text-center">
-                <Link to="/resultados">
-                  <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                    Ver Minha Evolução Completa
-                  </Button>
-                </Link>
-              </div>
-            </>}
-        </CardContent>
-      </Card>
+            </div>
+
+            <div className="mt-6 text-center">
+              <Link to="/resultados">
+                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                  Ver Resultados da Mentoria
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Agenda Completa */}
       <Card className="border-border bg-card shadow-card">

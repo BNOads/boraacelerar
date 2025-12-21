@@ -1,4 +1,4 @@
-import { Home, BookOpen, TrendingUp, Trophy, Calendar, Video, Users as UsersIcon, Link as LinkIcon, Settings, LogOut, User, Users, Bell, Store } from "lucide-react";
+import { Home, BookOpen, TrendingUp, Trophy, Calendar, Video, Users as UsersIcon, Link as LinkIcon, Settings, LogOut, User, Users, Bell, Store, Target } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
@@ -26,7 +26,8 @@ import logoLight from "@/assets/logo-bora-light.png";
 const menuItems = [
   { title: "Início", url: "/dashboard", icon: Home },
   { title: "Trilha & Conteúdo", url: "/trilha", icon: BookOpen },
-  { title: "Resultados", url: "/resultados", icon: TrendingUp },
+  { title: "Painel de Controle", url: "/resultados", icon: TrendingUp },
+  { title: "Metas", url: "/metas", icon: Target },
   { title: "Área de Membros", url: "/membros", icon: Video },
   { title: "Navegador", url: "/navegador", icon: UsersIcon },
   { title: "Links Úteis", url: "/links", icon: LinkIcon },

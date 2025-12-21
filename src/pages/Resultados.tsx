@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { TrendingUp, Users, CheckCircle, ArrowUp, Trophy, UserPlus, Instagram, Youtube, Music, Target, Plus, FileText, Percent, Linkedin } from "lucide-react";
+import { TrendingUp, Users, CheckCircle, ArrowUp, Trophy, UserPlus, Instagram, Youtube, Music, FileText, Percent, Linkedin } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -10,9 +10,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { CronometroTrimestral } from "@/components/CronometroTrimestral";
-import { MetaCard } from "@/components/MetaCard";
-import { NovaMetaDialog } from "@/components/NovaMetaDialog";
-import { NovoObjetivoDialog } from "@/components/NovoObjetivoDialog";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { ResultadosAdmin } from "@/components/ResultadosAdmin";
 import { format, parse } from "date-fns";
@@ -73,78 +70,66 @@ export default function Resultados() {
     clientes_mes: 0,
     qtd_propostas: 0,
   });
-  const [metas, setMetas] = useState<any[]>([]);
-  const [dialogNovaMetaAberto, setDialogNovaMetaAberto] = useState(false);
-  const [dialogNovoObjetivoAberto, setDialogNovoObjetivoAberto] = useState(false);
-  const [metaSelecionada, setMetaSelecionada] = useState<string | null>(null);
-  const [filtroStatus, setFiltroStatus] = useState<string>("ativa");
 
   useEffect(() => {
     const fetchDesempenho = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (user) {
-        const { data: mentoradoData } = await supabase
-          .from("mentorados")
-          .select("id")
-          .eq("user_id", user.id)
-          .single();
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
 
-        if (mentoradoData) {
-          setMentoradoId(mentoradoData.id);
-          
-          const { data: allData } = await supabase
-            .from("desempenho_mensal")
-            .select("*")
-            .eq("mentorado_id", mentoradoData.id)
-            .order("mes_ano", { ascending: true });
+        if (user) {
+          const { data: mentoradoData, error: mentoradoError } = await supabase
+            .from("mentorados")
+            .select("id")
+            .eq("user_id", user.id)
+            .single();
 
-          if (allData && allData.length > 0) {
-            setHistorico(allData);
-            setDesempenhoAtual(allData[allData.length - 1]);
+          if (mentoradoError) {
+            console.error("Erro ao buscar mentorado:", mentoradoError);
           }
 
-          // Buscar métricas mensais
-          const { data: metricasData } = await supabase
-            .from("metricas_mensais")
-            .select("*")
-            .eq("mentorado_id", mentoradoData.id)
-            .order("mes_ano", { ascending: true });
+          if (mentoradoData) {
+            setMentoradoId(mentoradoData.id);
 
-          if (metricasData) {
-            setMetricasMensais(metricasData);
+            const { data: allData, error: desempenhoError } = await supabase
+              .from("desempenho_mensal")
+              .select("*")
+              .eq("mentorado_id", mentoradoData.id)
+              .order("mes_ano", { ascending: true });
+
+            if (desempenhoError) {
+              console.error("Erro ao buscar desempenho:", desempenhoError);
+            }
+
+            if (allData && allData.length > 0) {
+              setHistorico(allData);
+              setDesempenhoAtual(allData[allData.length - 1]);
+            }
+
+            // Buscar métricas mensais
+            const { data: metricasData, error: metricasError } = await supabase
+              .from("metricas_mensais")
+              .select("*")
+              .eq("mentorado_id", mentoradoData.id)
+              .order("mes_ano", { ascending: true });
+
+            if (metricasError) {
+              console.error("Erro ao buscar métricas:", metricasError);
+            }
+
+            if (metricasData) {
+              setMetricasMensais(metricasData);
+            }
           }
-
-          // Buscar metas e objetivos
-          await carregarMetas(mentoradoData.id);
         }
+      } catch (error) {
+        console.error("Erro geral ao carregar dados:", error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchDesempenho();
   }, []);
-
-  const carregarMetas = async (mentoradoIdParam?: string) => {
-    const idParaBuscar = mentoradoIdParam || mentoradoId;
-    if (!idParaBuscar) return;
-
-    const { data: metasData, error } = await supabase
-      .from("metas")
-      .select(`
-        *,
-        objetivos (*)
-      `)
-      .eq("mentorado_id", idParaBuscar)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Erro ao carregar metas:", error);
-      return;
-    }
-
-    setMetas(metasData || []);
-  };
 
   const handleSalvarMetricas = async () => {
     if (!mentoradoId) {
@@ -325,7 +310,7 @@ export default function Resultados() {
     <div className="space-y-6 animate-slide-in">
       <div className="flex items-center gap-3">
         <TrendingUp className="h-8 w-8 text-primary" />
-        <h1 className="text-4xl font-bold text-foreground">Meus Resultados</h1>
+        <h1 className="text-4xl font-bold text-foreground">📊 Painel de Controle</h1>
       </div>
       <p className="text-muted-foreground text-lg">
         Acompanhe seu desempenho e evolução
@@ -622,89 +607,6 @@ export default function Resultados() {
 
       {/* Cronômetro Trimestral */}
       {mentoradoId && <CronometroTrimestral mentoradoId={mentoradoId} />}
-
-      {/* Metas (OKRs) */}
-      <Card className="border-border bg-card shadow-card">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Target className="h-6 w-6 text-primary" />
-              <CardTitle className="text-foreground">Metas (OKRs)</CardTitle>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="flex gap-1">
-                {["ativa", "concluida", "arquivada"].map((status) => (
-                  <Button
-                    key={status}
-                    variant={filtroStatus === status ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setFiltroStatus(status)}
-                  >
-                    {status.charAt(0).toUpperCase() + status.slice(1)}
-                  </Button>
-                ))}
-              </div>
-              <Button onClick={() => setDialogNovaMetaAberto(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Nova Meta
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {metas.filter(m => m.status === filtroStatus).length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>Nenhuma meta {filtroStatus} encontrada</p>
-              <Button
-                variant="link"
-                onClick={() => setDialogNovaMetaAberto(true)}
-                className="mt-2"
-              >
-                Criar sua primeira meta
-              </Button>
-            </div>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2">
-              {metas
-                .filter(m => m.status === filtroStatus)
-                .map((meta) => (
-                  <MetaCard
-                    key={meta.id}
-                    meta={meta}
-                    onUpdate={() => carregarMetas()}
-                    onAddObjetivo={(metaId) => {
-                      setMetaSelecionada(metaId);
-                      setDialogNovoObjetivoAberto(true);
-                    }}
-                  />
-                ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Diálogos */}
-      {mentoradoId && (
-        <>
-          <NovaMetaDialog
-            open={dialogNovaMetaAberto}
-            onOpenChange={setDialogNovaMetaAberto}
-            mentoradoId={mentoradoId}
-            onSuccess={(metaId) => {
-              carregarMetas();
-              setMetaSelecionada(metaId);
-              setDialogNovoObjetivoAberto(true);
-            }}
-          />
-          <NovoObjetivoDialog
-            open={dialogNovoObjetivoAberto}
-            onOpenChange={setDialogNovoObjetivoAberto}
-            metaId={metaSelecionada}
-            onSuccess={() => carregarMetas()}
-          />
-        </>
-      )}
 
       {/* Métricas de Crescimento */}
       <Card className="border-border bg-card shadow-card">

@@ -55,7 +55,7 @@ export function NovoObjetivoDialog({
     }
 
     if (tipo === "numerico" && !valorMeta) {
-      toast.error("Defina o valor meta para objetivos numéricos");
+      toast.error("Defina o valor meta para resultados chave numéricos");
       return;
     }
 
@@ -95,13 +95,13 @@ export function NovoObjetivoDialog({
 
       if (error) throw error;
 
-      toast.success("Objetivo adicionado com sucesso!");
+      toast.success("Resultado chave adicionado com sucesso!");
       resetForm();
       onOpenChange(false);
       onSuccess();
     } catch (error) {
-      console.error("Erro ao criar objetivo:", error);
-      toast.error("Erro ao criar objetivo");
+      console.error("Erro ao criar resultado chave:", error);
+      toast.error("Erro ao criar resultado chave");
     } finally {
       setSalvando(false);
     }
@@ -113,16 +113,16 @@ export function NovoObjetivoDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ListChecks className="h-5 w-5" />
-            Novo Objetivo
+            Novo Resultado Chave (KR)
           </DialogTitle>
           <DialogDescription>
-            Adicione um objetivo para acompanhar o progresso da sua meta
+            Adicione um resultado chave para acompanhar o progresso da sua meta
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="titulo">Título do Objetivo *</Label>
+            <Label htmlFor="titulo">Título do Resultado Chave *</Label>
             <Input
               id="titulo"
               value={titulo}
@@ -138,13 +138,13 @@ export function NovoObjetivoDialog({
               id="descricao"
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
-              placeholder="Descreva o objetivo em mais detalhes (opcional)"
+              placeholder="Descreva o resultado chave em mais detalhes (opcional)"
               rows={2}
             />
           </div>
 
           <div className="space-y-3">
-            <Label>Tipo de Objetivo</Label>
+            <Label>Tipo de Resultado Chave</Label>
             <RadioGroup value={tipo} onValueChange={(v) => setTipo(v as any)}>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="boolean" id="boolean" />
@@ -198,7 +198,7 @@ export function NovoObjetivoDialog({
               Cancelar
             </Button>
             <Button type="submit" disabled={salvando}>
-              {salvando ? "Adicionando..." : "Adicionar Objetivo"}
+              {salvando ? "Adicionando..." : "Adicionar Resultado Chave"}
             </Button>
           </div>
         </form>

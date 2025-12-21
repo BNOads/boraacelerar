@@ -71,8 +71,8 @@ export function MetaCard({
       if (error) throw error;
       onUpdate();
     } catch (error) {
-      console.error("Erro ao atualizar objetivo:", error);
-      toast.error("Erro ao atualizar objetivo");
+      console.error("Erro ao atualizar resultado chave:", error);
+      toast.error("Erro ao atualizar resultado chave");
     }
   };
 
@@ -84,11 +84,11 @@ export function MetaCard({
         .eq("id", objetivoId);
 
       if (error) throw error;
-      toast.success("Objetivo atualizado!");
+      toast.success("Resultado chave atualizado!");
       onUpdate();
     } catch (error) {
-      console.error("Erro ao atualizar objetivo:", error);
-      toast.error("Erro ao atualizar objetivo");
+      console.error("Erro ao atualizar resultado chave:", error);
+      toast.error("Erro ao atualizar resultado chave");
     }
   };
 
@@ -180,7 +180,7 @@ export function MetaCard({
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => onAddObjetivo(meta.id)}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Adicionar Objetivo
+                  Adicionar Resultado Chave (KR)
                 </DropdownMenuItem>
                 {meta.status === "ativa" && (
                   <DropdownMenuItem onClick={concluirMeta}>
@@ -213,7 +213,7 @@ export function MetaCard({
               <ChevronRight className="h-4 w-4 mr-2" />
             )}
             <span className="font-semibold">
-              Objetivos ({meta.objetivos.length})
+              Resultados Chave ({meta.objetivos.length})
             </span>
           </Button>
 
