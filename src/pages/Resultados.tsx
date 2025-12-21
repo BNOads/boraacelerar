@@ -320,8 +320,8 @@ export default function Resultados() {
   return (
     <div className="space-y-6 animate-slide-in">
       <div className="flex items-center gap-3">
-        <TrendingUp className="h-8 w-8 text-secondary" strokeWidth={1.5} />
-        <h1 className="text-4xl font-bold text-foreground">Painel de Controle</h1>
+        <TrendingUp className="h-8 w-8 text-primary" />
+        <h1 className="text-4xl font-bold text-foreground">📊 Painel de Controle</h1>
       </div>
       <p className="text-muted-foreground text-lg">
         Acompanhe seu desempenho e evolução
@@ -331,7 +331,7 @@ export default function Resultados() {
       <Card className="border-border bg-card shadow-card">
         <CardHeader>
           <div className="flex items-center gap-3">
-            <TrendingUp className="h-6 w-6 text-secondary" strokeWidth={1.5} />
+            <TrendingUp className="h-6 w-6 text-primary" />
             <CardTitle className="text-foreground">Registrar Desempenho Mensal</CardTitle>
           </div>
         </CardHeader>
@@ -414,7 +414,7 @@ export default function Resultados() {
           <Card key={kpi.title} className="border-border bg-card shadow-card">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <kpi.icon className="h-5 w-5 text-secondary" />
+                <kpi.icon className="h-5 w-5 text-primary" />
                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
                   {kpi.positive ? (
                     <ArrowUp className="h-3 w-3 text-green-500" />
@@ -437,7 +437,7 @@ export default function Resultados() {
       <Card className="border-border bg-card shadow-card">
         <CardHeader>
           <div className="flex items-center gap-3">
-            <Trophy className="h-6 w-6 text-secondary" />
+            <Trophy className="h-6 w-6 text-primary" />
             <CardTitle className="text-foreground">Prêmio Profissional Extraordinário</CardTitle>
           </div>
         </CardHeader>
@@ -495,7 +495,7 @@ export default function Resultados() {
         <Card className="border-border bg-card shadow-card">
           <CardHeader>
             <CardTitle className="text-foreground flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-secondary" />
+              <TrendingUp className="h-5 w-5 text-primary" />
               Evolução do Faturamento
             </CardTitle>
           </CardHeader>
@@ -546,7 +546,7 @@ export default function Resultados() {
         <Card className="border-border bg-card shadow-card">
           <CardHeader>
             <CardTitle className="text-foreground flex items-center gap-2">
-              <Users className="h-5 w-5 text-secondary" />
+              <Users className="h-5 w-5 text-primary" />
               Métricas Operacionais
             </CardTitle>
           </CardHeader>
@@ -626,7 +626,7 @@ export default function Resultados() {
       <Card className="border-border bg-card shadow-card">
         <CardHeader>
           <div className="flex items-center gap-3">
-            <UserPlus className="h-6 w-6 text-secondary" />
+            <UserPlus className="h-6 w-6 text-primary" />
             <CardTitle className="text-foreground">Métricas de Crescimento</CardTitle>
           </div>
         </CardHeader>

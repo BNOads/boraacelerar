@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, User, Edit, Save, X, ExternalLink, Users } from "lucide-react";
+import { Search, User, Edit, Save, X, ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -142,9 +142,8 @@ export default function Mentorados() {
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
-              <Users className="h-8 w-8 text-primary" strokeWidth={1.5} />
-              Gerenciar Usuários
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+              👥 Gerenciar Usuários
             </h1>
             <p className="text-muted-foreground">
               Adicione novos usuários e gerencie informações dos mentorados

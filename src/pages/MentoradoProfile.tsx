@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, User, Calendar, TrendingUp, Target, Award, Instagram, Mail, Phone, Share2, BookOpen, CheckCircle, Circle } from "lucide-react";
+import { ArrowLeft, User, Calendar, TrendingUp, Target, Award, Instagram, Mail, Phone, Share2 } from "lucide-react";
 import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
@@ -234,15 +234,15 @@ export default function MentoradoProfile() {
 
                 <div className="flex flex-wrap gap-2 justify-center md:justify-start">
                   {mentorado.turma && (
-                    <Badge variant="outline" className="text-sm flex items-center gap-1">
-                      <BookOpen className="h-3 w-3" strokeWidth={1.5} /> {mentorado.turma}
+                    <Badge variant="outline" className="text-sm">
+                      📚 {mentorado.turma}
                     </Badge>
                   )}
                   <Badge
                     variant={mentorado.status === "ativo" ? "default" : "secondary"}
-                    className="text-sm flex items-center gap-1"
+                    className="text-sm"
                   >
-                    {mentorado.status === "ativo" ? <><CheckCircle className="h-3 w-3" strokeWidth={1.5} /> Ativo</> : <><Circle className="h-3 w-3" strokeWidth={1.5} /> Inativo</>}
+                    {mentorado.status === "ativo" ? "✓ Ativo" : "○ Inativo"}
                   </Badge>
                   {mentorado.data_ingresso && (
                     <Badge variant="outline" className="text-sm">
