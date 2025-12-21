@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { TrendingUp, Users, CheckCircle, ArrowUp, Trophy, UserPlus, Instagram, Youtube, Music, FileText, Percent, Linkedin } from "lucide-react";
+import { TrendingUp, Users, CheckCircle, ArrowUp, Trophy, UserPlus, Instagram, Youtube, Music, FileText, Percent, Linkedin, Target } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -224,18 +224,28 @@ export default function Resultados() {
 
   // Formatar dados do histórico com nome do mês
   const historicoFormatado = useMemo(() => {
-    return historico.map(item => ({
-      ...item,
-      mes_formatado: format(parse(item.mes_ano, 'yyyy-MM', new Date()), 'MMM yyyy', { locale: ptBR })
-    }));
+    try {
+      return historico.map(item => ({
+        ...item,
+        mes_formatado: format(parse(item.mes_ano, 'yyyy-MM', new Date()), 'MMM yyyy', { locale: ptBR })
+      }));
+    } catch (error) {
+      console.error("Erro ao formatar histórico:", error);
+      return [];
+    }
   }, [historico]);
 
   // Formatar dados das métricas com nome do mês
   const metricasFormatadas = useMemo(() => {
-    return metricasMensais.map(item => ({
-      ...item,
-      mes_formatado: format(parse(item.mes_ano, 'yyyy-MM', new Date()), 'MMM yyyy', { locale: ptBR })
-    }));
+    try {
+      return metricasMensais.map(item => ({
+        ...item,
+        mes_formatado: format(parse(item.mes_ano, 'yyyy-MM', new Date()), 'MMM yyyy', { locale: ptBR })
+      }));
+    } catch (error) {
+      console.error("Erro ao formatar métricas:", error);
+      return [];
+    }
   }, [metricasMensais]);
 
   const faixaAtual = faixas.find(f => 
@@ -468,7 +478,7 @@ export default function Resultados() {
                 <div className="text-2xl mb-1">{faixa.emoji}</div>
                 <div className="text-xs font-semibold">{faixa.nome}</div>
                 <div className="text-xs text-muted-foreground">
-                  R$ {(faixa.min / 1000).toFixed(0)}k{faixa.max ? ` - ${(faixa.max / 1000).toFixed(0)}k` : '+'}
+                  R$ {(faixa.min / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}k{faixa.max ? ` - ${faixa.max.toLocaleString('pt-BR')}` : '+'}
                 </div>
               </div>
             ))}
