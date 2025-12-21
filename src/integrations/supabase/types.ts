@@ -704,6 +704,47 @@ export type Database = {
           },
         ]
       }
+      marketing_metrics: {
+        Row: {
+          created_at: string
+          id: string
+          investimento_marketing: number
+          leads_qualificados: number
+          leads_totais: number
+          mentorado_id: string
+          mes_ano: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          investimento_marketing: number
+          leads_qualificados: number
+          leads_totais: number
+          mentorado_id: string
+          mes_ano: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          investimento_marketing?: number
+          leads_qualificados?: number
+          leads_totais?: number
+          mentorado_id?: string
+          mes_ano?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_metrics_mentorado_id_fkey"
+            columns: ["mentorado_id"]
+            isOneToOne: false
+            referencedRelation: "mentorados"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       navegadores: {
         Row: {
           ativo: boolean | null

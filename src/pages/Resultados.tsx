@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { CronometroTrimestral } from "@/components/CronometroTrimestral";
+import { TaxasMarketing } from "@/components/TaxasMarketing";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { ResultadosAdmin } from "@/components/ResultadosAdmin";
 import { format, parse } from "date-fns";
@@ -614,6 +615,9 @@ export default function Resultados() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Taxas de Marketing */}
+      {mentoradoId && <TaxasMarketing mentoradoId={mentoradoId} />}
 
       {/* Cronômetro Trimestral */}
       {mentoradoId && <CronometroTrimestral mentoradoId={mentoradoId} />}
