@@ -88,6 +88,16 @@ export default {
             boxShadow: "0 0 40px hsla(195, 65%, 45%, 0.6)",
           },
         },
+        "icon-pulse": {
+          "0%, 100%": {
+            transform: "scale(1.1)",
+            filter: "drop-shadow(0 0 4px hsl(195, 65%, 45%))",
+          },
+          "50%": {
+            transform: "scale(1.15)",
+            filter: "drop-shadow(0 0 8px hsl(195, 65%, 55%))",
+          },
+        },
         "slide-in": {
           from: {
             opacity: "0",
@@ -103,6 +113,7 @@ export default {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "glow-pulse": "glow-pulse 2s ease-in-out infinite",
+        "icon-pulse": "icon-pulse 2s ease-in-out infinite",
         "slide-in": "slide-in 0.5s ease-out",
       },
     },
