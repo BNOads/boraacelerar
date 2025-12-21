@@ -88,14 +88,8 @@ export default function Navegador() {
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <div>
-<<<<<<< HEAD
-            <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
-              <Compass className="h-8 w-8 text-secondary" strokeWidth={1.5} />
-              Navegador
-=======
             <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
               🤝 Navegador
->>>>>>> 486f461a9dafad709f4a63825cc535b9b4f24deb
             </h1>
             <p className="text-muted-foreground">
               Seu time de suporte está aqui para te ajudar a acelerar ainda mais!
