@@ -83,7 +83,7 @@ export function AppSidebar() {
         )}
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-white">Navegação</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-sidebar-foreground/70">Navegação</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems
@@ -95,8 +95,8 @@ export function AppSidebar() {
                         to={item.url}
                         className={({ isActive }) =>
                           isActive
-                            ? "bg-secondary text-secondary-foreground font-semibold rounded-lg border-l-4 border-primary [&>svg]:text-primary pl-3 shadow-lg"
-                            : "text-sidebar-foreground [&>svg]:text-muted-foreground hover:bg-secondary/20 hover:text-sidebar-foreground rounded-lg transition-colors pl-4"
+                            ? "flex items-center gap-2 bg-secondary text-white font-semibold rounded-lg border-l-4 border-primary pl-3 py-2 shadow-lg"
+                            : "flex items-center gap-2 text-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors pl-4 py-2"
                         }
                       >
                         <item.icon className="h-5 w-5 transition-colors" strokeWidth={1.5} />
@@ -156,8 +156,8 @@ export function AppSidebar() {
                   to="/configuracoes"
                   className={({ isActive }) =>
                     isActive
-                      ? "bg-secondary text-secondary-foreground font-semibold rounded-lg border-l-4 border-primary [&>svg]:text-primary pl-3 shadow-lg"
-                      : "text-sidebar-foreground [&>svg]:text-muted-foreground hover:bg-secondary/20 hover:text-sidebar-foreground rounded-lg transition-colors pl-4"
+                      ? "flex items-center gap-2 bg-secondary text-white font-semibold rounded-lg border-l-4 border-primary pl-3 py-2 shadow-lg"
+                      : "flex items-center gap-2 text-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors pl-4 py-2"
                     }
                 >
                   <Settings className="h-5 w-5 transition-colors" strokeWidth={1.5} />
@@ -166,7 +166,7 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton onClick={handleLogout} className="text-sidebar-foreground [&>svg]:text-muted-foreground hover:bg-secondary/20 hover:text-sidebar-foreground rounded-lg transition-colors pl-4">
+              <SidebarMenuButton onClick={handleLogout} className="flex items-center gap-2 text-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors pl-4 py-2">
                 <LogOut className="h-5 w-5 transition-colors" strokeWidth={1.5} />
                 {state !== "collapsed" && <span>Sair</span>}
               </SidebarMenuButton>
