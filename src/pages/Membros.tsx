@@ -162,12 +162,11 @@ export default function Membros() {
       <Tabs defaultValue="gravacoes" className="space-y-6">
         <TabsList className="bg-card/50 border border-border">
           <TabsTrigger value="gravacoes">Minhas Gravações</TabsTrigger>
-          <TabsTrigger value="conteudo">Meu Conteúdo</TabsTrigger>
+          <TabsTrigger value="agentes-ia">Agentes de IA</TabsTrigger>
           <TabsTrigger value="posto-ipiranga">
             <span className="mr-2">⛽️</span>
             Posto Ipiranga
           </TabsTrigger>
-          <TabsTrigger value="recomendacoes">Recomendações</TabsTrigger>
         </TabsList>
 
         <TabsContent value="gravacoes" className="space-y-6">
@@ -310,56 +309,168 @@ export default function Membros() {
           </div>
         </TabsContent>
 
-        <TabsContent value="conteudo" className="space-y-4">
-          {loadingConteudo ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
-            </div>
-          ) : filteredConteudo && filteredConteudo.length > 0 ? (
-            <div className="grid gap-4 md:grid-cols-2">
-              {filteredConteudo.map((conteudo) => (
-                <Card
-                  key={conteudo.id}
-                  className="border-border bg-card/50 backdrop-blur-sm hover:shadow-elegant transition-all duration-300"
-                >
-                  <CardHeader>
-                    <div className="flex items-start justify-between gap-2">
-                      <CardTitle className="text-lg">{conteudo.titulo}</CardTitle>
-                      <Badge variant="outline" className="shrink-0">
-                        {conteudo.tipo}
-                      </Badge>
-                    </div>
-                    {conteudo.descricao && (
-                      <CardDescription>{conteudo.descricao}</CardDescription>
-                    )}
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {conteudo.pilar && (
-                      <Badge className="bg-primary/10 text-primary">
-                        {conteudo.pilar}
-                      </Badge>
-                    )}
-                    <Button
-                      className="w-full bg-primary hover:bg-primary/90"
-                      onClick={() => window.open(conteudo.url, "_blank")}
-                    >
-                      <FileText className="mr-2 h-4 w-4" />
-                      Acessar Conteúdo
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Card className="border-border bg-card/50">
-              <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                <FileText className="h-16 w-16 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">
-                  Nenhum conteúdo direcionado no momento.
-                </p>
-              </CardContent>
-            </Card>
-          )}
+        <TabsContent value="agentes-ia">
+          <Card className="border-border bg-card/50">
+            <CardHeader>
+              <div>
+                <CardTitle className="flex items-center gap-2">🤖 Agentes de IA</CardTitle>
+                <CardDescription>
+                  Coleção de agentes para apoiar metas, precificação, posicionamento, marketing, vendas, projetos e obras.
+                </CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <h4 className="font-semibold">🤖 Agentes de suporte para auxiliar na criação de Metas</h4>
+                <ul className="mt-2 space-y-1 list-none">
+                  <li>
+                    <a href="https://chatgpt.com/g/g-693d3dfde064819191ec396762e96ee8-mba-metas-pessoais-2026" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                      Metas pessoais
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://chatgpt.com/g/g-693d7baae68c8191a4ab4ed1639edd65-mba-metas-para-escritorios-e-construtora" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                      Metas do negócio
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-semibold">🤖 Agentes de suporte para auxiliar na Precificação</h4>
+                <ul className="mt-2 space-y-1 list-none">
+                  <li>
+                    <a href="https://chatgpt.com/g/g-68753f363fb0819183e161707647d548-boranaobra-calculadora-da-hora-do-escritorio" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                      Calculadora de custo/hora do escritório
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://chatgpt.com/g/g-68754d3406ac81918d8d55840722d725-boranaobra-precificacao-de-projeto" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                      Calculadora de valor de Projeto
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://chatgpt.com/g/g-68754de919808191a4dca447e904b99f-mba-precificador-evf" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                      Calculadora de valor de EVF
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://chatgpt.com/g/g-687552be41a08191993b9ad7a0ed2705-mba-precificador-de-custo-fixo-de-obra" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                      Calculadora de valor fixo mensal de Obra
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-semibold">🤖 Agentes para trabalhar o Posicionamento</h4>
+                <ul className="mt-2 space-y-1 list-none">
+                  <li>
+                    <a href="https://chatgpt.com/g/g-686451db18a48191b82471c2e12b423c-mba-posicionamento-estrategico" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                      Posicionamento pessoal
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://chatgpt.com/g/g-6891ed5302a0819181dd2eef80557650-mba-posicionamento-empresarial" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                      Agente de posicionamento de estratégia da empresa
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-semibold">🤖 Agente de suporte para facilitar o Marketing</h4>
+                <ul className="mt-2 space-y-1 list-none">
+                  <li>
+                    <a href="https://chatgpt.com/g/g-6864770bdb0c819193664fc8e6dbec06-mba-organizador-de-perfil-profissional" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                      Organizador de perfil profissional (bio e posts fixados)
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://chatgpt.com/g/g-6839cc7005f88191aa6b98d1c0f95a11-ace-agente-de-producao-de-conteudo" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                      Produção de Conteúdo
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://chatgpt.com/g/g-68be3d13a8ec8191ae908402c4e7cdaa-mba-producao-de-conteudo-c1-c2-e-c3" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                      Produção de conteúdo (c1, c2, c3)
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-semibold">🤖 Agente de suporte para facilitar nas Vendas</h4>
+                <ul className="mt-2 space-y-1 list-none">
+                  <li>
+                    <a href="https://chatgpt.com/g/g-6875a39fea8c819181846aca5aea3057-mba-construtor-de-jornada-do-cliente" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                      Criação da Jornada do Cliente
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://chatgpt.com/g/g-684d572390cc8191a7362c85d163e0da-ace-criacao-de-campanhas-de-vendas-conteudo" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                      Estruturação de Campanhas de Vendas
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://chatgpt.com/g/g-68759980cf488191bdc3adb7c3af7688-mba-assistente-de-caixa-rapido" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                      Estratégia de Caixa Rápido
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://chatgpt.com/g/g-6874fca635348191a595871bb3e11ffd-mba-assistente-de-proposta-irresistivel" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                      Criação da Proposta Irresistível
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-semibold">🤖 Agente de suporte para facilitar o desenvolvimento de Projetos</h4>
+                <ul className="mt-2 space-y-1 list-none">
+                  <li>
+                    <a href="https://chatgpt.com/g/g-68408938b23481918104237904e496ba-boranaobra-renderizador-de-projetos" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                      Renderizador de projetos
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-semibold">🤖 Agente de suporte para facilitar o desenvolvimento das Obras</h4>
+                <ul className="mt-2 space-y-1 list-none">
+                  <li>
+                    <a href="https://chatgpt.com/g/g-xfw2K2cNJ-agente-profissional-de-campo" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                      Agente profissional de campo
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://chatgpt.com/g/g-6734b4dd282c81908061652f23285871-agente-de-planejamento-de-obra/" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                      Agente de planejamento de obra
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Posto Ipiranga Tab */}
@@ -473,16 +584,7 @@ export default function Membros() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="recomendacoes">
-          <Card className="border-border bg-card/50">
-            <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-              <FileText className="h-16 w-16 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">
-                Sistema de recomendações em desenvolvimento.
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
+        {/* recomendacoes removida — agora consolidado na aba "Agentes de IA" */}
       </Tabs>
 
       <EditarPostoIpirangaDialog
