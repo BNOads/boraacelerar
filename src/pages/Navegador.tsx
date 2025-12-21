@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MessageCircle, Mail, User, Clock, Edit } from "lucide-react";
+import { MessageCircle, Mail, User, Clock, Edit, Compass } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { AdminNavegadorDialog } from "@/components/AdminNavegadorDialog";
@@ -88,8 +88,9 @@ export default function Navegador() {
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-              🤝 Navegador
+            <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
+              <Compass className="h-8 w-8 text-primary" strokeWidth={1.5} />
+              Navegador
             </h1>
             <p className="text-muted-foreground">
               Seu time de suporte está aqui para te ajudar a acelerar ainda mais!
@@ -165,7 +166,7 @@ export default function Navegador() {
                     {nav.ativo && <SolicitarAtendimentoDialog navegadorId={nav.id} />}
                     {nav.whatsapp_url && (
                       <Button
-                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
+                        className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground font-semibold"
                         onClick={() => window.open(nav.whatsapp_url, "_blank")}
                       >
                         <MessageCircle className="mr-2 h-4 w-4" />

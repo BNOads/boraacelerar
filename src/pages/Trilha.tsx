@@ -65,7 +65,7 @@ export default function Trilha() {
     <div className="space-y-8 animate-slide-in">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <BookOpen className="h-8 w-8 text-primary" />
+          <BookOpen className="h-8 w-8 text-secondary" strokeWidth={1.5} />
           <div>
             <h1 className="text-4xl font-bold text-foreground">Trilha & Conteúdo</h1>
             <p className="text-muted-foreground text-lg">
@@ -103,7 +103,7 @@ export default function Trilha() {
               {pilarItems.map((item) => (
                 <Card 
                   key={item.id} 
-                  className="hover:scale-105 transition-transform duration-300 border-border bg-card shadow-card hover:shadow-glow"
+                  className="hover:scale-105 transition-transform duration-300 border-border bg-card shadow-card"
                 >
                   {item.thumbnail_url && (
                     <div className="h-40 overflow-hidden rounded-t-lg bg-muted">
@@ -128,7 +128,7 @@ export default function Trilha() {
                     )}
                     {item.url && (
                       <Button 
-                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                        className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
                         onClick={() => window.open(item.url!, '_blank')}
                       >
                         <ExternalLink className="h-4 w-4 mr-2" />

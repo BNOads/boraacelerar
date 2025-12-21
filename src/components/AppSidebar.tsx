@@ -1,4 +1,4 @@
-import { Home, BookOpen, TrendingUp, Trophy, Calendar, Video, Users as UsersIcon, Link as LinkIcon, Settings, LogOut, User, Users, Bell, Store, Target } from "lucide-react";
+import { Home, BookOpen, TrendingUp, Settings, LogOut, User, Users, Target, Compass, Link2, ShoppingBag, UserCheck } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
@@ -28,11 +28,11 @@ const menuItems = [
   { title: "Trilha & Conteúdo", url: "/trilha", icon: BookOpen },
   { title: "Painel de Controle", url: "/resultados", icon: TrendingUp },
   { title: "Metas", url: "/metas", icon: Target },
-  { title: "Área de Membros", url: "/membros", icon: Video },
-  { title: "Navegador", url: "/navegador", icon: UsersIcon },
-  { title: "Links Úteis", url: "/links", icon: LinkIcon },
-  { title: "Loja", url: "/loja", icon: Store },
-  { title: "Mentorados", url: "/mentorados", icon: Users, adminOnly: true },
+  { title: "Área de Membros", url: "/membros", icon: Users },
+  { title: "Navegador", url: "/navegador", icon: Compass },
+  { title: "Links Úteis", url: "/links", icon: Link2 },
+  { title: "Loja", url: "/loja", icon: ShoppingBag },
+  { title: "Mentorados", url: "/mentorados", icon: UserCheck, adminOnly: true },
 ];
 
 export function AppSidebar() {
@@ -73,11 +73,11 @@ export function AppSidebar() {
     <Sidebar className={state === "collapsed" ? "w-14" : "w-60"} collapsible="icon">
       <SidebarContent className="bg-sidebar">
         {state !== "collapsed" && (
-          <div className="p-6 flex justify-center">
+          <div className="p-3 flex justify-center">
             <img
               src={theme === "light" ? logoLight : logo}
               alt="BORA Acelerar"
-              className="h-32 w-auto"
+              className="h-24 w-auto"
             />
           </div>
         )}
@@ -91,15 +91,15 @@ export function AppSidebar() {
                 .map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
-                      <NavLink 
-                        to={item.url} 
+                      <NavLink
+                        to={item.url}
                         className={({ isActive }) =>
-                          isActive 
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium hover:bg-sidebar-accent/80 border-l-4 border-primary" 
-                            : "text-sidebar-foreground hover:bg-sidebar-accent/50 border-l-4 border-transparent"
+                          isActive
+                            ? "bg-secondary/30 text-black font-semibold rounded-r-lg border-l-4 border-secondary [&>svg]:text-secondary pl-3 shadow-md"
+                            : "text-black [&>svg]:text-gray-600 hover:bg-gray-200/30 hover:text-black [&>svg]:hover:text-gray-700 rounded-lg transition-colors pl-4"
                         }
                       >
-                        <item.icon className="h-4 w-4" />
+                        <item.icon className="h-5 w-5 transition-colors" strokeWidth={1.5} />
                         {state !== "collapsed" && <span>{item.title}</span>}
                       </NavLink>
                     </SidebarMenuButton>
@@ -151,23 +151,23 @@ export function AppSidebar() {
 
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild className="hover:text-sidebar-foreground">
-                <NavLink 
-                  to="/configuracoes" 
+              <SidebarMenuButton asChild>
+                <NavLink
+                  to="/configuracoes"
                   className={({ isActive }) =>
-                    isActive 
-                      ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium hover:bg-sidebar-accent/80 border-l-4 border-primary" 
-                      : "text-sidebar-foreground hover:bg-sidebar-accent/50 border-l-4 border-transparent"
-                  }
+                    isActive
+                      ? "bg-secondary/30 text-black font-semibold rounded-r-lg border-l-4 border-secondary [&>svg]:text-secondary pl-3 shadow-md"
+                      : "text-black [&>svg]:text-gray-600 hover:bg-gray-200/30 hover:text-black [&>svg]:hover:text-gray-700 rounded-lg transition-colors pl-4"
+                    }
                 >
-                  <Settings className="h-4 w-4" />
+                  <Settings className="h-5 w-5 transition-colors" strokeWidth={1.5} />
                   {state !== "collapsed" && <span>Configurações</span>}
                 </NavLink>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton onClick={handleLogout} className="text-sidebar-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50">
-                <LogOut className="h-4 w-4" />
+              <SidebarMenuButton onClick={handleLogout} className="text-black [&>svg]:text-gray-600 hover:bg-gray-200/30 hover:text-black [&>svg]:hover:text-gray-700 rounded-lg transition-colors pl-4">
+                <LogOut className="h-5 w-5 transition-colors" strokeWidth={1.5} />
                 {state !== "collapsed" && <span>Sair</span>}
               </SidebarMenuButton>
             </SidebarMenuItem>

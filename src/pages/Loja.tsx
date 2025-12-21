@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Package, ShoppingCart, Edit } from "lucide-react";
+import { Package, ShoppingCart, Edit, ShoppingBag, BookOpen, Shirt, Backpack, Coffee } from "lucide-react";
 import { AdminProdutoDialog } from "@/components/AdminProdutoDialog";
 import { EditarProdutoDialog } from "@/components/EditarProdutoDialog";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -127,7 +127,7 @@ export default function Loja() {
               {produto.url_compra && (
                 <Button
                   size="sm"
-                  className="w-full bg-primary hover:bg-primary/90 h-7 text-[10px]"
+                  className="w-full bg-secondary hover:bg-secondary/90 h-7 text-[10px]"
                   onClick={(e) => {
                     e.stopPropagation();
                     window.open(produto.url_compra, "_blank");
@@ -149,8 +149,9 @@ export default function Loja() {
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-              🛍️ Loja BORA
+            <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
+              <ShoppingBag className="h-8 w-8 text-primary" strokeWidth={1.5} />
+              Loja BORA
             </h1>
             <p className="text-muted-foreground">
               Produtos exclusivos para acelerar sua jornada empreendedora
@@ -163,10 +164,10 @@ export default function Loja() {
       <Tabs defaultValue="todas" className="space-y-6">
         <TabsList className="grid grid-cols-5 w-full">
           <TabsTrigger value="todas">Todas</TabsTrigger>
-          <TabsTrigger value="livros">📚 Livros</TabsTrigger>
-          <TabsTrigger value="vestuario">👕 Vestuário</TabsTrigger>
-          <TabsTrigger value="acessorios">🎒 Acessórios</TabsTrigger>
-          <TabsTrigger value="canecas">☕ Canecas</TabsTrigger>
+          <TabsTrigger value="livros" className="flex items-center gap-1"><BookOpen className="h-4 w-4" strokeWidth={1.5} /> Livros</TabsTrigger>
+          <TabsTrigger value="vestuario" className="flex items-center gap-1"><Shirt className="h-4 w-4" strokeWidth={1.5} /> Vestuário</TabsTrigger>
+          <TabsTrigger value="acessorios" className="flex items-center gap-1"><Backpack className="h-4 w-4" strokeWidth={1.5} /> Acessórios</TabsTrigger>
+          <TabsTrigger value="canecas" className="flex items-center gap-1"><Coffee className="h-4 w-4" strokeWidth={1.5} /> Canecas</TabsTrigger>
         </TabsList>
 
         <TabsContent value="todas" className="space-y-4">

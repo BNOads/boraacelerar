@@ -23,7 +23,8 @@ All colors MUST be HSL.
     --primary-foreground: 0 0% 4%;
     --primary-glow: 51 100% 60%;
 
-    --secondary: 0 0% 15%;
+    /* Secondary = Azul Petróleo #1B4D5C */
+    --secondary: 193 57% 24%;
     --secondary-foreground: 0 0% 100%;
 
     --muted: 0 0% 12%;
@@ -75,8 +76,9 @@ All colors MUST be HSL.
     --primary-foreground: 0 0% 4%;
     --primary-glow: 51 100% 60%;
 
-    --secondary: 0 0% 92%;
-    --secondary-foreground: 0 0% 5%;
+    /* Secondary = Azul Petróleo #1B4D5C */
+    --secondary: 193 57% 24%;
+    --secondary-foreground: 0 0% 100%;
 
     --muted: 0 0% 94%;
     --muted-foreground: 0 0% 30%;
@@ -116,5 +118,25 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Esconder scrollbars mantendo funcionalidade */
+  /* Webkit (Chrome, Safari, Edge) */
+  *::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: transparent;
+  }
+
+  /* Firefox */
+  * {
+    scrollbar-width: none;
   }
 }

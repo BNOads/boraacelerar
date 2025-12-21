@@ -132,7 +132,7 @@ export default function Agenda() {
                   </div>
                   {encontro.link_zoom && (
                     <Button
-                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
+                      className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground font-semibold"
                       onClick={() => window.open(encontro.link_zoom, "_blank")}
                     >
                       <Video className="mr-2 h-4 w-4" />

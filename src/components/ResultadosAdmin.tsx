@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
 import { TrendingUp, Users, CheckCircle, Target, ArrowUpDown, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { AtividadeMentoradosCard } from "./AtividadeMentoradosCard";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -283,7 +284,7 @@ export function ResultadosAdmin() {
     return (
       <div className="space-y-6 animate-slide-in">
         <div className="flex items-center gap-3">
-          <TrendingUp className="h-8 w-8 text-primary" />
+          <TrendingUp className="h-8 w-8 text-primary" strokeWidth={1.5} />
           <h1 className="text-4xl font-bold text-foreground">Painel Administrativo - Resultados</h1>
         </div>
         
@@ -307,7 +308,7 @@ export function ResultadosAdmin() {
   return (
     <div className="space-y-6 animate-slide-in">
       <div className="flex items-center gap-3">
-        <TrendingUp className="h-8 w-8 text-primary" />
+        <TrendingUp className="h-8 w-8 text-primary" strokeWidth={1.5} />
         <div>
           <h1 className="text-4xl font-bold text-foreground">Painel Administrativo - Resultados</h1>
           <p className="text-muted-foreground text-lg">Visão consolidada de performance de todos os mentorados</p>
@@ -445,6 +446,9 @@ export function ResultadosAdmin() {
           </Card>
         </div>
       )}
+
+      {/* Atividade dos Mentorados */}
+      <AtividadeMentoradosCard />
 
       {/* Filtros e Busca */}
       <Card className="border-border bg-card shadow-card">
