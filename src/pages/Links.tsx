@@ -95,11 +95,7 @@ export default function Links() {
               </CardHeader>
               <CardContent>
                 <Button
-<<<<<<< HEAD
-                  className="w-full bg-secondary hover:bg-secondary/90 text-white"
-=======
-                  className="w-full bg-primary hover:bg-primary/90"
->>>>>>> 486f461a9dafad709f4a63825cc535b9b4f24deb
+                  className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
                   onClick={() => window.open(link.url_zoom, "_blank")}
                 >
                   Acessar

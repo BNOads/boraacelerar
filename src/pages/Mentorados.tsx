@@ -142,14 +142,8 @@ export default function Mentorados() {
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <div>
-<<<<<<< HEAD
-            <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
-              <Users className="h-8 w-8 text-secondary" strokeWidth={1.5} />
-              Gerenciar Usuários
-=======
             <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
               👥 Gerenciar Usuários
->>>>>>> 486f461a9dafad709f4a63825cc535b9b4f24deb
             </h1>
             <p className="text-muted-foreground">
               Adicione novos usuários e gerencie informações dos mentorados

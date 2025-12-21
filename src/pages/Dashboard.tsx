@@ -204,11 +204,7 @@ export default function Dashboard() {
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-card to-card/50 border border-border rounded-lg p-8 shadow-glow">
         <div className="flex items-center gap-3 mb-2">
-<<<<<<< HEAD
           <Rocket className="h-8 w-8 text-secondary" strokeWidth={1.5} />
-=======
-          <Rocket className="h-8 w-8 text-primary animate-glow-pulse" />
->>>>>>> 486f461a9dafad709f4a63825cc535b9b4f24deb
           <h1 className="text-4xl font-bold text-foreground">
             Bem-vindo(a), {profile?.apelido || profile?.nome_completo?.split(' ')[0]}! 🚀
           </h1>

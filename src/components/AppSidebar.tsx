@@ -94,15 +94,9 @@ export function AppSidebar() {
                       <NavLink 
                         to={item.url} 
                         className={({ isActive }) =>
-<<<<<<< HEAD
                           isActive
-                            ? "bg-secondary/30 text-black dark:text-white font-semibold rounded-r-lg border-l-4 border-secondary [&>svg]:text-secondary pl-3 shadow-md"
-                            : "text-black dark:text-white [&>svg]:text-gray-600 dark:[&>svg]:text-gray-400 hover:bg-gray-200/30 dark:hover:bg-gray-700/30 hover:text-black dark:hover:text-white [&>svg]:hover:text-gray-700 dark:[&>svg]:hover:text-gray-300 rounded-lg transition-colors pl-4"
-=======
-                          isActive 
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium hover:bg-sidebar-accent/80 border-l-4 border-primary" 
-                            : "text-sidebar-foreground hover:bg-sidebar-accent/50 border-l-4 border-transparent"
->>>>>>> 486f461a9dafad709f4a63825cc535b9b4f24deb
+                            ? "bg-secondary/30 text-foreground font-semibold rounded-r-lg border-l-4 border-secondary [&>svg]:text-secondary pl-3 shadow-md"
+                            : "text-foreground [&>svg]:text-muted-foreground hover:bg-muted/30 hover:text-foreground [&>svg]:hover:text-foreground rounded-lg transition-colors pl-4"
                         }
                       >
                         <item.icon className="h-4 w-4" />
@@ -161,17 +155,10 @@ export function AppSidebar() {
                 <NavLink 
                   to="/configuracoes" 
                   className={({ isActive }) =>
-<<<<<<< HEAD
                     isActive
-                      ? "bg-secondary/30 text-black dark:text-white font-semibold rounded-r-lg border-l-4 border-secondary [&>svg]:text-secondary pl-3 shadow-md"
-                      : "text-black dark:text-white [&>svg]:text-gray-600 dark:[&>svg]:text-gray-400 hover:bg-gray-200/30 dark:hover:bg-gray-700/30 hover:text-black dark:hover:text-white [&>svg]:hover:text-gray-700 dark:[&>svg]:hover:text-gray-300 rounded-lg transition-colors pl-4"
-                    }
-=======
-                    isActive 
-                      ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium hover:bg-sidebar-accent/80 border-l-4 border-primary" 
-                      : "text-sidebar-foreground hover:bg-sidebar-accent/50 border-l-4 border-transparent"
+                      ? "bg-secondary/30 text-foreground font-semibold rounded-r-lg border-l-4 border-secondary [&>svg]:text-secondary pl-3 shadow-md"
+                      : "text-foreground [&>svg]:text-muted-foreground hover:bg-muted/30 hover:text-foreground [&>svg]:hover:text-foreground rounded-lg transition-colors pl-4"
                   }
->>>>>>> 486f461a9dafad709f4a63825cc535b9b4f24deb
                 >
                   <Settings className="h-4 w-4" />
                   {state !== "collapsed" && <span>Configurações</span>}
@@ -179,13 +166,8 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-<<<<<<< HEAD
-              <SidebarMenuButton onClick={handleLogout} className="text-black dark:text-white [&>svg]:text-gray-600 dark:[&>svg]:text-gray-400 hover:bg-gray-200/30 dark:hover:bg-gray-700/30 hover:text-black dark:hover:text-white [&>svg]:hover:text-gray-700 dark:[&>svg]:hover:text-gray-300 rounded-lg transition-colors pl-4">
+              <SidebarMenuButton onClick={handleLogout} className="text-foreground [&>svg]:text-muted-foreground hover:bg-muted/30 hover:text-foreground [&>svg]:hover:text-foreground rounded-lg transition-colors pl-4">
                 <LogOut className="h-5 w-5 transition-colors" strokeWidth={1.5} />
-=======
-              <SidebarMenuButton onClick={handleLogout} className="text-sidebar-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50">
-                <LogOut className="h-4 w-4" />
->>>>>>> 486f461a9dafad709f4a63825cc535b9b4f24deb
                 {state !== "collapsed" && <span>Sair</span>}
               </SidebarMenuButton>
             </SidebarMenuItem>
