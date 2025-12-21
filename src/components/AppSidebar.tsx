@@ -95,8 +95,8 @@ export function AppSidebar() {
                         to={item.url} 
                         className={({ isActive }) =>
                           isActive
-                            ? "bg-primary/20 text-primary font-semibold rounded-r-lg border-l-4 border-primary [&>svg]:text-primary pl-3 shadow-md"
-                            : "text-sidebar-foreground [&>svg]:text-sidebar-foreground hover:bg-primary/10 hover:text-primary [&>svg]:hover:text-primary rounded-lg transition-colors pl-4"
+                            ? "bg-primary/15 text-primary font-semibold rounded-r-lg border-l-4 border-primary [&>svg]:text-primary [&>svg]:scale-110 [&>svg]:drop-shadow-[0_0_6px_hsl(195,65%,45%)] pl-3 shadow-[inset_0_0_20px_rgba(59,130,146,0.1)] transition-all duration-300"
+                            : "text-sidebar-foreground [&>svg]:text-sidebar-foreground hover:bg-primary/10 hover:text-primary [&>svg]:hover:text-primary [&>svg]:transition-all [&>svg]:duration-200 rounded-lg transition-all duration-200 pl-4"
                         }
                       >
                         <item.icon className="h-4 w-4" />
@@ -156,8 +156,8 @@ export function AppSidebar() {
                   to="/configuracoes" 
                   className={({ isActive }) =>
                     isActive
-                      ? "bg-primary/20 text-primary font-semibold rounded-r-lg border-l-4 border-primary [&>svg]:text-primary pl-3 shadow-md"
-                      : "text-sidebar-foreground [&>svg]:text-sidebar-foreground hover:bg-primary/10 hover:text-primary [&>svg]:hover:text-primary rounded-lg transition-colors pl-4"
+                      ? "bg-primary/15 text-primary font-semibold rounded-r-lg border-l-4 border-primary [&>svg]:text-primary [&>svg]:scale-110 [&>svg]:drop-shadow-[0_0_6px_hsl(195,65%,45%)] pl-3 shadow-[inset_0_0_20px_rgba(59,130,146,0.1)] transition-all duration-300"
+                      : "text-sidebar-foreground [&>svg]:text-sidebar-foreground hover:bg-primary/10 hover:text-primary [&>svg]:hover:text-primary [&>svg]:transition-all [&>svg]:duration-200 rounded-lg transition-all duration-200 pl-4"
                   }
                 >
                   <Settings className="h-4 w-4" />
@@ -166,7 +166,7 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton onClick={handleLogout} className="text-sidebar-foreground [&>svg]:text-sidebar-foreground hover:bg-primary/10 hover:text-primary [&>svg]:hover:text-primary rounded-lg transition-colors pl-4">
+              <SidebarMenuButton onClick={handleLogout} className="text-sidebar-foreground [&>svg]:text-sidebar-foreground hover:bg-primary/10 hover:text-primary [&>svg]:hover:text-primary [&>svg]:transition-all [&>svg]:duration-200 rounded-lg transition-all duration-200 pl-4">
                 <LogOut className="h-5 w-5 transition-colors" strokeWidth={1.5} />
                 {state !== "collapsed" && <span>Sair</span>}
               </SidebarMenuButton>
