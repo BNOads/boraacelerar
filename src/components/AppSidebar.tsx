@@ -91,12 +91,12 @@ export function AppSidebar() {
                 .map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
-                      <NavLink
+                    <NavLink
                         to={item.url}
                         className={({ isActive }) =>
                           isActive
-                            ? "bg-secondary/30 text-black font-semibold rounded-r-lg border-l-4 border-secondary [&>svg]:text-secondary pl-3 shadow-md"
-                            : "text-black [&>svg]:text-gray-600 hover:bg-gray-200/30 hover:text-black [&>svg]:hover:text-gray-700 rounded-lg transition-colors pl-4"
+                            ? "bg-secondary text-secondary-foreground font-semibold rounded-lg border-l-4 border-primary [&>svg]:text-primary pl-3 shadow-lg"
+                            : "text-sidebar-foreground [&>svg]:text-muted-foreground hover:bg-secondary/20 hover:text-sidebar-foreground rounded-lg transition-colors pl-4"
                         }
                       >
                         <item.icon className="h-5 w-5 transition-colors" strokeWidth={1.5} />
@@ -156,8 +156,8 @@ export function AppSidebar() {
                   to="/configuracoes"
                   className={({ isActive }) =>
                     isActive
-                      ? "bg-secondary/30 text-black font-semibold rounded-r-lg border-l-4 border-secondary [&>svg]:text-secondary pl-3 shadow-md"
-                      : "text-black [&>svg]:text-gray-600 hover:bg-gray-200/30 hover:text-black [&>svg]:hover:text-gray-700 rounded-lg transition-colors pl-4"
+                      ? "bg-secondary text-secondary-foreground font-semibold rounded-lg border-l-4 border-primary [&>svg]:text-primary pl-3 shadow-lg"
+                      : "text-sidebar-foreground [&>svg]:text-muted-foreground hover:bg-secondary/20 hover:text-sidebar-foreground rounded-lg transition-colors pl-4"
                     }
                 >
                   <Settings className="h-5 w-5 transition-colors" strokeWidth={1.5} />
@@ -166,7 +166,7 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton onClick={handleLogout} className="text-black [&>svg]:text-gray-600 hover:bg-gray-200/30 hover:text-black [&>svg]:hover:text-gray-700 rounded-lg transition-colors pl-4">
+              <SidebarMenuButton onClick={handleLogout} className="text-sidebar-foreground [&>svg]:text-muted-foreground hover:bg-secondary/20 hover:text-sidebar-foreground rounded-lg transition-colors pl-4">
                 <LogOut className="h-5 w-5 transition-colors" strokeWidth={1.5} />
                 {state !== "collapsed" && <span>Sair</span>}
               </SidebarMenuButton>
