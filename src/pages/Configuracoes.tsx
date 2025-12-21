@@ -255,7 +255,7 @@ export default function Configuracoes() {
             <div className="relative group">
               <Avatar className="h-20 w-20 border-4 border-primary/20">
                 <AvatarImage src={userData.profile?.foto_url} />
-                <AvatarFallback className="bg-primary/10 text-primary text-2xl">
+                <AvatarFallback className="bg-secondary/10 text-secondary text-2xl">
                   {userData.profile?.nome_completo?.charAt(0) || <User className="h-8 w-8" />}
                 </AvatarFallback>
               </Avatar>
@@ -363,7 +363,7 @@ export default function Configuracoes() {
           {isEditing && (
             <div className="flex gap-3">
               <Button
-                className="flex-1 bg-primary hover:bg-primary/90"
+                className="flex-1 bg-secondary hover:bg-secondary/90"
                 onClick={handleSave}
                 disabled={updateProfileMutation.isPending}
               >
@@ -478,7 +478,7 @@ export default function Configuracoes() {
 
             <div className="flex gap-3 pt-2">
               <Button
-                className="flex-1 bg-primary hover:bg-primary/90"
+                className="flex-1 bg-secondary hover:bg-secondary/90"
                 onClick={() => changePasswordMutation.mutate(passwordData)}
                 disabled={
                   changePasswordMutation.isPending ||
@@ -522,7 +522,7 @@ export default function Configuracoes() {
               <Button
                 variant={theme === "dark" ? "default" : "outline"}
                 onClick={() => setTheme("dark")}
-                className={theme === "dark" ? "bg-primary hover:bg-primary/90" : ""}
+                className={theme === "dark" ? "bg-secondary hover:bg-secondary/90 text-white" : ""}
               >
                 <Moon className="mr-2 h-4 w-4" />
                 Modo Escuro
@@ -530,7 +530,7 @@ export default function Configuracoes() {
               <Button
                 variant={theme === "light" ? "default" : "outline"}
                 onClick={() => setTheme("light")}
-                className={theme === "light" ? "bg-primary hover:bg-primary/90" : ""}
+                className={theme === "light" ? "bg-secondary hover:bg-secondary/90 text-white" : ""}
               >
                 <Sun className="mr-2 h-4 w-4" />
                 Modo Claro

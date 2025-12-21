@@ -217,7 +217,7 @@ export default function MentoradoProfile() {
             <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
               <Avatar className="h-32 w-32 border-4 border-primary/20">
                 <AvatarImage src={mentorado.profiles?.foto_url} />
-                <AvatarFallback className="bg-primary/10 text-primary text-3xl">
+                <AvatarFallback className="bg-secondary/10 text-secondary text-3xl">
                   {mentorado.profiles?.nome_completo?.charAt(0) || <User className="h-16 w-16" />}
                 </AvatarFallback>
               </Avatar>
@@ -284,7 +284,7 @@ export default function MentoradoProfile() {
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Faturamento Total
               </CardTitle>
-              <TrendingUp className="h-4 w-4 text-primary" />
+              <TrendingUp className="h-4 w-4 text-secondary" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-foreground">
@@ -310,7 +310,7 @@ export default function MentoradoProfile() {
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Meta Clientes
               </CardTitle>
-              <Target className="h-4 w-4 text-primary" />
+              <Target className="h-4 w-4 text-secondary" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-foreground">
@@ -395,7 +395,7 @@ export default function MentoradoProfile() {
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="text-sm font-bold text-primary">
+                            <p className="text-sm font-bold text-secondary">
                               R$ {Number(d.faturamento_mensal || 0).toLocaleString("pt-BR")}
                             </p>
                             {d.meta_mensal && (
@@ -665,7 +665,7 @@ export default function MentoradoProfile() {
                           })}
                         </p>
                         {atendimento.avaliacao && (
-                          <div className="flex items-center gap-1 text-xs text-primary">
+                          <div className="flex items-center gap-1 text-xs text-secondary">
                             <span>{"⭐".repeat(atendimento.avaliacao)}</span>
                           </div>
                         )}

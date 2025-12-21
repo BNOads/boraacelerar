@@ -71,7 +71,7 @@ export function AdminTrilhaDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-primary hover:bg-primary/90">
+        <Button className="bg-secondary hover:bg-secondary/90">
           <Plus className="mr-2 h-4 w-4" />
           Adicionar Conteúdo
         </Button>
@@ -169,7 +169,7 @@ export function AdminTrilhaDialog() {
 
         <div className="flex gap-3">
           <Button
-            className="flex-1 bg-primary hover:bg-primary/90"
+            className="flex-1 bg-secondary hover:bg-secondary/90"
             onClick={() => addItemMutation.mutate(formData)}
             disabled={!formData.titulo || !formData.pilar || !formData.tipo || addItemMutation.isPending}
           >

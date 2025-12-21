@@ -83,7 +83,7 @@ export function AdminCriarUsuarioDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-primary hover:bg-primary/90">
+        <Button className="bg-secondary hover:bg-secondary/90">
           <UserPlus className="mr-2 h-4 w-4" />
           Criar Novo Usuário
         </Button>
@@ -236,7 +236,7 @@ export function AdminCriarUsuarioDialog() {
 
         <div className="flex gap-3 pt-4">
           <Button
-            className="flex-1 bg-primary hover:bg-primary/90"
+            className="flex-1 bg-secondary hover:bg-secondary/90"
             onClick={() => criarUsuarioMutation.mutate()}
             disabled={
               !formData.email ||

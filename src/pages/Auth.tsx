@@ -200,7 +200,7 @@ export default function Auth() {
             <button
               type="button"
               onClick={handleResetPassword}
-              className="text-xs text-muted-foreground hover:text-primary transition-colors"
+              className="text-xs text-muted-foreground hover:text-secondary transition-colors"
             >
               Esqueci minha senha
             </button>

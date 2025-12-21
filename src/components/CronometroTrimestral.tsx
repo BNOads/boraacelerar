@@ -29,7 +29,7 @@ const PILARES = [
 const getCorNota = (nota: number) => {
   if (nota >= 90) return "bg-green-100 text-green-800 border-green-300";
   if (nota >= 70) return "bg-blue-100 text-blue-800 border-blue-300";
-  if (nota >= 50) return "bg-yellow-100 text-yellow-800 border-yellow-300";
+  if (nota >= 50) return "bg-secondary/20 text-secondary border-secondary/30";
   if (nota >= 30) return "bg-orange-100 text-orange-800 border-orange-300";
   return "bg-red-100 text-red-800 border-red-300";
 };
@@ -238,7 +238,7 @@ export function CronometroTrimestral({ mentoradoId }: { mentoradoId: string }) {
             70-90: Muito bom
           </span>
           <span className="flex items-center gap-1">
-            <div className="w-4 h-4 bg-yellow-100 border-2 border-yellow-300 rounded" />
+            <div className="w-4 h-4 bg-secondary/20 border-2 border-secondary rounded" />
             50-70: Mediano
           </span>
           <span className="flex items-center gap-1">

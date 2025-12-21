@@ -167,7 +167,7 @@ export default function Dashboard() {
     if (days === 0) {
       return <Badge className="bg-green-500 text-white font-bold">HOJE!</Badge>;
     } else if (days === 1) {
-      return <Badge className="bg-yellow-500 text-white font-bold">AMANHÃ</Badge>;
+      return <Badge className="bg-secondary text-white font-bold">AMANHÃ</Badge>;
     } else if (days <= 7) {
       return <Badge variant="outline" className="font-semibold">{days} dias</Badge>;
     } else {
@@ -204,7 +204,7 @@ export default function Dashboard() {
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-card to-card/50 border border-border rounded-lg p-8 shadow-card">
         <div className="flex items-center gap-3 mb-2">
-          <Rocket className="h-8 w-8 text-primary" strokeWidth={1.5} />
+          <Rocket className="h-8 w-8 text-secondary" strokeWidth={1.5} />
           <h1 className="text-4xl font-bold text-foreground">
             Bem-vindo(a), {profile?.apelido || profile?.nome_completo?.split(' ')[0]}! 🚀
           </h1>
@@ -222,18 +222,18 @@ export default function Dashboard() {
         <Card className="border-border bg-card shadow-card">
           <CardHeader>
             <CardTitle className="text-2xl text-foreground flex items-center gap-2">
-              <Users className="h-6 w-6 text-primary" />
+              <Users className="h-6 w-6 text-secondary" />
               Estatísticas da Mentoria
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="text-center p-6 bg-muted/30 rounded-lg">
-                <p className="text-4xl font-bold text-primary mb-2">{adminStats.total_mentorados}</p>
+                <p className="text-4xl font-bold text-secondary mb-2">{adminStats.total_mentorados}</p>
                 <p className="text-sm text-muted-foreground">Mentorados Ativos</p>
               </div>
               <div className="text-center p-6 bg-muted/30 rounded-lg">
-                <p className="text-4xl font-bold text-primary mb-2">
+                <p className="text-4xl font-bold text-secondary mb-2">
                   R$ {adminStats.faturamento_acumulado_total.toLocaleString('pt-BR', {
                 minimumFractionDigits: 2
               })}
@@ -257,8 +257,8 @@ export default function Dashboard() {
       <Card className="border-border bg-card shadow-card">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Calendar className="h-6 w-6 text-primary" />
+            <div className="flex items-center gap-4">
+              <Calendar className="h-6 w-6 text-secondary" />
               <CardTitle className="text-foreground">Agenda de Mentorias</CardTitle>
             </div>
             <div className="flex items-center gap-2">

@@ -44,7 +44,7 @@ interface MetricasMensais {
 const faixas: FaixaPremiacao[] = [
   { nome: "Bronze", min: 10000, max: 24999, cor: "bg-amber-700", emoji: "🥉" },
   { nome: "Prata", min: 25000, max: 49999, cor: "bg-slate-400", emoji: "🥈" },
-  { nome: "Ouro", min: 50000, max: 99999, cor: "bg-yellow-500", emoji: "🥇" },
+  { nome: "Ouro", min: 50000, max: 99999, cor: "bg-secondary", emoji: "🥇" },
   { nome: "Platina", min: 100000, max: 249999, cor: "bg-cyan-400", emoji: "💎" },
   { nome: "Diamante", min: 250000, max: null, cor: "bg-blue-600", emoji: "💠" },
 ];
@@ -472,7 +472,7 @@ export default function Resultados() {
                 key={faixa.nome}
                 className={`p-3 rounded-lg text-center border-2 ${
                   faixa.nome === faixaAtual.nome 
-                    ? 'border-primary bg-primary/10' 
+                    ? 'border-secondary bg-secondary/10' 
                     : 'border-border bg-muted/30'
                 }`}
               >

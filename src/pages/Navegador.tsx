@@ -89,7 +89,7 @@ export default function Navegador() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
-              <Compass className="h-8 w-8 text-primary" strokeWidth={1.5} />
+              <Compass className="h-8 w-8 text-secondary" strokeWidth={1.5} />
               Navegador
             </h1>
             <p className="text-muted-foreground">
@@ -142,7 +142,7 @@ export default function Navegador() {
                     <div className="flex justify-center mb-4">
                       <Avatar className="h-24 w-24 border-4 border-primary/20">
                         <AvatarImage src={fotoUrl || ""} alt={nome} />
-                        <AvatarFallback className="bg-primary/10 text-primary text-2xl">
+                        <AvatarFallback className="bg-secondary/10 text-secondary text-2xl">
                           {nome.charAt(0) || <User className="h-8 w-8" />}
                         </AvatarFallback>
                       </Avatar>
@@ -151,7 +151,7 @@ export default function Navegador() {
                       {nome}
                     </CardTitle>
                     {nav.cargo && (
-                      <CardDescription className="font-medium text-primary">
+                      <CardDescription className="font-medium text-secondary">
                         {nav.cargo}
                       </CardDescription>
                     )}

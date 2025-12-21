@@ -378,11 +378,11 @@ export function AdminImportarMentoradosCompleto() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Total de Linhas</p>
-                  <p className="text-2xl font-bold text-primary">{previewStats.totalLinhas}</p>
+                  <p className="text-2xl font-bold text-secondary">{previewStats.totalLinhas}</p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Mentorados Únicos</p>
-                  <p className="text-2xl font-bold text-primary">{previewStats.mentoradosUnicos}</p>
+                  <p className="text-2xl font-bold text-secondary">{previewStats.mentoradosUnicos}</p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Primeiro Período</p>
@@ -512,7 +512,7 @@ export function AdminImportarMentoradosCompleto() {
                               result.status === "success"
                                 ? "text-green-600"
                                 : result.status === "warning"
-                                ? "text-yellow-600"
+                                ? "text-secondary"
                                 : "text-red-600"
                             }
                           >

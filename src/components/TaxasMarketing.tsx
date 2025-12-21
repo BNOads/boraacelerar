@@ -243,7 +243,7 @@ export function TaxasMarketing({ mentoradoId }: { mentoradoId: string | null }) 
       <Card className="border-border bg-card shadow-card">
         <CardHeader>
           <div className="flex items-center gap-3">
-            <Target className="h-6 w-6 text-primary" />
+            <Target className="h-6 w-6 text-secondary" />
             <div>
               <CardTitle className="text-foreground">
                 {editingId ? "Editar Métrica de Marketing" : "Registrar Métrica de Marketing"}

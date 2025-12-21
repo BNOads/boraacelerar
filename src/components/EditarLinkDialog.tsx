@@ -145,7 +145,7 @@ export function EditarLinkDialog({ link, open, onOpenChange }: EditarLinkDialogP
 
           <div className="flex gap-3">
             <Button
-              className="flex-1 bg-primary hover:bg-primary/90"
+              className="flex-1 bg-secondary hover:bg-secondary/90 text-white"
               onClick={() => updateLinkMutation.mutate()}
               disabled={!formData.titulo || !formData.url_zoom || updateLinkMutation.isPending}
             >

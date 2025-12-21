@@ -130,7 +130,7 @@ export function EstatisticasNavegadorDialog({ navegadorId, navegadorNome }: Esta
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center gap-1">
-                    <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                    <Star className="h-5 w-5 fill-secondary text-secondary" />
                     <span className="text-2xl font-bold">{stats.mediaAvaliacao}</span>
                     <span className="text-sm text-muted-foreground">({stats.totalAvaliacoes})</span>
                   </div>

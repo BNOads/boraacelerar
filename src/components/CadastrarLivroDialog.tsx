@@ -61,7 +61,7 @@ export function CadastrarLivroDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-primary hover:bg-primary/90">
+        <Button className="bg-secondary hover:bg-secondary/90">
           <Plus className="mr-2 h-4 w-4" />
           Cadastrar Livro
         </Button>

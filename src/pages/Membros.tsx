@@ -130,7 +130,7 @@ export default function Membros() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
-              <Users className="h-8 w-8 text-primary" strokeWidth={1.5} />
+              <Users className="h-8 w-8 text-secondary" strokeWidth={1.5} />
               Área de Membros
             </h1>
             <p className="text-muted-foreground">
@@ -199,7 +199,7 @@ export default function Membros() {
                       )}
                       <Button
                         size="icon"
-                        className="absolute bottom-2 right-2 bg-secondary hover:bg-secondary/90"
+                        className="absolute bottom-2 right-2 bg-secondary hover:bg-secondary/90 text-white"
                         onClick={() => window.open(gravacao.url_video, "_blank")}
                       >
                         <Play className="h-4 w-4" />
@@ -268,7 +268,7 @@ export default function Membros() {
                       )}
                       <Button
                         size="icon"
-                        className="absolute bottom-2 right-2 bg-secondary hover:bg-secondary/90"
+                        className="absolute bottom-2 right-2 bg-secondary hover:bg-secondary/90 text-white"
                         onClick={() => window.open(gravacao.url_video, "_blank")}
                       >
                         <Play className="h-4 w-4" />
@@ -325,13 +325,13 @@ export default function Membros() {
                 <h4 className="font-semibold">🤖 Agentes de suporte para auxiliar na criação de Metas</h4>
                 <ul className="mt-2 space-y-1 list-none">
                   <li>
-                    <a href="https://chatgpt.com/g/g-693d3dfde064819191ec396762e96ee8-mba-metas-pessoais-2026" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                    <a href="https://chatgpt.com/g/g-693d3dfde064819191ec396762e96ee8-mba-metas-pessoais-2026" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
                       Metas pessoais
                       <ExternalLink className="h-4 w-4" />
                     </a>
                   </li>
                   <li>
-                    <a href="https://chatgpt.com/g/g-693d7baae68c8191a4ab4ed1639edd65-mba-metas-para-escritorios-e-construtora" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                    <a href="https://chatgpt.com/g/g-693d7baae68c8191a4ab4ed1639edd65-mba-metas-para-escritorios-e-construtora" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
                       Metas do negócio
                       <ExternalLink className="h-4 w-4" />
                     </a>
@@ -343,25 +343,25 @@ export default function Membros() {
                 <h4 className="font-semibold">🤖 Agentes de suporte para auxiliar na Precificação</h4>
                 <ul className="mt-2 space-y-1 list-none">
                   <li>
-                    <a href="https://chatgpt.com/g/g-68753f363fb0819183e161707647d548-boranaobra-calculadora-da-hora-do-escritorio" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                    <a href="https://chatgpt.com/g/g-68753f363fb0819183e161707647d548-boranaobra-calculadora-da-hora-do-escritorio" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
                       Calculadora de custo/hora do escritório
                       <ExternalLink className="h-4 w-4" />
                     </a>
                   </li>
                   <li>
-                    <a href="https://chatgpt.com/g/g-68754d3406ac81918d8d55840722d725-boranaobra-precificacao-de-projeto" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                    <a href="https://chatgpt.com/g/g-68754d3406ac81918d8d55840722d725-boranaobra-precificacao-de-projeto" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
                       Calculadora de valor de Projeto
                       <ExternalLink className="h-4 w-4" />
                     </a>
                   </li>
                   <li>
-                    <a href="https://chatgpt.com/g/g-68754de919808191a4dca447e904b99f-mba-precificador-evf" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                    <a href="https://chatgpt.com/g/g-68754de919808191a4dca447e904b99f-mba-precificador-evf" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
                       Calculadora de valor de EVF
                       <ExternalLink className="h-4 w-4" />
                     </a>
                   </li>
                   <li>
-                    <a href="https://chatgpt.com/g/g-687552be41a08191993b9ad7a0ed2705-mba-precificador-de-custo-fixo-de-obra" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                    <a href="https://chatgpt.com/g/g-687552be41a08191993b9ad7a0ed2705-mba-precificador-de-custo-fixo-de-obra" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
                       Calculadora de valor fixo mensal de Obra
                       <ExternalLink className="h-4 w-4" />
                     </a>
@@ -373,13 +373,13 @@ export default function Membros() {
                 <h4 className="font-semibold">🤖 Agentes para trabalhar o Posicionamento</h4>
                 <ul className="mt-2 space-y-1 list-none">
                   <li>
-                    <a href="https://chatgpt.com/g/g-686451db18a48191b82471c2e12b423c-mba-posicionamento-estrategico" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                    <a href="https://chatgpt.com/g/g-686451db18a48191b82471c2e12b423c-mba-posicionamento-estrategico" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
                       Posicionamento pessoal
                       <ExternalLink className="h-4 w-4" />
                     </a>
                   </li>
                   <li>
-                    <a href="https://chatgpt.com/g/g-6891ed5302a0819181dd2eef80557650-mba-posicionamento-empresarial" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                    <a href="https://chatgpt.com/g/g-6891ed5302a0819181dd2eef80557650-mba-posicionamento-empresarial" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
                       Agente de posicionamento de estratégia da empresa
                       <ExternalLink className="h-4 w-4" />
                     </a>
@@ -391,19 +391,19 @@ export default function Membros() {
                 <h4 className="font-semibold">🤖 Agente de suporte para facilitar o Marketing</h4>
                 <ul className="mt-2 space-y-1 list-none">
                   <li>
-                    <a href="https://chatgpt.com/g/g-6864770bdb0c819193664fc8e6dbec06-mba-organizador-de-perfil-profissional" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                    <a href="https://chatgpt.com/g/g-6864770bdb0c819193664fc8e6dbec06-mba-organizador-de-perfil-profissional" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
                       Organizador de perfil profissional (bio e posts fixados)
                       <ExternalLink className="h-4 w-4" />
                     </a>
                   </li>
                   <li>
-                    <a href="https://chatgpt.com/g/g-6839cc7005f88191aa6b98d1c0f95a11-ace-agente-de-producao-de-conteudo" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                    <a href="https://chatgpt.com/g/g-6839cc7005f88191aa6b98d1c0f95a11-ace-agente-de-producao-de-conteudo" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
                       Produção de Conteúdo
                       <ExternalLink className="h-4 w-4" />
                     </a>
                   </li>
                   <li>
-                    <a href="https://chatgpt.com/g/g-68be3d13a8ec8191ae908402c4e7cdaa-mba-producao-de-conteudo-c1-c2-e-c3" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                    <a href="https://chatgpt.com/g/g-68be3d13a8ec8191ae908402c4e7cdaa-mba-producao-de-conteudo-c1-c2-e-c3" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
                       Produção de conteúdo (c1, c2, c3)
                       <ExternalLink className="h-4 w-4" />
                     </a>
@@ -415,25 +415,25 @@ export default function Membros() {
                 <h4 className="font-semibold">🤖 Agente de suporte para facilitar nas Vendas</h4>
                 <ul className="mt-2 space-y-1 list-none">
                   <li>
-                    <a href="https://chatgpt.com/g/g-6875a39fea8c819181846aca5aea3057-mba-construtor-de-jornada-do-cliente" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                    <a href="https://chatgpt.com/g/g-6875a39fea8c819181846aca5aea3057-mba-construtor-de-jornada-do-cliente" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
                       Criação da Jornada do Cliente
                       <ExternalLink className="h-4 w-4" />
                     </a>
                   </li>
                   <li>
-                    <a href="https://chatgpt.com/g/g-684d572390cc8191a7362c85d163e0da-ace-criacao-de-campanhas-de-vendas-conteudo" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                    <a href="https://chatgpt.com/g/g-684d572390cc8191a7362c85d163e0da-ace-criacao-de-campanhas-de-vendas-conteudo" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
                       Estruturação de Campanhas de Vendas
                       <ExternalLink className="h-4 w-4" />
                     </a>
                   </li>
                   <li>
-                    <a href="https://chatgpt.com/g/g-68759980cf488191bdc3adb7c3af7688-mba-assistente-de-caixa-rapido" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                    <a href="https://chatgpt.com/g/g-68759980cf488191bdc3adb7c3af7688-mba-assistente-de-caixa-rapido" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
                       Estratégia de Caixa Rápido
                       <ExternalLink className="h-4 w-4" />
                     </a>
                   </li>
                   <li>
-                    <a href="https://chatgpt.com/g/g-6874fca635348191a595871bb3e11ffd-mba-assistente-de-proposta-irresistivel" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                    <a href="https://chatgpt.com/g/g-6874fca635348191a595871bb3e11ffd-mba-assistente-de-proposta-irresistivel" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
                       Criação da Proposta Irresistível
                       <ExternalLink className="h-4 w-4" />
                     </a>
@@ -445,7 +445,7 @@ export default function Membros() {
                 <h4 className="font-semibold">🤖 Agente de suporte para facilitar o desenvolvimento de Projetos</h4>
                 <ul className="mt-2 space-y-1 list-none">
                   <li>
-                    <a href="https://chatgpt.com/g/g-68408938b23481918104237904e496ba-boranaobra-renderizador-de-projetos" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                    <a href="https://chatgpt.com/g/g-68408938b23481918104237904e496ba-boranaobra-renderizador-de-projetos" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
                       Renderizador de projetos
                       <ExternalLink className="h-4 w-4" />
                     </a>
@@ -457,13 +457,13 @@ export default function Membros() {
                 <h4 className="font-semibold">🤖 Agente de suporte para facilitar o desenvolvimento das Obras</h4>
                 <ul className="mt-2 space-y-1 list-none">
                   <li>
-                    <a href="https://chatgpt.com/g/g-xfw2K2cNJ-agente-profissional-de-campo" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                    <a href="https://chatgpt.com/g/g-xfw2K2cNJ-agente-profissional-de-campo" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
                       Agente profissional de campo
                       <ExternalLink className="h-4 w-4" />
                     </a>
                   </li>
                   <li>
-                    <a href="https://chatgpt.com/g/g-6734b4dd282c81908061652f23285871-agente-de-planejamento-de-obra/" target="_blank" rel="noopener noreferrer" className="text-primary inline-flex items-center gap-2">
+                    <a href="https://chatgpt.com/g/g-6734b4dd282c81908061652f23285871-agente-de-planejamento-de-obra/" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
                       Agente de planejamento de obra
                       <ExternalLink className="h-4 w-4" />
                     </a>
@@ -540,7 +540,7 @@ export default function Membros() {
                                        href={link.url}
                                        target="_blank"
                                        rel="noopener noreferrer"
-                                       className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
+                                       className="inline-flex items-center gap-2 text-sm text-secondary hover:underline"
                                      >
                                        Acessar recurso
                                        <ExternalLink className="h-4 w-4" />

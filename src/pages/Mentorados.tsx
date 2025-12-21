@@ -143,7 +143,7 @@ export default function Mentorados() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
-              <Users className="h-8 w-8 text-primary" strokeWidth={1.5} />
+              <Users className="h-8 w-8 text-secondary" strokeWidth={1.5} />
               Gerenciar Usuários
             </h1>
             <p className="text-muted-foreground">
@@ -182,7 +182,7 @@ export default function Mentorados() {
               <div className="flex items-start gap-4">
                 <Avatar className="h-16 w-16 border-2 border-primary/20">
                   <AvatarImage src={mentorado.profiles?.foto_url} />
-                  <AvatarFallback className="bg-primary/10 text-primary">
+                  <AvatarFallback className="bg-secondary/10 text-secondary">
                     {mentorado.profiles?.nome_completo?.charAt(0) || <User className="h-6 w-6" />}
                   </AvatarFallback>
                 </Avatar>

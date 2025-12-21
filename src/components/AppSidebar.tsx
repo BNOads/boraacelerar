@@ -95,8 +95,8 @@ export function AppSidebar() {
                         to={item.url}
                         className={({ isActive }) =>
                           isActive
-                            ? "bg-secondary/30 text-black font-semibold rounded-r-lg border-l-4 border-secondary [&>svg]:text-secondary pl-3 shadow-md"
-                            : "text-black [&>svg]:text-gray-600 hover:bg-gray-200/30 hover:text-black [&>svg]:hover:text-gray-700 rounded-lg transition-colors pl-4"
+                            ? "bg-secondary/30 text-black dark:text-white font-semibold rounded-r-lg border-l-4 border-secondary [&>svg]:text-secondary pl-3 shadow-md"
+                            : "text-black dark:text-white [&>svg]:text-gray-600 dark:[&>svg]:text-gray-400 hover:bg-gray-200/30 dark:hover:bg-gray-700/30 hover:text-black dark:hover:text-white [&>svg]:hover:text-gray-700 dark:[&>svg]:hover:text-gray-300 rounded-lg transition-colors pl-4"
                         }
                       >
                         <item.icon className="h-5 w-5 transition-colors" strokeWidth={1.5} />
@@ -114,9 +114,9 @@ export function AppSidebar() {
           {state !== "collapsed" && userData?.profile && (
             <div className="p-4 border-b border-sidebar-border">
               <div className="flex items-center gap-3">
-                <Avatar className="h-10 w-10 border-2 border-primary/20">
+                <Avatar className="h-10 w-10 border-2 border-secondary/20">
                   <AvatarImage src={userData.profile.foto_url} alt={userData.profile.nome_completo} />
-                  <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                  <AvatarFallback className="bg-secondary/10 text-secondary text-sm">
                     {userData.profile.nome_completo?.charAt(0) || <User className="h-4 w-4" />}
                   </AvatarFallback>
                 </Avatar>
@@ -140,9 +140,9 @@ export function AppSidebar() {
           {/* Avatar mini quando colapsado */}
           {state === "collapsed" && userData?.profile && (
             <div className="p-2 border-b border-sidebar-border flex justify-center">
-              <Avatar className="h-8 w-8 border-2 border-primary/20">
+              <Avatar className="h-8 w-8 border-2 border-secondary/20">
                 <AvatarImage src={userData.profile.foto_url} alt={userData.profile.nome_completo} />
-                <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                <AvatarFallback className="bg-secondary/10 text-secondary text-xs">
                   {userData.profile.nome_completo?.charAt(0) || <User className="h-3 w-3" />}
                 </AvatarFallback>
               </Avatar>
@@ -156,8 +156,8 @@ export function AppSidebar() {
                   to="/configuracoes"
                   className={({ isActive }) =>
                     isActive
-                      ? "bg-secondary/30 text-black font-semibold rounded-r-lg border-l-4 border-secondary [&>svg]:text-secondary pl-3 shadow-md"
-                      : "text-black [&>svg]:text-gray-600 hover:bg-gray-200/30 hover:text-black [&>svg]:hover:text-gray-700 rounded-lg transition-colors pl-4"
+                      ? "bg-secondary/30 text-black dark:text-white font-semibold rounded-r-lg border-l-4 border-secondary [&>svg]:text-secondary pl-3 shadow-md"
+                      : "text-black dark:text-white [&>svg]:text-gray-600 dark:[&>svg]:text-gray-400 hover:bg-gray-200/30 dark:hover:bg-gray-700/30 hover:text-black dark:hover:text-white [&>svg]:hover:text-gray-700 dark:[&>svg]:hover:text-gray-300 rounded-lg transition-colors pl-4"
                     }
                 >
                   <Settings className="h-5 w-5 transition-colors" strokeWidth={1.5} />
@@ -166,7 +166,7 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton onClick={handleLogout} className="text-black [&>svg]:text-gray-600 hover:bg-gray-200/30 hover:text-black [&>svg]:hover:text-gray-700 rounded-lg transition-colors pl-4">
+              <SidebarMenuButton onClick={handleLogout} className="text-black dark:text-white [&>svg]:text-gray-600 dark:[&>svg]:text-gray-400 hover:bg-gray-200/30 dark:hover:bg-gray-700/30 hover:text-black dark:hover:text-white [&>svg]:hover:text-gray-700 dark:[&>svg]:hover:text-gray-300 rounded-lg transition-colors pl-4">
                 <LogOut className="h-5 w-5 transition-colors" strokeWidth={1.5} />
                 {state !== "collapsed" && <span>Sair</span>}
               </SidebarMenuButton>

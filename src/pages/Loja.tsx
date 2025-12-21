@@ -127,7 +127,7 @@ export default function Loja() {
               {produto.url_compra && (
                 <Button
                   size="sm"
-                  className="w-full bg-secondary hover:bg-secondary/90 h-7 text-[10px]"
+                  className="w-full bg-secondary hover:bg-secondary/90 h-7 text-[10px] text-white"
                   onClick={(e) => {
                     e.stopPropagation();
                     window.open(produto.url_compra, "_blank");
@@ -150,7 +150,7 @@ export default function Loja() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
-              <ShoppingBag className="h-8 w-8 text-primary" strokeWidth={1.5} />
+              <ShoppingBag className="h-8 w-8 text-secondary" strokeWidth={1.5} />
               Loja BORA
             </h1>
             <p className="text-muted-foreground">

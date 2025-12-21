@@ -10,7 +10,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <AppSidebar />
         <div className="flex-1 flex flex-col">
           <header className="h-14 border-b border-border flex items-center justify-between px-4 bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-            <SidebarTrigger className="text-primary" />
+            <SidebarTrigger className="text-secondary" />
             <NotificationBell />
           </header>
           <main className="flex-1 p-6">

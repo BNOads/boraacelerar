@@ -279,7 +279,7 @@ export function EditarNavegadorDialog({ navegador, open, onOpenChange }: EditarN
 
           <div className="flex gap-3">
             <Button
-              className="flex-1 bg-primary hover:bg-primary/90"
+              className="flex-1 bg-secondary hover:bg-secondary/90"
               onClick={() => updateNavegadorMutation.mutate()}
               disabled={!formData.cargo || updateNavegadorMutation.isPending}
             >

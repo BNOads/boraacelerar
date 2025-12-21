@@ -24,7 +24,7 @@ export default function Agenda() {
     if (days === 0) {
       return <Badge className="bg-green-500 text-white font-bold">HOJE!</Badge>;
     } else if (days === 1) {
-      return <Badge className="bg-yellow-500 text-white font-bold">AMANHÃ</Badge>;
+      return <Badge className="bg-secondary text-white font-bold">AMANHÃ</Badge>;
     } else if (days <= 7) {
       return <Badge variant="outline" className="font-semibold">{days} dias</Badge>;
     } else {
@@ -106,7 +106,7 @@ export default function Agenda() {
                     </CardTitle>
                     <div className="flex gap-2 shrink-0">
                       {getCountdownBadge(daysUntil)}
-                      <span className="px-2 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full">
+                      <span className="px-2 py-1 text-xs font-medium bg-secondary/10 text-secondary rounded-full">
                         {encontro.tipo}
                       </span>
                     </div>

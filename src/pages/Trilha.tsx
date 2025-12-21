@@ -19,12 +19,12 @@ interface TrilhaItem {
 }
 
 const pilarColors: Record<string, string> = {
-  Empreendedor: "bg-primary/20 text-primary",
+  Empreendedor: "bg-secondary/20 text-secondary",
   Estruturação: "bg-blue-500/20 text-blue-400",
   Marketing: "bg-green-500/20 text-green-400",
   Vendas: "bg-red-500/20 text-red-400",
   Gestão: "bg-purple-500/20 text-purple-400",
-  Finanças: "bg-yellow-500/20 text-yellow-400",
+  Finanças: "bg-secondary/20 text-secondary",
 };
 
 export default function Trilha() {

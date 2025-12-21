@@ -114,7 +114,7 @@ export default function Metas() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
-            <Target className="h-8 w-8 text-primary" strokeWidth={1.5} />
+            <Target className="h-8 w-8 text-secondary" strokeWidth={1.5} />
             Metas e Resultados Chave
           </h1>
           <p className="text-muted-foreground">
@@ -123,7 +123,7 @@ export default function Metas() {
         </div>
         <Button
           onClick={() => setDialogNovaMetaAberto(true)}
-          className="bg-primary hover:bg-primary/90"
+          className="bg-secondary hover:bg-secondary/90 text-white"
         >
           <Plus className="mr-2 h-4 w-4" />
           Nova Meta

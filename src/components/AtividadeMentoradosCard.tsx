@@ -208,7 +208,7 @@ export function AtividadeMentoradosCard() {
       <CardHeader>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3">
-            <Activity className="h-6 w-6 text-primary" />
+            <Activity className="h-6 w-6 text-secondary" />
             <CardTitle className="text-foreground">Atividade dos Mentorados</CardTitle>
           </div>
           <Select value={selectedDate} onValueChange={handleMonthChange}>

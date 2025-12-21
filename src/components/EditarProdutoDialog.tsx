@@ -206,7 +206,7 @@ export function EditarProdutoDialog({
 
           <div className="flex gap-3">
             <Button
-              className="flex-1 bg-primary hover:bg-primary/90"
+              className="flex-1 bg-secondary hover:bg-secondary/90"
               onClick={() => updateProdutoMutation.mutate()}
               disabled={!formData.nome || !formData.categoria || updateProdutoMutation.isPending}
             >

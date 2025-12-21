@@ -44,7 +44,7 @@ type SortOrder = 'asc' | 'desc';
 const faixas = [
   { nome: "Bronze", min: 10000, max: 24999, cor: "bg-amber-700", emoji: "🥉" },
   { nome: "Prata", min: 25000, max: 49999, cor: "bg-slate-400", emoji: "🥈" },
-  { nome: "Ouro", min: 50000, max: 99999, cor: "bg-yellow-500", emoji: "🥇" },
+  { nome: "Ouro", min: 50000, max: 99999, cor: "bg-secondary", emoji: "🥇" },
   { nome: "Platina", min: 100000, max: 249999, cor: "bg-cyan-400", emoji: "💎" },
   { nome: "Diamante", min: 250000, max: null, cor: "bg-blue-600", emoji: "💠" },
 ];
@@ -58,7 +58,7 @@ const determinarFaixa = (faturamentoMedio: number) => {
 const getPerformanceColor = (valor: number): string => {
   if (valor >= 90) return "text-blue-500";
   if (valor >= 75) return "text-green-500";
-  if (valor >= 50) return "text-yellow-500";
+  if (valor >= 50) return "text-secondary";
   return "text-red-500";
 };
 
