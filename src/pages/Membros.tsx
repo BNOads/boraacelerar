@@ -17,6 +17,7 @@ import { EditarEncontroGravadoDialog } from "@/components/EditarEncontroGravadoD
 import { EditarConteudoDialog } from "@/components/EditarConteudoDialog";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { getVideoThumbnail } from "@/lib/videoUtils";
+import logoBora from "@/assets/logo-bora.png";
 
 const TIPOS_FILTRO = ["Todos", "Hotseat", "Implementação", "Mentoria", "Análise Temática", "Imersões com Convidados"] as const;
 
@@ -262,8 +263,8 @@ export default function Membros() {
                             {thumbnail ? (
                               <img src={thumbnail} alt={gravacao.titulo} className="w-full h-full object-cover" />
                             ) : (
-                              <div className="flex items-center justify-center h-full">
-                                <Video className="h-12 w-12 text-muted-foreground" />
+                              <div className="flex items-center justify-center h-full bg-card p-4">
+                                <img src={logoBora} alt="Logo" className="max-h-full max-w-full object-contain opacity-60" />
                               </div>
                             )}
                             <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 transition-opacity">
@@ -326,8 +327,8 @@ export default function Membros() {
                           {thumb ? (
                             <img src={thumb} alt={conteudo.titulo} className="w-full h-full object-cover" />
                           ) : (
-                            <div className="flex items-center justify-center h-full">
-                              <FileText className="h-12 w-12 text-muted-foreground" />
+                            <div className="flex items-center justify-center h-full bg-card p-4">
+                              <img src={logoBora} alt="Logo" className="max-h-full max-w-full object-contain opacity-60" />
                             </div>
                           )}
                           <div className="absolute inset-0 flex items-center justify-center bg-black/20">
@@ -405,8 +406,8 @@ export default function Membros() {
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <div className="flex items-center justify-center h-full">
-                              <Video className="h-12 w-12 text-muted-foreground" />
+                            <div className="flex items-center justify-center h-full bg-card p-4">
+                              <img src={logoBora} alt="Logo" className="max-h-full max-w-full object-contain opacity-60" />
                             </div>
                           )}
                           <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 transition-opacity">
@@ -481,8 +482,8 @@ export default function Membros() {
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <div className="flex items-center justify-center h-full">
-                              <Video className="h-12 w-12 text-muted-foreground" />
+                            <div className="flex items-center justify-center h-full bg-card p-4">
+                              <img src={logoBora} alt="Logo" className="max-h-full max-w-full object-contain opacity-60" />
                             </div>
                           )}
                           <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 transition-opacity">
