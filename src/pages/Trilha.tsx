@@ -6,24 +6,12 @@ import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
-import { ExternalLink, BookOpen, Calendar, Eye, CheckCircle2, Clock, Target } from "lucide-react";
-import { AdminTrilhaDialog } from "@/components/AdminTrilhaDialog";
-import { AdminImportarTrilhaDialog } from "@/components/AdminImportarTrilhaDialog";
+import { BookOpen, Calendar, Eye, CheckCircle2, Clock, Target } from "lucide-react";
 import { AdminTrilhaMentoradoDialog } from "@/components/AdminTrilhaMentoradoDialog";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { useNavigate } from "react-router-dom";
 import { differenceInDays, parseISO, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-
-interface TrilhaItem {
-  id: string;
-  pilar: string;
-  tipo: string;
-  titulo: string;
-  descricao: string | null;
-  url: string | null;
-  thumbnail_url: string | null;
-}
 
 interface TrilhaMentorado {
   id: string;
@@ -44,17 +32,7 @@ interface TrilhaMentorado {
   itens_trilha: { id: string; concluido: boolean }[];
 }
 
-const pilarColors: Record<string, string> = {
-  Empreendedor: "bg-secondary/20 text-secondary",
-  Estruturação: "bg-blue-500/20 text-blue-400",
-  Marketing: "bg-green-500/20 text-green-400",
-  Vendas: "bg-red-500/20 text-red-400",
-  Gestão: "bg-purple-500/20 text-purple-400",
-  Finanças: "bg-secondary/20 text-secondary",
-};
-
 export default function Trilha() {
-  const [items, setItems] = useState<TrilhaItem[]>([]);
   const [trilhasMentorados, setTrilhasMentorados] = useState<TrilhaMentorado[]>([]);
   const [minhasTrilhas, setMinhasTrilhas] = useState<TrilhaMentorado[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,21 +41,9 @@ export default function Trilha() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchTrilha();
     fetchTrilhasMentorados();
     fetchMinhasTrilhas();
   }, []);
-
-  const fetchTrilha = async () => {
-    const { data } = await supabase
-      .from("trilha_aceleracao")
-      .select("*")
-      .order("pilar", { ascending: true })
-      .order("ordem", { ascending: true });
-
-    setItems(data || []);
-    setLoading(false);
-  };
 
   const fetchTrilhasMentorados = async () => {
     const { data } = await supabase
@@ -96,6 +62,7 @@ export default function Trilha() {
       .order("created_at", { ascending: false });
 
     setTrilhasMentorados(data || []);
+    setLoading(false);
   };
 
   const fetchMinhasTrilhas = async () => {
@@ -140,12 +107,6 @@ export default function Trilha() {
     );
   }
 
-  const groupedByPilar = items.reduce((acc, item) => {
-    if (!acc[item.pilar]) acc[item.pilar] = [];
-    acc[item.pilar].push(item);
-    return acc;
-  }, {} as Record<string, TrilhaItem[]>);
-
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "concluida":
@@ -189,19 +150,14 @@ export default function Trilha() {
           </div>
         </div>
         {isAdmin && (
-          <div className="flex gap-2">
-            <AdminImportarTrilhaDialog />
-            <AdminTrilhaDialog />
-            <AdminTrilhaMentoradoDialog onSuccess={() => { fetchTrilhasMentorados(); fetchMinhasTrilhas(); }} />
-          </div>
+          <AdminTrilhaMentoradoDialog onSuccess={() => { fetchTrilhasMentorados(); fetchMinhasTrilhas(); }} />
         )}
       </div>
 
-      <Tabs defaultValue={mentoradoId && !isAdmin ? "minhas" : isAdmin ? "mentorados" : "conteudo"} className="space-y-6">
+      <Tabs defaultValue={mentoradoId && !isAdmin ? "minhas" : "mentorados"} className="space-y-6">
         <TabsList>
           {mentoradoId && <TabsTrigger value="minhas">Minhas Trilhas</TabsTrigger>}
           {isAdmin && <TabsTrigger value="mentorados">Trilhas dos Mentorados</TabsTrigger>}
-          <TabsTrigger value="conteudo">Conteúdo Geral</TabsTrigger>
         </TabsList>
 
         {/* Seção Minhas Trilhas - para mentorados */}
@@ -410,48 +366,6 @@ export default function Trilha() {
           </TabsContent>
         )}
 
-        <TabsContent value="conteudo" className="space-y-6">
-          {Object.keys(groupedByPilar).length === 0 ? (
-            <Card className="border-border bg-card">
-              <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground">Nenhum conteúdo disponível no momento.</p>
-              </CardContent>
-            </Card>
-          ) : (
-            Object.entries(groupedByPilar).map(([pilar, pilarItems]) => (
-              <div key={pilar} className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <Badge className={pilarColors[pilar] || "bg-muted text-muted-foreground"}>{pilar}</Badge>
-                  <h2 className="text-2xl font-bold text-foreground">{pilar}</h2>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {pilarItems.map((item) => (
-                    <Card key={item.id} className="hover:scale-105 transition-transform border-border bg-card shadow-card">
-                      {item.thumbnail_url && (
-                        <div className="h-40 overflow-hidden rounded-t-lg bg-muted">
-                          <img src={item.thumbnail_url} alt={item.titulo} className="w-full h-full object-cover" />
-                        </div>
-                      )}
-                      <CardHeader>
-                        <Badge variant="outline" className="w-fit mb-2">{item.tipo}</Badge>
-                        <CardTitle className="text-lg text-foreground">{item.titulo}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        {item.descricao && <p className="text-sm text-muted-foreground mb-4 line-clamp-3">{item.descricao}</p>}
-                        {item.url && (
-                          <Button className="w-full" onClick={() => window.open(item.url!, '_blank')}>
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            Acessar
-                          </Button>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            ))
-          )}
-        </TabsContent>
       </Tabs>
     </div>
   );
