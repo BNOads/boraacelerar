@@ -28,6 +28,7 @@ interface GravacaoIndividual {
   id: string;
   titulo: string;
   url_video: string;
+  resumo_url: string | null;
   descricao: string | null;
   duracao_seg: number | null;
   data_gravacao: string;
@@ -58,6 +59,7 @@ export function EditarGravacaoIndividualDialog({
   const [form, setForm] = useState({
     titulo: "",
     url_video: "",
+    resumo_url: "",
     descricao: "",
     duracao_min: "",
     data_gravacao: "",
@@ -68,6 +70,7 @@ export function EditarGravacaoIndividualDialog({
       setForm({
         titulo: gravacao.titulo || "",
         url_video: gravacao.url_video || "",
+        resumo_url: gravacao.resumo_url || "",
         descricao: gravacao.descricao || "",
         duracao_min: gravacao.duracao_seg ? String(Math.floor(gravacao.duracao_seg / 60)) : "",
         data_gravacao: gravacao.data_gravacao || "",
@@ -95,6 +98,7 @@ export function EditarGravacaoIndividualDialog({
         .update({
           titulo: form.titulo,
           url_video: form.url_video,
+          resumo_url: form.resumo_url || null,
           descricao: form.descricao || null,
           duracao_seg: form.duracao_min ? parseInt(form.duracao_min) * 60 : null,
           data_gravacao: form.data_gravacao,
@@ -188,6 +192,16 @@ export function EditarGravacaoIndividualDialog({
                 value={form.url_video}
                 onChange={(e) => setForm({ ...form, url_video: e.target.value })}
                 placeholder="https://..."
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="resumo_url">Link do Resumo</Label>
+              <Input
+                id="resumo_url"
+                value={form.resumo_url}
+                onChange={(e) => setForm({ ...form, resumo_url: e.target.value })}
+                placeholder="https://... (link para resumo da conversa)"
               />
             </div>
 

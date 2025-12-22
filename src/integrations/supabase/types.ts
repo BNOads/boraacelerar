@@ -558,6 +558,7 @@ export type Database = {
           id: string
           mentorado_id: string
           navegador_id: string | null
+          resumo_url: string | null
           tags: string[] | null
           thumbnail_url: string | null
           titulo: string
@@ -577,6 +578,7 @@ export type Database = {
           id?: string
           mentorado_id: string
           navegador_id?: string | null
+          resumo_url?: string | null
           tags?: string[] | null
           thumbnail_url?: string | null
           titulo: string
@@ -596,6 +598,7 @@ export type Database = {
           id?: string
           mentorado_id?: string
           navegador_id?: string | null
+          resumo_url?: string | null
           tags?: string[] | null
           thumbnail_url?: string | null
           titulo?: string
