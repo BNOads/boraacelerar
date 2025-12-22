@@ -11,7 +11,6 @@ import { format, differenceInDays, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { AdminAgendaDialog } from "@/components/AdminAgendaDialog";
 import { AdminImportarAgendaDialog } from "@/components/AdminImportarAgendaDialog";
-import { AdminImportarEncontrosDialog } from "@/components/AdminImportarEncontrosDialog";
 import { AdminLinksDialog } from "@/components/AdminLinksDialog";
 import { AdminImportarLinksDialog } from "@/components/AdminImportarLinksDialog";
 import { EditarLinkDialog } from "@/components/EditarLinkDialog";
@@ -242,7 +241,6 @@ export default function Dashboard() {
             <div className="flex items-center gap-2">
               {isAdmin && (
                 <div className="flex gap-2">
-                  <AdminImportarEncontrosDialog />
                   <AdminImportarAgendaDialog />
                   <AdminAgendaDialog />
                 </div>
