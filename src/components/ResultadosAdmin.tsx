@@ -10,13 +10,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
-import { TrendingUp, Users, CheckCircle, Target, ArrowUpDown, Search, Settings2 } from "lucide-react";
+import { TrendingUp, Users, CheckCircle, Target, ArrowUpDown, Search, Settings2, Activity } from "lucide-react";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
 import { FAIXAS_PREMIACAO, determinarFaixa } from "@/constants/faixas";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { format, parse } from "date-fns";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, BarChart, Bar } from 'recharts';
+import { format, parse, startOfMonth, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { Progress } from "@/components/ui/progress";
 
 interface MentoradoRanking {
   id: string;
@@ -112,6 +113,66 @@ export function ResultadosAdmin() {
       }));
 
       return resultado;
+    },
+  });
+
+  // Query para taxa de atualização de dados
+  const { data: taxaAtualizacao } = useQuery({
+    queryKey: ["taxa-atualizacao-dados"],
+    queryFn: async () => {
+      // Buscar total de mentorados ativos
+      const { data: mentorados, error: mentoradosError } = await supabase
+        .from("mentorados")
+        .select("id")
+        .eq("status", "ativo");
+
+      if (mentoradosError) throw mentoradosError;
+      const totalMentorados = mentorados?.length || 0;
+
+      // Buscar desempenho mensal dos últimos 12 meses
+      const { data: desempenhoData, error: desempenhoError } = await supabase
+        .from("desempenho_mensal")
+        .select("mes_ano, mentorado_id")
+        .order("mes_ano", { ascending: true });
+
+      if (desempenhoError) throw desempenhoError;
+
+      // Agrupar por mês
+      const atualizacoesPorMes = desempenhoData?.reduce((acc, item) => {
+        if (!acc[item.mes_ano]) {
+          acc[item.mes_ano] = new Set();
+        }
+        acc[item.mes_ano].add(item.mentorado_id);
+        return acc;
+      }, {} as Record<string, Set<string>>) || {};
+
+      // Converter para array com percentuais
+      const mesAtual = format(new Date(), 'yyyy-MM');
+      const resultado = Object.entries(atualizacoesPorMes)
+        .map(([mes, mentoradosSet]) => ({
+          mes_ano: mes,
+          mes_formatado: format(parse(mes, 'yyyy-MM', new Date()), 'MMM yyyy', { locale: ptBR }),
+          quantidade: mentoradosSet.size,
+          percentual: totalMentorados > 0 ? Math.round((mentoradosSet.size / totalMentorados) * 100) : 0,
+          totalMentorados,
+        }))
+        .sort((a, b) => a.mes_ano.localeCompare(b.mes_ano))
+        .slice(-12); // Últimos 12 meses
+
+      // Dados do mês atual
+      const dadosMesAtual = resultado.find(r => r.mes_ano === mesAtual) || {
+        quantidade: 0,
+        percentual: 0,
+        totalMentorados,
+      };
+
+      return {
+        historico: resultado,
+        mesAtual: {
+          ...dadosMesAtual,
+          mesFormatado: format(new Date(), 'MMMM yyyy', { locale: ptBR }),
+        },
+      };
     },
   });
 
@@ -393,7 +454,100 @@ export function ResultadosAdmin() {
         </Card>
       )}
 
-      {/* KPIs Agregados */}
+      {/* Taxa de Atualização de Dados */}
+      {taxaAtualizacao && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Card do Mês Atual */}
+          <Card className="border-border bg-card shadow-card">
+            <CardHeader className="pb-2">
+              <div className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-primary" />
+                <CardTitle className="text-lg">Atualização Mês Atual</CardTitle>
+              </div>
+              <p className="text-sm text-muted-foreground capitalize">{taxaAtualizacao.mesAtual.mesFormatado}</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Mentorados que atualizaram:</span>
+                <span className="text-2xl font-bold text-foreground">
+                  {taxaAtualizacao.mesAtual.quantidade} / {taxaAtualizacao.mesAtual.totalMentorados}
+                </span>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Taxa de atualização</span>
+                  <span className="text-lg font-semibold text-primary">{taxaAtualizacao.mesAtual.percentual}%</span>
+                </div>
+                <Progress value={taxaAtualizacao.mesAtual.percentual} className="h-3" />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {taxaAtualizacao.mesAtual.totalMentorados - taxaAtualizacao.mesAtual.quantidade} mentorados ainda não atualizaram este mês
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Gráfico de Histórico */}
+          <Card className="border-border bg-card shadow-card lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="text-lg">Histórico de Atualizações (Últimos 12 meses)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={taxaAtualizacao.historico}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis 
+                    dataKey="mes_formatado" 
+                    className="text-xs"
+                    stroke="hsl(var(--muted-foreground))"
+                    tick={{ fontSize: 10 }}
+                  />
+                  <YAxis 
+                    className="text-xs"
+                    stroke="hsl(var(--muted-foreground))"
+                    tickFormatter={(value) => `${value}%`}
+                    domain={[0, 100]}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px'
+                    }}
+                    formatter={(value: any, name: string) => {
+                      if (name === 'Taxa (%)') {
+                        return [`${value}%`, 'Taxa de Atualização'];
+                      }
+                      return [value, name];
+                    }}
+                    labelFormatter={(label) => `Mês: ${label}`}
+                  />
+                  <Bar 
+                    dataKey="percentual" 
+                    fill="hsl(var(--primary))" 
+                    name="Taxa (%)"
+                    radius={[4, 4, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+              <div className="mt-3 flex items-center justify-between text-sm">
+                <div className="flex items-center gap-4">
+                  <span className="text-muted-foreground">
+                    Média geral: <span className="font-semibold text-foreground">
+                      {taxaAtualizacao.historico.length > 0 
+                        ? Math.round(taxaAtualizacao.historico.reduce((acc, h) => acc + h.percentual, 0) / taxaAtualizacao.historico.length) 
+                        : 0}%
+                    </span>
+                  </span>
+                </div>
+                <span className="text-muted-foreground">
+                  Total base: {taxaAtualizacao.mesAtual.totalMentorados} mentorados
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {kpisAgregados && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="border-border bg-card shadow-card">
