@@ -315,6 +315,51 @@ export type Database = {
           },
         ]
       }
+      diario_bordo: {
+        Row: {
+          autor_id: string
+          conteudo: string
+          created_at: string
+          id: string
+          lancamento: string | null
+          mentorado_id: string
+          updated_at: string
+        }
+        Insert: {
+          autor_id: string
+          conteudo: string
+          created_at?: string
+          id?: string
+          lancamento?: string | null
+          mentorado_id: string
+          updated_at?: string
+        }
+        Update: {
+          autor_id?: string
+          conteudo?: string
+          created_at?: string
+          id?: string
+          lancamento?: string | null
+          mentorado_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diario_bordo_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diario_bordo_mentorado_id_fkey"
+            columns: ["mentorado_id"]
+            isOneToOne: false
+            referencedRelation: "mentorados"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       encontros: {
         Row: {
           created_at: string
