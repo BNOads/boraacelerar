@@ -6,16 +6,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, Video, FileText, Clock, Play, ExternalLink, Edit, Trash2 } from "lucide-react";
+import { Search, Video, FileText, Clock, Play, ExternalLink, Edit, User } from "lucide-react";
 import { AdminMembrosDialog } from "@/components/AdminMembrosDialog";
 import { AdminImportarConteudoDialog } from "@/components/AdminImportarConteudoDialog";
 import { AdminPostoIpirangaDialog } from "@/components/AdminPostoIpirangaDialog";
 import { EditarPostoIpirangaDialog } from "@/components/EditarPostoIpirangaDialog";
 import { AdminGravacaoIndividualDialog } from "@/components/AdminGravacaoIndividualDialog";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { getVideoThumbnail } from "@/lib/videoUtils";
 
 export default function Membros() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchEncontros, setSearchEncontros] = useState("");
+  const [searchIndividuais, setSearchIndividuais] = useState("");
   const { isAdmin } = useIsAdmin();
   const [editingLink, setEditingLink] = useState<any>(null);
 
@@ -51,7 +54,7 @@ export default function Membros() {
     },
   });
 
-  // Gravações Individuais
+  // Gravações Individuais - Para mentorado normal
   const { data: gravacoesIndividuais, isLoading: loadingIndividuais } = useQuery({
     queryKey: ["gravacoes-individuais", mentorado?.id],
     queryFn: async () => {
@@ -66,7 +69,29 @@ export default function Membros() {
       if (error) throw error;
       return data;
     },
-    enabled: !!mentorado?.id,
+    enabled: !!mentorado?.id && !isAdmin,
+  });
+
+  // Gravações Individuais - Para admin (todas)
+  const { data: todasGravacoesIndividuais, isLoading: loadingTodasIndividuais } = useQuery({
+    queryKey: ["todas-gravacoes-individuais"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("gravacoes_individuais")
+        .select(`
+          *,
+          mentorado:mentorados(
+            id,
+            user_id,
+            profile:profiles(nome_completo, apelido)
+          )
+        `)
+        .eq("ativo", true)
+        .order("data_publicacao", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: isAdmin,
   });
 
   // Conteúdo Direcionado
@@ -104,17 +129,29 @@ export default function Membros() {
     },
   });
 
+  // Filtragem de encontros
   const filteredEncontros = gravacoesEncontros?.filter(
     (g) =>
-      g.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      g.descricao?.toLowerCase().includes(searchTerm.toLowerCase())
+      g.titulo.toLowerCase().includes(searchEncontros.toLowerCase()) ||
+      g.descricao?.toLowerCase().includes(searchEncontros.toLowerCase())
   );
 
+  // Filtragem de sessões individuais (mentorado)
   const filteredIndividuais = gravacoesIndividuais?.filter(
     (g) =>
       g.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
       g.descricao?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Filtragem de todas sessões individuais (admin)
+  const filteredTodasIndividuais = todasGravacoesIndividuais?.filter((g) => {
+    const mentoradoNome = g.mentorado?.profile?.nome_completo || g.mentorado?.profile?.apelido || "";
+    return (
+      g.titulo.toLowerCase().includes(searchIndividuais.toLowerCase()) ||
+      g.descricao?.toLowerCase().includes(searchIndividuais.toLowerCase()) ||
+      mentoradoNome.toLowerCase().includes(searchIndividuais.toLowerCase())
+    );
+  });
 
   const filteredConteudo = conteudoDirecionado?.filter(
     (c) =>
@@ -145,16 +182,6 @@ export default function Membros() {
         </div>
       </div>
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Buscar por título, descrição ou tag..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 bg-card/50 border-border"
-        />
-      </div>
 
       {/* Tabs */}
       <Tabs defaultValue="gravacoes" className="space-y-6">
@@ -170,65 +197,78 @@ export default function Membros() {
         <TabsContent value="gravacoes" className="space-y-6">
           {/* Gravações de Encontros */}
           <div className="space-y-4">
-            <h3 className="text-xl font-bold text-foreground">Encontros Gravados</h3>
+            <div className="flex items-center justify-between gap-4">
+              <h3 className="text-xl font-bold text-foreground">Encontros Gravados</h3>
+              <div className="relative flex-1 max-w-xs">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar encontro..."
+                  value={searchEncontros}
+                  onChange={(e) => setSearchEncontros(e.target.value)}
+                  className="pl-10 bg-card/50 border-border"
+                />
+              </div>
+            </div>
             {loadingEncontros ? (
               <div className="flex justify-center py-8">
                 <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
               </div>
             ) : filteredEncontros && filteredEncontros.length > 0 ? (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {filteredEncontros.map((gravacao) => (
-                  <Card
-                    key={gravacao.id}
-                    className="border-border bg-card/50 backdrop-blur-sm hover:shadow-elegant hover:scale-[1.02] transition-all duration-300"
-                  >
-                    <div className="relative aspect-video bg-muted">
-                      {gravacao.thumbnail_url ? (
-                        <img
-                          src={gravacao.thumbnail_url}
-                          alt={gravacao.titulo}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full">
-                          <Video className="h-12 w-12 text-muted-foreground" />
-                        </div>
-                      )}
-                      <Button
-                        size="icon"
-                        className="absolute bottom-2 right-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+                {filteredEncontros.map((gravacao) => {
+                  const thumbnail = gravacao.thumbnail_url || getVideoThumbnail(gravacao.url_video);
+                  return (
+                    <Card
+                      key={gravacao.id}
+                      className="border-border bg-card/50 backdrop-blur-sm hover:shadow-elegant hover:scale-[1.02] transition-all duration-300"
+                    >
+                      <div 
+                        className="relative aspect-video bg-muted cursor-pointer"
                         onClick={() => window.open(gravacao.url_video, "_blank")}
                       >
-                        <Play className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <CardHeader>
-                      <CardTitle className="text-base">{gravacao.titulo}</CardTitle>
-                      {gravacao.descricao && (
-                        <CardDescription className="line-clamp-2">
-                          {gravacao.descricao}
-                        </CardDescription>
-                      )}
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                      {gravacao.duracao_seg && (
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Clock className="h-4 w-4" />
-                          <span>{Math.floor(gravacao.duracao_seg / 60)} min</span>
+                        {thumbnail ? (
+                          <img
+                            src={thumbnail}
+                            alt={gravacao.titulo}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center h-full">
+                            <Video className="h-12 w-12 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 transition-opacity">
+                          <Play className="h-12 w-12 text-white" />
                         </div>
-                      )}
-                      {gravacao.tags && gravacao.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1">
-                          {gravacao.tags.slice(0, 3).map((tag, idx) => (
-                            <Badge key={idx} variant="secondary" className="text-xs">
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
+                      </div>
+                      <CardHeader>
+                        <CardTitle className="text-base">{gravacao.titulo}</CardTitle>
+                        {gravacao.descricao && (
+                          <CardDescription className="line-clamp-2">
+                            {gravacao.descricao}
+                          </CardDescription>
+                        )}
+                      </CardHeader>
+                      <CardContent className="space-y-2">
+                        {gravacao.duracao_seg && (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Clock className="h-4 w-4" />
+                            <span>{Math.floor(gravacao.duracao_seg / 60)} min</span>
+                          </div>
+                        )}
+                        {gravacao.tags && gravacao.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {gravacao.tags.slice(0, 3).map((tag, idx) => (
+                              <Badge key={idx} variant="secondary" className="text-xs">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             ) : (
               <p className="text-center text-muted-foreground py-8">
@@ -237,74 +277,149 @@ export default function Membros() {
             )}
           </div>
 
-          {/* Gravações 1:1 */}
-          <div className="space-y-4">
-            <h3 className="text-xl font-bold text-foreground">Sessões Individuais</h3>
-            {loadingIndividuais ? (
-              <div className="flex justify-center py-8">
-                <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
-              </div>
-            ) : filteredIndividuais && filteredIndividuais.length > 0 ? (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {filteredIndividuais.map((gravacao) => (
-                  <Card
-                    key={gravacao.id}
-                    className="border-border bg-card/50 backdrop-blur-sm hover:shadow-elegant hover:scale-[1.02] transition-all duration-300"
-                  >
-                    <div className="relative aspect-video bg-muted">
-                      {gravacao.thumbnail_url ? (
-                        <img
-                          src={gravacao.thumbnail_url}
-                          alt={gravacao.titulo}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full">
-                          <Video className="h-12 w-12 text-muted-foreground" />
-                        </div>
-                      )}
-                      <Button
-                        size="icon"
-                        className="absolute bottom-2 right-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground"
-                        onClick={() => window.open(gravacao.url_video, "_blank")}
+          {/* Sessões Individuais - Visão do Mentorado */}
+          {!isAdmin && (
+            <div className="space-y-4">
+              <h3 className="text-xl font-bold text-foreground">Sessões Individuais</h3>
+              {loadingIndividuais ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+                </div>
+              ) : filteredIndividuais && filteredIndividuais.length > 0 ? (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {filteredIndividuais.map((gravacao) => {
+                    const thumbnail = getVideoThumbnail(gravacao.url_video);
+                    return (
+                      <Card
+                        key={gravacao.id}
+                        className="border-border bg-card/50 backdrop-blur-sm hover:shadow-elegant hover:scale-[1.02] transition-all duration-300"
                       >
-                        <Play className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <CardHeader>
-                      <CardTitle className="text-base">{gravacao.titulo}</CardTitle>
-                      {gravacao.descricao && (
-                        <CardDescription className="line-clamp-2">
-                          {gravacao.descricao}
-                        </CardDescription>
-                      )}
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                      {gravacao.duracao_seg && (
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Clock className="h-4 w-4" />
-                          <span>{Math.floor(gravacao.duracao_seg / 60)} min</span>
+                        <div 
+                          className="relative aspect-video bg-muted cursor-pointer"
+                          onClick={() => window.open(gravacao.url_video, "_blank")}
+                        >
+                          {thumbnail ? (
+                            <img
+                              src={thumbnail}
+                              alt={gravacao.titulo}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex items-center justify-center h-full">
+                              <Video className="h-12 w-12 text-muted-foreground" />
+                            </div>
+                          )}
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 transition-opacity">
+                            <Play className="h-12 w-12 text-white" />
+                          </div>
                         </div>
-                      )}
-                      {gravacao.tags && gravacao.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1">
-                          {gravacao.tags.slice(0, 3).map((tag, idx) => (
-                            <Badge key={idx} variant="secondary" className="text-xs">
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
+                        <CardHeader>
+                          <CardTitle className="text-base">{gravacao.titulo}</CardTitle>
+                          {gravacao.descricao && (
+                            <CardDescription className="line-clamp-2">
+                              {gravacao.descricao}
+                            </CardDescription>
+                          )}
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                          {gravacao.duracao_seg && (
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Clock className="h-4 w-4" />
+                              <span>{Math.floor(gravacao.duracao_seg / 60)} min</span>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-center text-muted-foreground py-8">
+                  Nenhuma sessão individual encontrada.
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Sessões Individuais - Visão do Admin (todas as sessões) */}
+          {isAdmin && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between gap-4">
+                <h3 className="text-xl font-bold text-foreground">Sessões Individuais (Todas)</h3>
+                <div className="relative flex-1 max-w-xs">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar por mentorado..."
+                    value={searchIndividuais}
+                    onChange={(e) => setSearchIndividuais(e.target.value)}
+                    className="pl-10 bg-card/50 border-border"
+                  />
+                </div>
               </div>
-            ) : (
-              <p className="text-center text-muted-foreground py-8">
-                Nenhuma sessão individual encontrada.
-              </p>
-            )}
-          </div>
+              {loadingTodasIndividuais ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+                </div>
+              ) : filteredTodasIndividuais && filteredTodasIndividuais.length > 0 ? (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {filteredTodasIndividuais.map((gravacao) => {
+                    const thumbnail = getVideoThumbnail(gravacao.url_video);
+                    const mentoradoNome = gravacao.mentorado?.profile?.apelido || gravacao.mentorado?.profile?.nome_completo || "Mentorado";
+                    return (
+                      <Card
+                        key={gravacao.id}
+                        className="border-border bg-card/50 backdrop-blur-sm hover:shadow-elegant hover:scale-[1.02] transition-all duration-300"
+                      >
+                        <div 
+                          className="relative aspect-video bg-muted cursor-pointer"
+                          onClick={() => window.open(gravacao.url_video, "_blank")}
+                        >
+                          {thumbnail ? (
+                            <img
+                              src={thumbnail}
+                              alt={gravacao.titulo}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex items-center justify-center h-full">
+                              <Video className="h-12 w-12 text-muted-foreground" />
+                            </div>
+                          )}
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 transition-opacity">
+                            <Play className="h-12 w-12 text-white" />
+                          </div>
+                        </div>
+                        <CardHeader>
+                          <div className="flex items-center gap-2 mb-2">
+                            <User className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground font-medium">{mentoradoNome}</span>
+                          </div>
+                          <CardTitle className="text-base">{gravacao.titulo}</CardTitle>
+                          {gravacao.descricao && (
+                            <CardDescription className="line-clamp-2">
+                              {gravacao.descricao}
+                            </CardDescription>
+                          )}
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                          {gravacao.duracao_seg && (
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Clock className="h-4 w-4" />
+                              <span>{Math.floor(gravacao.duracao_seg / 60)} min</span>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-center text-muted-foreground py-8">
+                  Nenhuma sessão individual encontrada.
+                </p>
+              )}
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="agentes-ia">
