@@ -38,9 +38,7 @@ export function AdminGravacaoIndividualDialog({ onSuccess }: AdminGravacaoIndivi
     titulo: "",
     url_video: "",
     descricao: "",
-    thumbnail_url: "",
     duracao_min: "",
-    tags: "",
     data_gravacao: new Date().toISOString().split("T")[0],
   });
 
@@ -99,9 +97,7 @@ export function AdminGravacaoIndividualDialog({ onSuccess }: AdminGravacaoIndivi
         titulo: form.titulo,
         url_video: form.url_video,
         descricao: form.descricao || null,
-        thumbnail_url: form.thumbnail_url || null,
         duracao_seg: form.duracao_min ? parseInt(form.duracao_min) * 60 : null,
-        tags: form.tags ? form.tags.split(",").map((t) => t.trim()) : null,
         data_gravacao: form.data_gravacao,
         ativo: true,
       });
@@ -119,9 +115,7 @@ export function AdminGravacaoIndividualDialog({ onSuccess }: AdminGravacaoIndivi
         titulo: "",
         url_video: "",
         descricao: "",
-        thumbnail_url: "",
         duracao_min: "",
-        tags: "",
         data_gravacao: new Date().toISOString().split("T")[0],
       });
 
@@ -228,26 +222,6 @@ export function AdminGravacaoIndividualDialog({ onSuccess }: AdminGravacaoIndivi
                 placeholder="60"
               />
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="thumbnail_url">URL da Thumbnail</Label>
-            <Input
-              id="thumbnail_url"
-              value={form.thumbnail_url}
-              onChange={(e) => setForm({ ...form, thumbnail_url: e.target.value })}
-              placeholder="https://..."
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="tags">Tags (separadas por vírgula)</Label>
-            <Input
-              id="tags"
-              value={form.tags}
-              onChange={(e) => setForm({ ...form, tags: e.target.value })}
-              placeholder="mentoria, 1:1, fevereiro"
-            />
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
