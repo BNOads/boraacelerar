@@ -240,138 +240,141 @@ export default function Membros() {
                 <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
               </div>
             ) : (filteredEncontros && filteredEncontros.length > 0) || (filteredConteudo && filteredConteudo.length > 0) ? (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {[...(filteredEncontros || []).map((g: any) => ({ kind: "encontro" as const, item: g })), ...(filteredConteudo || []).map((c: any) => ({ kind: "conteudo" as const, item: c }))]
-                  .sort((a, b) => {
-                    const aDate = new Date(a.item.data_publicacao || a.item.created_at || 0).getTime();
-                    const bDate = new Date(b.item.data_publicacao || b.item.created_at || 0).getTime();
-                    return bDate - aDate;
-                  })
-                  .map(({ kind, item }) => {
-                    if (kind === "encontro") {
-                      const gravacao = item;
-                      const thumbnail = gravacao.thumbnail_url || getVideoThumbnail(gravacao.url_video);
-                      return (
-                        <Card
-                          key={`encontro-${gravacao.id}`}
-                          className="border-border bg-card/50 backdrop-blur-sm hover:shadow-elegant hover:scale-[1.02] transition-all duration-300"
-                        >
-                          <div
-                            className="relative aspect-video bg-muted cursor-pointer"
-                            onClick={() => window.open(gravacao.url_video, "_blank")}
-                          >
-                            {thumbnail ? (
-                              <img src={thumbnail} alt={gravacao.titulo} className="w-full h-full object-cover" />
-                            ) : (
-                              <div className="flex items-center justify-center h-full bg-card p-4">
-                                <img src={logoBora} alt="Logo" className="max-h-full max-w-full object-contain opacity-60" />
-                              </div>
-                            )}
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 transition-opacity">
-                              <Play className="h-12 w-12 text-white" />
-                            </div>
-                          </div>
-                          <CardHeader>
-                            <div className="flex items-center justify-between">
-                              <CardTitle className="text-base">{gravacao.titulo}</CardTitle>
-                              {isAdmin && (
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  className="h-8 w-8"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setEditingEncontro(gravacao);
-                                  }}
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                              )}
-                            </div>
-                            {gravacao.descricao && (
-                              <CardDescription className="line-clamp-2">{gravacao.descricao}</CardDescription>
-                            )}
-                          </CardHeader>
-                          <CardContent className="space-y-2">
-                            {gravacao.duracao_seg && (
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Clock className="h-4 w-4" />
-                                <span>{Math.floor(gravacao.duracao_seg / 60)} min</span>
-                              </div>
-                            )}
-                            {gravacao.tags && gravacao.tags.length > 0 && (
-                              <div className="flex flex-wrap gap-1">
-                                {gravacao.tags.slice(0, 3).map((tag: string, idx: number) => (
-                                  <Badge key={idx} variant="secondary" className="text-xs">
-                                    {tag}
-                                  </Badge>
-                                ))}
-                              </div>
-                            )}
-                          </CardContent>
-                        </Card>
-                      );
-                    }
-
-                    const conteudo = item;
-                    const tipo = conteudo.tags?.[0];
-                    const thumb = conteudo.url ? getVideoThumbnail(conteudo.url) : null;
-
-                    return (
-                      <Card
-                        key={`conteudo-${conteudo.id}`}
-                        className="border-border bg-card/50 backdrop-blur-sm hover:shadow-elegant hover:scale-[1.02] transition-all duration-300 cursor-pointer"
-                        onClick={() => conteudo.url && window.open(conteudo.url, "_blank")}
-                      >
-                        <div className="relative aspect-video bg-muted">
-                          {thumb ? (
-                            <img src={thumb} alt={conteudo.titulo} className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="flex items-center justify-center h-full bg-card p-4">
-                              <img src={logoBora} alt="Logo" className="max-h-full max-w-full object-contain opacity-60" />
-                            </div>
-                          )}
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                            <ExternalLink className="h-8 w-8 text-white" />
-                          </div>
+              <div className="space-y-6">
+                {/* Conteúdos Direcionados - Cards menores com scroll horizontal */}
+                {filteredConteudo && filteredConteudo.length > 0 && (
+                  <div className="space-y-3">
+                    <h4 className="text-lg font-semibold text-foreground">Conteúdos</h4>
+                    <div className="relative">
+                      <div className="overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
+                        <div className="flex gap-3" style={{ minWidth: "max-content" }}>
+                          {filteredConteudo.map((conteudo) => {
+                            const tipo = conteudo.tags?.[0];
+                            const thumb = conteudo.url ? getVideoThumbnail(conteudo.url) : null;
+                            return (
+                              <Card
+                                key={`conteudo-${conteudo.id}`}
+                                className="w-[200px] shrink-0 border-border bg-card/50 backdrop-blur-sm hover:shadow-elegant hover:scale-[1.02] transition-all duration-300 cursor-pointer"
+                                onClick={() => conteudo.url && window.open(conteudo.url, "_blank")}
+                              >
+                                <div className="relative aspect-video bg-muted">
+                                  {thumb ? (
+                                    <img src={thumb} alt={conteudo.titulo} className="w-full h-full object-cover" />
+                                  ) : (
+                                    <div className="flex items-center justify-center h-full bg-card p-2">
+                                      <img src={logoBora} alt="Logo" className="max-h-full max-w-full object-contain opacity-60" />
+                                    </div>
+                                  )}
+                                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 hover:opacity-100 transition-opacity">
+                                    <ExternalLink className="h-6 w-6 text-white" />
+                                  </div>
+                                  {tipo && (
+                                    <Badge variant="default" className="absolute top-1 right-1 text-[10px] px-1.5 py-0.5">
+                                      {tipo}
+                                    </Badge>
+                                  )}
+                                </div>
+                                <CardHeader className="p-3">
+                                  <div className="flex items-center justify-between gap-1">
+                                    <CardTitle className="text-sm line-clamp-1">{conteudo.titulo}</CardTitle>
+                                    {isAdmin && (
+                                      <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        className="h-6 w-6 shrink-0"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setEditingConteudo(conteudo);
+                                        }}
+                                      >
+                                        <Edit className="h-3 w-3" />
+                                      </Button>
+                                    )}
+                                  </div>
+                                  {conteudo.descricao && (
+                                    <CardDescription className="text-xs line-clamp-1">{conteudo.descricao}</CardDescription>
+                                  )}
+                                </CardHeader>
+                              </Card>
+                            );
+                          })}
                         </div>
-                        <CardHeader>
-                          <div className="flex items-center justify-between gap-2">
-                            <CardTitle className="text-base">{conteudo.titulo}</CardTitle>
-                            <div className="flex items-center gap-1">
-                              {tipo && (
-                                <Badge variant="default" className="text-xs shrink-0">
-                                  {tipo}
-                                </Badge>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Encontros Gravados - Grid normal */}
+                {filteredEncontros && filteredEncontros.length > 0 && (
+                  <div className="space-y-3">
+                    <h4 className="text-lg font-semibold text-foreground">Encontros Gravados</h4>
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                      {filteredEncontros.map((gravacao) => {
+                        const thumbnail = gravacao.thumbnail_url || getVideoThumbnail(gravacao.url_video);
+                        return (
+                          <Card
+                            key={`encontro-${gravacao.id}`}
+                            className="border-border bg-card/50 backdrop-blur-sm hover:shadow-elegant hover:scale-[1.02] transition-all duration-300"
+                          >
+                            <div
+                              className="relative aspect-video bg-muted cursor-pointer"
+                              onClick={() => window.open(gravacao.url_video, "_blank")}
+                            >
+                              {thumbnail ? (
+                                <img src={thumbnail} alt={gravacao.titulo} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="flex items-center justify-center h-full bg-card p-4">
+                                  <img src={logoBora} alt="Logo" className="max-h-full max-w-full object-contain opacity-60" />
+                                </div>
                               )}
-                              {isAdmin && (
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  className="h-8 w-8"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setEditingConteudo(conteudo);
-                                  }}
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                              )}
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 transition-opacity">
+                                <Play className="h-12 w-12 text-white" />
+                              </div>
                             </div>
-                          </div>
-                          {conteudo.descricao && (
-                            <CardDescription className="line-clamp-2">{conteudo.descricao}</CardDescription>
-                          )}
-                        </CardHeader>
-                        <CardContent>
-                          <div className="flex items-center gap-2 text-sm text-primary">
-                            <ExternalLink className="h-4 w-4" />
-                            <span>Acessar conteúdo</span>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
+                            <CardHeader>
+                              <div className="flex items-center justify-between">
+                                <CardTitle className="text-base">{gravacao.titulo}</CardTitle>
+                                {isAdmin && (
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-8 w-8"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setEditingEncontro(gravacao);
+                                    }}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                )}
+                              </div>
+                              {gravacao.descricao && (
+                                <CardDescription className="line-clamp-2">{gravacao.descricao}</CardDescription>
+                              )}
+                            </CardHeader>
+                            <CardContent className="space-y-2">
+                              {gravacao.duracao_seg && (
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                  <Clock className="h-4 w-4" />
+                                  <span>{Math.floor(gravacao.duracao_seg / 60)} min</span>
+                                </div>
+                              )}
+                              {gravacao.tags && gravacao.tags.length > 0 && (
+                                <div className="flex flex-wrap gap-1">
+                                  {gravacao.tags.slice(0, 3).map((tag: string, idx: number) => (
+                                    <Badge key={idx} variant="secondary" className="text-xs">
+                                      {tag}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <p className="text-center text-muted-foreground py-8">Nenhuma gravação encontrada.</p>
