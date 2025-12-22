@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, Video, FileText, Clock, Play, ExternalLink, Edit, User } from "lucide-react";
+import { Search, Video, FileText, Clock, Play, ExternalLink, Edit, User, ChevronLeft, ChevronRight } from "lucide-react";
 import { AdminMembrosDialog } from "@/components/AdminMembrosDialog";
 import { AdminImportarConteudoDialog } from "@/components/AdminImportarConteudoDialog";
 import { AdminPostoIpirangaDialog } from "@/components/AdminPostoIpirangaDialog";
@@ -31,6 +31,12 @@ export default function Membros() {
   const [editingGravacao, setEditingGravacao] = useState<any>(null);
   const [editingEncontro, setEditingEncontro] = useState<any>(null);
   const [editingConteudo, setEditingConteudo] = useState<any>(null);
+  
+  // Scroll do carrossel de conteúdos
+  const conteudoScrollRef = useRef<HTMLDivElement>(null);
+  const [conteudoScrollInfo, setConteudoScrollInfo] = useState({ start: 1, end: 4, total: 0 });
+  const CARD_WIDTH = 200;
+  const CARD_GAP = 12;
 
   // Buscar mentorado_id do usuário
   const { data: mentorado } = useQuery({
@@ -170,6 +176,41 @@ export default function Membros() {
     return matchSearch && matchTipo;
   });
 
+  const updateScrollInfo = () => {
+    if (conteudoScrollRef.current && filteredConteudo) {
+      const container = conteudoScrollRef.current;
+      const scrollLeft = container.scrollLeft;
+      const containerWidth = container.clientWidth;
+      const itemWidth = CARD_WIDTH + CARD_GAP;
+      
+      const startIndex = Math.floor(scrollLeft / itemWidth) + 1;
+      const visibleItems = Math.max(1, Math.floor(containerWidth / itemWidth));
+      const endIndex = Math.min(startIndex + visibleItems - 1, filteredConteudo.length);
+      
+      setConteudoScrollInfo({
+        start: Math.max(1, startIndex),
+        end: Math.max(1, endIndex),
+        total: filteredConteudo.length
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (filteredConteudo && filteredConteudo.length > 0) {
+      updateScrollInfo();
+    }
+  }, [filteredConteudo]);
+
+  const scrollConteudo = (direction: 'left' | 'right') => {
+    if (conteudoScrollRef.current) {
+      const scrollAmount = (CARD_WIDTH + CARD_GAP) * 4;
+      conteudoScrollRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
@@ -244,9 +285,40 @@ export default function Membros() {
                 {/* Conteúdos Direcionados - Cards menores com scroll horizontal */}
                 {filteredConteudo && filteredConteudo.length > 0 && (
                   <div className="space-y-3">
-                    <h4 className="text-lg font-semibold text-foreground">Conteúdos</h4>
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-lg font-semibold text-foreground">Conteúdos</h4>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">
+                          {conteudoScrollInfo.start}-{conteudoScrollInfo.end} de {conteudoScrollInfo.total}
+                        </span>
+                        <div className="flex gap-1">
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            className="h-8 w-8"
+                            onClick={() => scrollConteudo('left')}
+                            disabled={conteudoScrollInfo.start <= 1}
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            className="h-8 w-8"
+                            onClick={() => scrollConteudo('right')}
+                            disabled={conteudoScrollInfo.end >= conteudoScrollInfo.total}
+                          >
+                            <ChevronRight className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
                     <div className="relative">
-                      <div className="overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
+                      <div 
+                        ref={conteudoScrollRef}
+                        className="overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent"
+                        onScroll={updateScrollInfo}
+                      >
                         <div className="flex gap-3" style={{ minWidth: "max-content" }}>
                           {filteredConteudo.map((conteudo) => {
                             const tipo = conteudo.tags?.[0];
