@@ -12,6 +12,7 @@ import { AdminImportarConteudoDialog } from "@/components/AdminImportarConteudoD
 import { AdminPostoIpirangaDialog } from "@/components/AdminPostoIpirangaDialog";
 import { EditarPostoIpirangaDialog } from "@/components/EditarPostoIpirangaDialog";
 import { AdminGravacaoIndividualDialog } from "@/components/AdminGravacaoIndividualDialog";
+import { EditarGravacaoIndividualDialog } from "@/components/EditarGravacaoIndividualDialog";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { getVideoThumbnail } from "@/lib/videoUtils";
 
@@ -21,6 +22,7 @@ export default function Membros() {
   const [searchIndividuais, setSearchIndividuais] = useState("");
   const { isAdmin } = useIsAdmin();
   const [editingLink, setEditingLink] = useState<any>(null);
+  const [editingGravacao, setEditingGravacao] = useState<any>(null);
 
   // Buscar mentorado_id do usuário
   const { data: mentorado } = useQuery({
@@ -390,9 +392,22 @@ export default function Membros() {
                           </div>
                         </div>
                         <CardHeader>
-                          <div className="flex items-center gap-2 mb-2">
-                            <User className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-sm text-muted-foreground font-medium">{mentoradoNome}</span>
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <User className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm text-muted-foreground font-medium">{mentoradoNome}</span>
+                            </div>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-8 w-8"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingGravacao(gravacao);
+                              }}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
                           </div>
                           <CardTitle className="text-base">{gravacao.titulo}</CardTitle>
                           {gravacao.descricao && (
@@ -704,6 +719,12 @@ export default function Membros() {
         link={editingLink}
         open={!!editingLink}
         onOpenChange={(open) => !open && setEditingLink(null)}
+      />
+
+      <EditarGravacaoIndividualDialog
+        gravacao={editingGravacao}
+        open={!!editingGravacao}
+        onOpenChange={(open) => !open && setEditingGravacao(null)}
       />
     </div>
   );
