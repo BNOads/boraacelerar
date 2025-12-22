@@ -13,6 +13,7 @@ import { AdminPostoIpirangaDialog } from "@/components/AdminPostoIpirangaDialog"
 import { EditarPostoIpirangaDialog } from "@/components/EditarPostoIpirangaDialog";
 import { AdminGravacaoIndividualDialog } from "@/components/AdminGravacaoIndividualDialog";
 import { EditarGravacaoIndividualDialog } from "@/components/EditarGravacaoIndividualDialog";
+import { EditarEncontroGravadoDialog } from "@/components/EditarEncontroGravadoDialog";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { getVideoThumbnail } from "@/lib/videoUtils";
 
@@ -23,6 +24,7 @@ export default function Membros() {
   const { isAdmin } = useIsAdmin();
   const [editingLink, setEditingLink] = useState<any>(null);
   const [editingGravacao, setEditingGravacao] = useState<any>(null);
+  const [editingEncontro, setEditingEncontro] = useState<any>(null);
 
   // Buscar mentorado_id do usuário
   const { data: mentorado } = useQuery({
@@ -244,7 +246,22 @@ export default function Membros() {
                         </div>
                       </div>
                       <CardHeader>
-                        <CardTitle className="text-base">{gravacao.titulo}</CardTitle>
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-base">{gravacao.titulo}</CardTitle>
+                          {isAdmin && (
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-8 w-8"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingEncontro(gravacao);
+                              }}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
                         {gravacao.descricao && (
                           <CardDescription className="line-clamp-2">
                             {gravacao.descricao}
@@ -725,6 +742,12 @@ export default function Membros() {
         gravacao={editingGravacao}
         open={!!editingGravacao}
         onOpenChange={(open) => !open && setEditingGravacao(null)}
+      />
+
+      <EditarEncontroGravadoDialog
+        gravacao={editingEncontro}
+        open={!!editingEncontro}
+        onOpenChange={(open) => !open && setEditingEncontro(null)}
       />
     </div>
   );
