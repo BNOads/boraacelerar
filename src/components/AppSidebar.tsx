@@ -5,61 +5,83 @@ import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { AdminBadge } from "./AdminBadge";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarTrigger,
-  useSidebar,
-} from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import logo from "@/assets/logo-bora.png";
 import logoLight from "@/assets/logo-bora-light.png";
-
-const menuItems = [
-  { title: "Início", url: "/dashboard", icon: Home },
-  { title: "Trilha & Conteúdo", url: "/trilha", icon: BookOpen },
-  { title: "Painel de Controle", url: "/resultados", icon: TrendingUp },
-  { title: "Metas", url: "/metas", icon: Target },
-  { title: "Área de Membros", url: "/membros", icon: Video },
-  { title: "Navegador", url: "/navegador", icon: UsersIcon },
-  { title: "Loja", url: "/loja", icon: Store },
-  { title: "Mentorados", url: "/mentorados", icon: Users, adminOnly: true },
-];
-
+const menuItems = [{
+  title: "Início",
+  url: "/dashboard",
+  icon: Home
+}, {
+  title: "Trilha & Conteúdo",
+  url: "/trilha",
+  icon: BookOpen
+}, {
+  title: "Painel de Controle",
+  url: "/resultados",
+  icon: TrendingUp
+}, {
+  title: "Metas",
+  url: "/metas",
+  icon: Target
+}, {
+  title: "Área de Membros",
+  url: "/membros",
+  icon: Video
+}, {
+  title: "Navegador",
+  url: "/navegador",
+  icon: UsersIcon
+}, {
+  title: "Loja",
+  url: "/loja",
+  icon: Store
+}, {
+  title: "Mentorados",
+  url: "/mentorados",
+  icon: Users,
+  adminOnly: true
+}];
 export function AppSidebar() {
-  const { state } = useSidebar();
-  const { theme } = useTheme();
+  const {
+    state
+  } = useSidebar();
+  const {
+    theme
+  } = useTheme();
   const navigate = useNavigate();
-  const { isAdmin } = useIsAdmin();
+  const {
+    isAdmin
+  } = useIsAdmin();
 
   // Buscar dados do usuário e perfil
-  const { data: userData } = useQuery({
+  const {
+    data: userData
+  } = useQuery({
     queryKey: ["sidebar-profile"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: {
+          user
+        }
+      } = await supabase.auth.getUser();
       if (!user) return null;
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .maybeSingle();
-
-      return { user, profile };
-    },
+      const {
+        data: profile
+      } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
+      return {
+        user,
+        profile
+      };
+    }
   });
-
-
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
+    const {
+      error
+    } = await supabase.auth.signOut();
     if (error) {
       toast.error("Erro ao sair");
     } else {
@@ -67,51 +89,33 @@ export function AppSidebar() {
       navigate("/auth");
     }
   };
-
-  return (
-    <Sidebar className={state === "collapsed" ? "w-14" : "w-60"} collapsible="icon">
+  return <Sidebar className={state === "collapsed" ? "w-14" : "w-60"} collapsible="icon">
       <SidebarContent className="bg-sidebar">
-        {state !== "collapsed" && (
-          <div className="pt-4 pb-2 flex justify-center">
-            <img
-              src={theme === "light" ? logoLight : logo}
-              alt="BORA Acelerar"
-              className="h-24 w-auto"
-            />
-          </div>
-        )}
+        {state !== "collapsed" && <div className="pt-4 pb-2 flex justify-center">
+            <img src={theme === "light" ? logoLight : logo} alt="BORA Acelerar" className="h-24 w-auto" />
+          </div>}
 
         <SidebarGroup className="pt-0">
-          <SidebarGroupLabel className="text-white">Navegação</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-primary">Navegação</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems
-                .filter((item) => !item.adminOnly || isAdmin)
-                .map((item) => (
-                  <SidebarMenuItem key={item.title}>
+              {menuItems.filter(item => !item.adminOnly || isAdmin).map(item => <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
-                      <NavLink 
-                        to={item.url} 
-                        className={({ isActive }) =>
-                          isActive
-                            ? "bg-primary/15 text-primary font-semibold rounded-r-lg border-l-4 border-primary [&>svg]:text-primary pl-3 shadow-[inset_0_0_20px_rgba(59,130,146,0.1)] transition-all duration-300"
-                            : "text-sidebar-foreground [&>svg]:text-sidebar-foreground hover:bg-primary/10 hover:text-primary [&>svg]:hover:text-primary rounded-lg transition-all duration-200 pl-4"
-                        }
-                      >
+                      <NavLink to={item.url} className={({
+                  isActive
+                }) => isActive ? "bg-primary/15 text-primary font-semibold rounded-r-lg border-l-4 border-primary [&>svg]:text-primary pl-3 shadow-[inset_0_0_20px_rgba(59,130,146,0.1)] transition-all duration-300" : "text-sidebar-foreground [&>svg]:text-sidebar-foreground hover:bg-primary/10 hover:text-primary [&>svg]:hover:text-primary rounded-lg transition-all duration-200 pl-4"}>
                         <item.icon className="h-4 w-4" />
                         {state !== "collapsed" && <span>{item.title}</span>}
                       </NavLink>
                     </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                  </SidebarMenuItem>)}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
         <div className="mt-auto border-t border-sidebar-border">
           {/* Perfil do Usuário */}
-          {state !== "collapsed" && userData?.profile && (
-            <div className="p-4 border-b border-sidebar-border">
+          {state !== "collapsed" && userData?.profile && <div className="p-4 border-b border-sidebar-border">
               <div className="flex items-center gap-3">
                 <Avatar className="h-10 w-10 border-2 border-secondary/20">
                   <AvatarImage src={userData.profile.foto_url} alt={userData.profile.nome_completo} />
@@ -126,39 +130,29 @@ export function AppSidebar() {
                   <p className="text-xs text-sidebar-foreground/70 truncate">
                     {userData.user.email}
                   </p>
-                  {isAdmin && (
-                    <div className="mt-1">
+                  {isAdmin && <div className="mt-1">
                       <AdminBadge />
-                    </div>
-                  )}
+                    </div>}
                 </div>
               </div>
-            </div>
-          )}
+            </div>}
 
           {/* Avatar mini quando colapsado */}
-          {state === "collapsed" && userData?.profile && (
-            <div className="p-2 border-b border-sidebar-border flex justify-center">
+          {state === "collapsed" && userData?.profile && <div className="p-2 border-b border-sidebar-border flex justify-center">
               <Avatar className="h-8 w-8 border-2 border-secondary/20">
                 <AvatarImage src={userData.profile.foto_url} alt={userData.profile.nome_completo} />
                 <AvatarFallback className="bg-secondary/10 text-secondary text-xs">
                   {userData.profile.nome_completo?.charAt(0) || <User className="h-3 w-3" />}
                 </AvatarFallback>
               </Avatar>
-            </div>
-          )}
+            </div>}
 
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild className="hover:text-sidebar-foreground">
-                <NavLink 
-                  to="/configuracoes" 
-                  className={({ isActive }) =>
-                    isActive
-                      ? "bg-primary/15 text-primary font-semibold rounded-r-lg border-l-4 border-primary [&>svg]:text-primary pl-3 shadow-[inset_0_0_20px_rgba(59,130,146,0.1)] transition-all duration-300"
-                      : "text-sidebar-foreground [&>svg]:text-sidebar-foreground hover:bg-primary/10 hover:text-primary [&>svg]:hover:text-primary rounded-lg transition-all duration-200 pl-4"
-                  }
-                >
+                <NavLink to="/configuracoes" className={({
+                isActive
+              }) => isActive ? "bg-primary/15 text-primary font-semibold rounded-r-lg border-l-4 border-primary [&>svg]:text-primary pl-3 shadow-[inset_0_0_20px_rgba(59,130,146,0.1)] transition-all duration-300" : "text-sidebar-foreground [&>svg]:text-sidebar-foreground hover:bg-primary/10 hover:text-primary [&>svg]:hover:text-primary rounded-lg transition-all duration-200 pl-4"}>
                   <Settings className="h-4 w-4" />
                   {state !== "collapsed" && <span>Configurações</span>}
                 </NavLink>
@@ -173,6 +167,5 @@ export function AppSidebar() {
           </SidebarMenu>
         </div>
       </SidebarContent>
-    </Sidebar>
-  );
+    </Sidebar>;
 }
