@@ -253,181 +253,184 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      {/* Agenda Completa */}
-      <Card className="border-border bg-card shadow-card">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Calendar className="h-6 w-6 text-secondary" />
-              <CardTitle className="text-foreground">Agenda da Mentoria</CardTitle>
+      {/* Agenda e Links em Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        {/* Agenda Completa */}
+        <Card className="border-border bg-card shadow-card h-fit">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Calendar className="h-6 w-6 text-secondary" />
+                <CardTitle className="text-foreground">Agenda da Mentoria</CardTitle>
+              </div>
+              <div className="flex items-center gap-2">
+                {isAdmin && (
+                  <div className="flex gap-2">
+                    <AdminImportarAgendaDialog />
+                    <AdminAgendaDialog />
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-2">
+          </CardHeader>
+          <CardContent>
+            {/* Filtros */}
+            <div className="flex gap-2 mb-4 flex-wrap">
+              <Button
+                variant={filtroAgenda === 'proximos' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFiltroAgenda('proximos')}
+              >
+                Próximos ({proximosEncontros.length})
+              </Button>
+              <Button
+                variant={filtroAgenda === 'passados' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFiltroAgenda('passados')}
+              >
+                Passados ({encontrosPassados.length})
+              </Button>
+              <Button
+                variant={filtroAgenda === 'todos' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFiltroAgenda('todos')}
+              >
+                Todos ({proximosEncontros.length + encontrosPassados.length})
+              </Button>
+            </div>
+
+            {/* Lista de Encontros */}
+            {(() => {
+              const encontrosExibir =
+                filtroAgenda === 'proximos' ? proximosEncontros :
+                filtroAgenda === 'passados' ? encontrosPassados :
+                [...proximosEncontros, ...encontrosPassados].sort((a, b) =>
+                  new Date(b.data_hora).getTime() - new Date(a.data_hora).getTime()
+                );
+
+              return encontrosExibir.length > 0 ? (
+                <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                  {encontrosExibir.map(encontro => {
+                    const daysUntil = getDaysUntilMeeting(encontro.data_hora);
+                    const isPast = new Date(encontro.data_hora) < new Date();
+
+                    return (
+                      <div
+                        key={encontro.id}
+                        className={`p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors ${isPast ? 'opacity-75' : ''}`}
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
+                              <Badge variant="outline" className="text-xs">
+                                {encontro.tipo}
+                              </Badge>
+                              {!isPast && getCountdownBadge(daysUntil)}
+                              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                <Clock className="h-3 w-3" />
+                                {format(new Date(encontro.data_hora), "dd 'de' MMMM 'às' HH:mm", {
+                                  locale: ptBR
+                                })}
+                              </div>
+                            </div>
+                            <h4 className="font-semibold text-foreground mb-1">{encontro.titulo}</h4>
+                            {encontro.descricao && (
+                              <p className="text-sm text-muted-foreground line-clamp-2">
+                                {encontro.descricao}
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {isAdmin && (
+                              <EditarAgendaDialog encontro={encontro} />
+                            )}
+                            {encontro.link_zoom && !isPast && (
+                              <Button size="sm" asChild>
+                                <a href={encontro.link_zoom} target="_blank" rel="noopener noreferrer">
+                                  <Video className="h-4 w-4 mr-1" />
+                                  Acessar
+                                </a>
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-center py-8">
+                  Nenhum encontro encontrado.
+                </p>
+              );
+            })()}
+          </CardContent>
+        </Card>
+
+        {/* Links Úteis */}
+        <Card className="border-border bg-card shadow-card h-fit">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <LinkIcon className="h-6 w-6 text-primary" />
+                <CardTitle className="text-foreground">Links Úteis</CardTitle>
+              </div>
               {isAdmin && (
                 <div className="flex gap-2">
-                  <AdminImportarAgendaDialog />
-                  <AdminAgendaDialog />
+                  <AdminImportarLinksDialog />
+                  <AdminLinksDialog />
                 </div>
               )}
             </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {/* Filtros */}
-          <div className="flex gap-2 mb-4 flex-wrap">
-            <Button
-              variant={filtroAgenda === 'proximos' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFiltroAgenda('proximos')}
-            >
-              Próximos ({proximosEncontros.length})
-            </Button>
-            <Button
-              variant={filtroAgenda === 'passados' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFiltroAgenda('passados')}
-            >
-              Passados ({encontrosPassados.length})
-            </Button>
-            <Button
-              variant={filtroAgenda === 'todos' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFiltroAgenda('todos')}
-            >
-              Todos ({proximosEncontros.length + encontrosPassados.length})
-            </Button>
-          </div>
-
-          {/* Lista de Encontros */}
-          {(() => {
-            const encontrosExibir =
-              filtroAgenda === 'proximos' ? proximosEncontros :
-              filtroAgenda === 'passados' ? encontrosPassados :
-              [...proximosEncontros, ...encontrosPassados].sort((a, b) =>
-                new Date(b.data_hora).getTime() - new Date(a.data_hora).getTime()
-              );
-
-            return encontrosExibir.length > 0 ? (
-              <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
-                {encontrosExibir.map(encontro => {
-                  const daysUntil = getDaysUntilMeeting(encontro.data_hora);
-                  const isPast = new Date(encontro.data_hora) < new Date();
-
-                  return (
-                    <div
-                      key={encontro.id}
-                      className={`p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors ${isPast ? 'opacity-75' : ''}`}
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2 flex-wrap">
-                            <Badge variant="outline" className="text-xs">
-                              {encontro.tipo}
-                            </Badge>
-                            {!isPast && getCountdownBadge(daysUntil)}
-                            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                              <Clock className="h-3 w-3" />
-                              {format(new Date(encontro.data_hora), "dd 'de' MMMM 'às' HH:mm", {
-                                locale: ptBR
-                              })}
-                            </div>
-                          </div>
-                          <h4 className="font-semibold text-foreground mb-1">{encontro.titulo}</h4>
-                          {encontro.descricao && (
-                            <p className="text-sm text-muted-foreground line-clamp-2">
-                              {encontro.descricao}
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {isAdmin && (
-                            <EditarAgendaDialog encontro={encontro} />
-                          )}
-                          {encontro.link_zoom && !isPast && (
-                            <Button size="sm" asChild>
-                              <a href={encontro.link_zoom} target="_blank" rel="noopener noreferrer">
-                                <Video className="h-4 w-4 mr-1" />
-                                Acessar
-                              </a>
-                            </Button>
-                          )}
-                        </div>
+          </CardHeader>
+          <CardContent>
+            {links && links.length > 0 ? (
+              <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                {links.map((link: any) => (
+                  <div
+                    key={link.id}
+                    className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-3">
+                      <h4 className="font-semibold text-foreground">{link.titulo}</h4>
+                      <div className="flex gap-1 items-center">
+                        {!link.ativo && (
+                          <Badge variant="secondary" className="text-xs">
+                            Inativo
+                          </Badge>
+                        )}
+                        {isAdmin && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 p-0"
+                            onClick={() => setEditingLink(link)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
                     </div>
-                  );
-                })}
+                    <Button
+                      className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+                      size="sm"
+                      onClick={() => window.open(link.url_zoom, "_blank")}
+                    >
+                      Acessar
+                      <ExternalLink className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
               </div>
             ) : (
-              <p className="text-muted-foreground text-center py-8">
-                Nenhum encontro encontrado.
-              </p>
-            );
-          })()}
-        </CardContent>
-      </Card>
-
-      {/* Links Úteis */}
-      <Card className="border-border bg-card shadow-card">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <LinkIcon className="h-6 w-6 text-primary" />
-              <CardTitle className="text-foreground">Links Úteis</CardTitle>
-            </div>
-            {isAdmin && (
-              <div className="flex gap-2">
-                <AdminImportarLinksDialog />
-                <AdminLinksDialog />
+              <div className="text-center py-8">
+                <LinkIcon className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                <p className="text-muted-foreground">Nenhum link disponível no momento</p>
               </div>
             )}
-          </div>
-        </CardHeader>
-        <CardContent>
-          {links && links.length > 0 ? (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {links.map((link: any) => (
-                <div
-                  key={link.id}
-                  className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex items-start justify-between gap-2 mb-3">
-                    <h4 className="font-semibold text-foreground">{link.titulo}</h4>
-                    <div className="flex gap-1 items-center">
-                      {!link.ativo && (
-                        <Badge variant="secondary" className="text-xs">
-                          Inativo
-                        </Badge>
-                      )}
-                      {isAdmin && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-8 w-8 p-0"
-                          onClick={() => setEditingLink(link)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                  <Button
-                    className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
-                    size="sm"
-                    onClick={() => window.open(link.url_zoom, "_blank")}
-                  >
-                    Acessar
-                    <ExternalLink className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <LinkIcon className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground">Nenhum link disponível no momento</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Navegadores */}
       <Card className="border-border bg-card shadow-card">
