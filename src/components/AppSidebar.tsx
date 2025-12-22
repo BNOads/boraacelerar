@@ -1,4 +1,4 @@
-import { Home, BookOpen, TrendingUp, Trophy, Calendar, Video, Users as UsersIcon, Link as LinkIcon, Settings, LogOut, User, Users, Bell, Store, Target } from "lucide-react";
+import { Home, BookOpen, TrendingUp, Trophy, Calendar, Video, Users as UsersIcon, Settings, LogOut, User, Users, Bell, Store, Target } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
@@ -30,7 +30,6 @@ const menuItems = [
   { title: "Metas", url: "/metas", icon: Target },
   { title: "Área de Membros", url: "/membros", icon: Video },
   { title: "Navegador", url: "/navegador", icon: UsersIcon },
-  { title: "Links Úteis", url: "/links", icon: LinkIcon },
   { title: "Loja", url: "/loja", icon: Store },
   { title: "Mentorados", url: "/mentorados", icon: Users, adminOnly: true },
 ];
@@ -73,16 +72,16 @@ export function AppSidebar() {
     <Sidebar className={state === "collapsed" ? "w-14" : "w-60"} collapsible="icon">
       <SidebarContent className="bg-sidebar">
         {state !== "collapsed" && (
-          <div className="p-6 flex justify-center">
+          <div className="pt-4 pb-2 flex justify-center">
             <img
               src={theme === "light" ? logoLight : logo}
               alt="BORA Acelerar"
-              className="h-32 w-auto"
+              className="h-24 w-auto"
             />
           </div>
         )}
 
-        <SidebarGroup>
+        <SidebarGroup className="pt-0">
           <SidebarGroupLabel className="text-white">Navegação</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>

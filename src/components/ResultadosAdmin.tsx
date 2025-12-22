@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
 import { TrendingUp, Users, CheckCircle, Target, ArrowUpDown, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { FAIXAS_PREMIACAO, determinarFaixa } from "@/constants/faixas";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -39,20 +40,6 @@ interface MentoradoRanking {
 
 type SortKey = 'nome' | 'faturamentoTotal' | 'faturamentoMedio' | 'contratosTotal' | 'taxaConversao' | 'clientesAtuais' | 'progressoMedioOKR' | 'notaMediaPilares';
 type SortOrder = 'asc' | 'desc';
-
-const faixas = [
-  { nome: "Bronze", min: 10000, max: 24999, cor: "bg-amber-700", emoji: "🥉" },
-  { nome: "Prata", min: 25000, max: 49999, cor: "bg-slate-400", emoji: "🥈" },
-  { nome: "Ouro", min: 50000, max: 99999, cor: "bg-secondary", emoji: "🥇" },
-  { nome: "Platina", min: 100000, max: 249999, cor: "bg-cyan-400", emoji: "💎" },
-  { nome: "Diamante", min: 250000, max: null, cor: "bg-blue-600", emoji: "💠" },
-];
-
-const determinarFaixa = (faturamentoMedio: number) => {
-  return faixas.find(f => 
-    faturamentoMedio >= f.min && (f.max === null || faturamentoMedio <= f.max)
-  ) || faixas[0];
-};
 
 const getPerformanceColor = (valor: number): string => {
   if (valor >= 90) return "text-blue-500";
@@ -476,7 +463,7 @@ export function ResultadosAdmin() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todas">Todas as faixas</SelectItem>
-                {faixas.map(faixa => (
+                {FAIXAS_PREMIACAO.map(faixa => (
                   <SelectItem key={faixa.nome} value={faixa.nome}>
                     {faixa.emoji} {faixa.nome}
                   </SelectItem>

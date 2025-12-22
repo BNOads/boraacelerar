@@ -6,11 +6,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bell, Search, AlertCircle, Info, AlertTriangle, Plus } from "lucide-react";
+import { Bell, Search, AlertCircle, Info, AlertTriangle, Plus, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function Notifications() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -69,6 +81,27 @@ export default function Notifications() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications-list"] });
       queryClient.invalidateQueries({ queryKey: ["notifications-unread"] });
+    },
+  });
+
+  const deleteNotificationMutation = useMutation({
+    mutationFn: async (notificationId: string) => {
+      const { error } = await supabase
+        .from("notifications")
+        .delete()
+        .eq("id", notificationId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications-list"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications-unread"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications-popup"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-notifications"] });
+      toast.success("Notificação excluída com sucesso");
+    },
+    onError: () => {
+      toast.error("Erro ao excluir notificação");
     },
   });
 
@@ -197,6 +230,40 @@ export default function Notifications() {
                           </p>
                         </div>
                       </div>
+                      {isAdmin && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Excluir notificação</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Tem certeza que deseja excluir esta notificação? Esta ação não pode ser desfeita.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction
+                                className="bg-destructive hover:bg-destructive/90"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  deleteNotificationMutation.mutate(notification.id);
+                                }}
+                              >
+                                Excluir
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
                     </div>
                   </CardHeader>
                   <CardContent>

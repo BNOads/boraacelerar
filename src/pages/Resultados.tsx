@@ -13,6 +13,7 @@ import { CronometroTrimestral } from "@/components/CronometroTrimestral";
 import { TaxasMarketing } from "@/components/TaxasMarketing";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { ResultadosAdmin } from "@/components/ResultadosAdmin";
+import { FAIXAS_PREMIACAO, FaixaPremiacao } from "@/constants/faixas";
 import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -24,14 +25,6 @@ interface DesempenhoData {
   contratos_fechados: number;
 }
 
-interface FaixaPremiacao {
-  nome: string;
-  min: number;
-  max: number | null;
-  cor: string;
-  emoji: string;
-}
-
 interface MetricasMensais {
   mes_ano: string;
   qtd_colaboradores: number;
@@ -40,14 +33,6 @@ interface MetricasMensais {
   seguidores_tiktok: number;
   seguidores_linkedin: number;
 }
-
-const faixas: FaixaPremiacao[] = [
-  { nome: "Bronze", min: 10000, max: 24999, cor: "bg-amber-700", emoji: "🥉" },
-  { nome: "Prata", min: 25000, max: 49999, cor: "bg-slate-400", emoji: "🥈" },
-  { nome: "Ouro", min: 50000, max: 99999, cor: "bg-secondary", emoji: "🥇" },
-  { nome: "Platina", min: 100000, max: 249999, cor: "bg-cyan-400", emoji: "💎" },
-  { nome: "Diamante", min: 250000, max: null, cor: "bg-blue-600", emoji: "💠" },
-];
 
 export default function Resultados() {
   const { isAdmin, isLoading: loadingAdmin } = useIsAdmin();
@@ -249,11 +234,11 @@ export default function Resultados() {
     }
   }, [metricasMensais]);
 
-  const faixaAtual = faixas.find(f => 
+  const faixaAtual = FAIXAS_PREMIACAO.find(f =>
     faturamentoMedioMensal >= f.min && (f.max === null || faturamentoMedioMensal <= f.max)
-  ) || faixas[0];
+  ) || FAIXAS_PREMIACAO[0];
 
-  const proximaFaixa = faixas[faixas.indexOf(faixaAtual) + 1];
+  const proximaFaixa = FAIXAS_PREMIACAO[FAIXAS_PREMIACAO.indexOf(faixaAtual) + 1];
   const progressoFaixa = proximaFaixa 
     ? ((faturamentoMedioMensal - faixaAtual.min) / (proximaFaixa.min - faixaAtual.min)) * 100
     : 100;
@@ -467,7 +452,7 @@ export default function Resultados() {
           )}
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2 pt-4 border-t">
-            {faixas.map((faixa) => (
+            {FAIXAS_PREMIACAO.map((faixa) => (
               <div 
                 key={faixa.nome}
                 className={`p-3 rounded-lg text-center border-2 ${

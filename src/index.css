@@ -25,6 +25,9 @@ All colors MUST be HSL.
 
     --secondary: 195 40% 20%;
     --secondary-foreground: 0 0% 100%;
+    --secondary-light: 195 50% 35%;
+    --secondary-subtle: 195 65% 45% / 0.1;
+    --secondary-hover: 195 65% 45% / 0.15;
 
     --muted: 0 0% 12%;
     --muted-foreground: 0 0% 65%;
@@ -77,6 +80,9 @@ All colors MUST be HSL.
 
     --secondary: 195 30% 90%;
     --secondary-foreground: 195 65% 25%;
+    --secondary-light: 195 40% 80%;
+    --secondary-subtle: 195 65% 40% / 0.1;
+    --secondary-hover: 195 65% 40% / 0.15;
 
     --muted: 0 0% 94%;
     --muted-foreground: 0 0% 30%;

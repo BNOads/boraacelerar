@@ -3,28 +3,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, TrendingUp, Trophy, BookOpen, Rocket, Users, Clock, Video, Plus } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Calendar, Rocket, Clock, Video, Plus, Bell, AlertCircle, Info, AlertTriangle, ExternalLink, Edit, Link as LinkIcon } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { useQuery } from "@tanstack/react-query";
 import { format, differenceInDays, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { AdminAgendaDialog } from "@/components/AdminAgendaDialog";
 import { AdminImportarAgendaDialog } from "@/components/AdminImportarAgendaDialog";
 import { AdminImportarEncontrosDialog } from "@/components/AdminImportarEncontrosDialog";
+import { AdminLinksDialog } from "@/components/AdminLinksDialog";
+import { AdminImportarLinksDialog } from "@/components/AdminImportarLinksDialog";
+import { EditarLinkDialog } from "@/components/EditarLinkDialog";
 interface Profile {
   nome_completo: string;
   apelido: string | null;
-}
-interface AdminStats {
-  total_mentorados: number;
-  faturamento_medio_mensal: number;
-  faturamento_acumulado_total: number;
-  distribuicao_faixas: {
-    faixa: string;
-    quantidade: number;
-    min_faturamento: number;
-    max_faturamento: number | null;
-  }[];
 }
 interface AgendaItem {
   id: string;
@@ -35,129 +28,98 @@ interface AgendaItem {
   descricao: string | null;
 }
 export default function Dashboard() {
-  const {
-    isAdmin
-  } = useIsAdmin();
+  const { isAdmin } = useIsAdmin();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [adminStats, setAdminStats] = useState<AdminStats | null>(null);
   const [proximosEncontros, setProximosEncontros] = useState<AgendaItem[]>([]);
   const [encontrosPassados, setEncontrosPassados] = useState<AgendaItem[]>([]);
   const [filtroAgenda, setFiltroAgenda] = useState<'proximos' | 'passados' | 'todos'>('proximos');
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [editingLink, setEditingLink] = useState<any>(null);
+
+  // Query para notificacoes
+  const { data: notifications } = useQuery({
+    queryKey: ["dashboard-notifications"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
+        .limit(5);
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Query para links úteis
+  const { data: links } = useQuery({
+    queryKey: ["dashboard-links", isAdmin],
+    queryFn: async () => {
+      let query = supabase
+        .from("zoom_info")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (!isAdmin) {
+        query = query.eq("ativo", true);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case "alerta":
+        return <AlertCircle className="h-5 w-5 text-orange-500" />;
+      case "prioridade":
+        return <AlertTriangle className="h-5 w-5 text-red-500" />;
+      default:
+        return <Info className="h-5 w-5 text-blue-500" />;
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
-      const {
-        data: {
-          user
-        }
-      } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const {
-          data: profileData
-        } = await supabase.from("profiles").select("nome_completo, apelido").eq("id", user.id).single();
+        setUserId(user.id);
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("nome_completo, apelido")
+          .eq("id", user.id)
+          .single();
         setProfile(profileData);
 
         // Buscar todos os encontros da agenda
         const now = new Date().toISOString();
-        const {
-          data: agendaFutura
-        } = await supabase.from("agenda_mentoria").select("*").gte("data_hora", now).order("data_hora", {
-          ascending: true
-        });
-        const {
-          data: agendaPassada
-        } = await supabase.from("agenda_mentoria").select("*").lt("data_hora", now).order("data_hora", {
-          ascending: false
-        });
+        const { data: agendaFutura } = await supabase
+          .from("agenda_mentoria")
+          .select("*")
+          .gte("data_hora", now)
+          .order("data_hora", { ascending: true });
+        const { data: agendaPassada } = await supabase
+          .from("agenda_mentoria")
+          .select("*")
+          .lt("data_hora", now)
+          .order("data_hora", { ascending: false });
+
         if (agendaFutura) {
           setProximosEncontros(agendaFutura);
         }
         if (agendaPassada) {
           setEncontrosPassados(agendaPassada);
         }
-        if (isAdmin) {
-          // Buscar estatísticas para admin - queries paralelas para performance
-          const [
-            { count: totalMentorados },
-            { data: allDesempenho },
-            { data: premiacoes },
-            { data: mentoradosAtivos }
-          ] = await Promise.all([
-            supabase.from("mentorados").select("*", { count: "exact", head: true }).eq("status", "ativo"),
-            supabase.from("desempenho_mensal").select("faturamento_mensal, mentorado_id, mes_ano"),
-            supabase.from("premiacoes").select("*").order("min_faturamento", { ascending: true }),
-            supabase.from("mentorados").select("id").eq("status", "ativo")
-          ]);
-
-          // Calcular faturamento total
-          let faturamentoTotal = 0;
-          let countRegistros = 0;
-          if (allDesempenho) {
-            allDesempenho.forEach(item => {
-              if (item.faturamento_mensal) {
-                faturamentoTotal += item.faturamento_mensal;
-                countRegistros++;
-              }
-            });
-          }
-          const faturamentoMedio = countRegistros > 0 ? faturamentoTotal / countRegistros : 0;
-
-          // Calcular distribuição de faixas usando dados já carregados
-          const distribuicaoFaixas: Record<string, number> = {};
-          if (premiacoes) {
-            premiacoes.forEach(p => {
-              distribuicaoFaixas[p.faixa] = 0;
-            });
-          }
-
-          if (mentoradosAtivos && premiacoes && allDesempenho) {
-            // Agrupar por mentorado e pegar o mais recente
-            const ultimosPorMentorado: Record<string, { mes_ano: string; faturamento: number }> = {};
-            allDesempenho.forEach(item => {
-              const current = ultimosPorMentorado[item.mentorado_id];
-              if (!current || item.mes_ano > current.mes_ano) {
-                ultimosPorMentorado[item.mentorado_id] = {
-                  mes_ano: item.mes_ano,
-                  faturamento: item.faturamento_mensal || 0
-                };
-              }
-            });
-
-            // Calcular faixas apenas para mentorados ativos
-            const mentoradosAtivosIds = new Set(mentoradosAtivos.map(m => m.id));
-            Object.entries(ultimosPorMentorado).forEach(([mentoradoId, data]) => {
-              if (!mentoradosAtivosIds.has(mentoradoId)) return;
-              
-              const faixa = premiacoes.find(p => {
-                const acimaDe = data.faturamento >= p.min_faturamento;
-                const abaixoDe = p.max_faturamento === null || data.faturamento <= p.max_faturamento;
-                return acimaDe && abaixoDe;
-              });
-              if (faixa) {
-                distribuicaoFaixas[faixa.faixa]++;
-              }
-            });
-          }
-
-          const distribuicaoArray = premiacoes?.map(p => ({
-            faixa: p.faixa,
-            quantidade: distribuicaoFaixas[p.faixa] || 0,
-            min_faturamento: p.min_faturamento,
-            max_faturamento: p.max_faturamento
-          })) || [];
-
-          setAdminStats({
-            total_mentorados: totalMentorados || 0,
-            faturamento_medio_mensal: faturamentoMedio,
-            faturamento_acumulado_total: faturamentoTotal,
-            distribuicao_faixas: distribuicaoArray
-          });
-        }
       }
       setLoading(false);
     };
     fetchData();
-  }, [isAdmin]);
+  }, []);
   const getDaysUntilMeeting = (dataHora: string) => {
     const today = startOfDay(new Date());
     const meetingDate = startOfDay(new Date(dataHora));
@@ -174,27 +136,6 @@ export default function Dashboard() {
       return <Badge variant="secondary">{days} dias</Badge>;
     }
   };
-  const quickAccessCards = [{
-    title: "Próximo Encontro",
-    icon: Calendar,
-    link: "/agenda",
-    color: "from-primary/20 to-primary/5"
-  }, {
-    title: "Trilha de Aceleração",
-    icon: BookOpen,
-    link: "/trilha",
-    color: "from-primary/20 to-primary/5"
-  }, {
-    title: "Meus Resultados",
-    icon: TrendingUp,
-    link: "/resultados",
-    color: "from-primary/20 to-primary/5"
-  }, {
-    title: "Prêmio Profissional",
-    icon: Trophy,
-    link: "/premio",
-    color: "from-primary/20 to-primary/5"
-  }];
   if (loading) {
     return <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-muted-foreground">Carregando...</div>
@@ -214,44 +155,80 @@ export default function Dashboard() {
         </p>
       </div>
 
-      {/* Quick Access Cards */}
-
-
-      {/* Estatísticas da Mentoria - Admin Only */}
-      {isAdmin && adminStats && (
-        <Card className="border-border bg-card shadow-card">
-          <CardHeader>
-            <CardTitle className="text-2xl text-foreground flex items-center gap-2">
-              <Users className="h-6 w-6 text-secondary" />
-              Estatísticas da Mentoria
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="text-center p-6 bg-muted/30 rounded-lg">
-                <p className="text-4xl font-bold text-secondary mb-2">{adminStats.total_mentorados}</p>
-                <p className="text-sm text-muted-foreground">Mentorados Ativos</p>
-              </div>
-              <div className="text-center p-6 bg-muted/30 rounded-lg">
-                <p className="text-4xl font-bold text-secondary mb-2">
-                  R$ {adminStats.faturamento_acumulado_total.toLocaleString('pt-BR', {
-                minimumFractionDigits: 2
-              })}
-                </p>
-                <p className="text-sm text-muted-foreground">Faturamento Acumulado da Mentoria</p>
-              </div>
+      {/* Notificações */}
+      <Card className="border-border bg-card shadow-card">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Bell className="h-6 w-6 text-primary" />
+              <CardTitle className="text-foreground">Avisos e Comunicados</CardTitle>
             </div>
-
-            <div className="mt-6 text-center">
-              <Link to="/resultados">
-                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                  Ver Resultados da Mentoria
+            <div className="flex items-center gap-2">
+              {isAdmin && (
+                <Button
+                  size="sm"
+                  className="bg-primary hover:bg-primary/90"
+                  onClick={() => navigate("/admin/notifications/create")}
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Nova Notificação
                 </Button>
-              </Link>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate("/notifications")}
+              >
+                Ver Todas
+              </Button>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        </CardHeader>
+        <CardContent>
+          {notifications && notifications.length > 0 ? (
+            <div className="space-y-3">
+              {notifications.map((notification: any) => {
+                const isRead = userId ? notification.read_by?.includes(userId) : false;
+                return (
+                  <div
+                    key={notification.id}
+                    className={`p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer ${
+                      !isRead ? "border-l-4 border-l-primary bg-primary/5" : ""
+                    }`}
+                    onClick={() => navigate("/notifications")}
+                  >
+                    <div className="flex items-start gap-3">
+                      {getNotificationIcon(notification.type)}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className="font-semibold text-foreground">{notification.title}</h4>
+                          {!isRead && (
+                            <Badge variant="default" className="text-xs">Nova</Badge>
+                          )}
+                          {notification.priority === "alta" && (
+                            <Badge variant="destructive" className="text-xs">Alta Prioridade</Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                          {notification.message}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          {format(new Date(notification.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+              <p className="text-muted-foreground">Nenhum aviso no momento</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Agenda Completa */}
       <Card className="border-border bg-card shadow-card">
@@ -360,6 +337,79 @@ export default function Dashboard() {
           })()}
         </CardContent>
       </Card>
+
+      {/* Links Úteis */}
+      <Card className="border-border bg-card shadow-card">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <LinkIcon className="h-6 w-6 text-primary" />
+              <CardTitle className="text-foreground">Links Úteis</CardTitle>
+            </div>
+            {isAdmin && (
+              <div className="flex gap-2">
+                <AdminImportarLinksDialog />
+                <AdminLinksDialog />
+              </div>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent>
+          {links && links.length > 0 ? (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {links.map((link: any) => (
+                <div
+                  key={link.id}
+                  className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-2 mb-3">
+                    <h4 className="font-semibold text-foreground">{link.titulo}</h4>
+                    <div className="flex gap-1 items-center">
+                      {!link.ativo && (
+                        <Badge variant="secondary" className="text-xs">
+                          Inativo
+                        </Badge>
+                      )}
+                      {isAdmin && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 w-8 p-0"
+                          onClick={() => setEditingLink(link)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  <Button
+                    className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+                    size="sm"
+                    onClick={() => window.open(link.url_zoom, "_blank")}
+                  >
+                    Acessar
+                    <ExternalLink className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <LinkIcon className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+              <p className="text-muted-foreground">Nenhum link disponível no momento</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Dialog de Edição de Link */}
+      {editingLink && (
+        <EditarLinkDialog
+          link={editingLink}
+          open={!!editingLink}
+          onOpenChange={(open) => !open && setEditingLink(null)}
+        />
+      )}
 
     </div>;
 }
