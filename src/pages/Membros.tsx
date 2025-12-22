@@ -188,8 +188,9 @@ export default function Membros() {
 
 
       {/* Tabs */}
-      <Tabs defaultValue="gravacoes" className="space-y-6">
+      <Tabs defaultValue="conteudos" className="space-y-6">
         <TabsList className="bg-card/50 border border-border">
+          <TabsTrigger value="conteudos">Conteúdos</TabsTrigger>
           <TabsTrigger value="gravacoes">Minhas Gravações</TabsTrigger>
           <TabsTrigger value="agentes-ia">Agentes de IA</TabsTrigger>
           <TabsTrigger value="posto-ipiranga">
@@ -197,6 +198,67 @@ export default function Membros() {
             Posto Ipiranga
           </TabsTrigger>
         </TabsList>
+
+        {/* Conteúdos Direcionados */}
+        <TabsContent value="conteudos" className="space-y-6">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between gap-4">
+              <h3 className="text-xl font-bold text-foreground">Conteúdos para Membros</h3>
+              <div className="relative flex-1 max-w-xs">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar conteúdo..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 bg-card/50 border-border"
+                />
+              </div>
+            </div>
+            {loadingConteudo ? (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+              </div>
+            ) : filteredConteudo && filteredConteudo.length > 0 ? (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {filteredConteudo.map((conteudo) => (
+                  <Card
+                    key={conteudo.id}
+                    className="border-border bg-card/50 backdrop-blur-sm hover:shadow-elegant hover:scale-[1.02] transition-all duration-300 cursor-pointer"
+                    onClick={() => conteudo.url && window.open(conteudo.url, "_blank")}
+                  >
+                    <CardHeader>
+                      <div className="flex items-center justify-between gap-2">
+                        <CardTitle className="text-base">{conteudo.titulo}</CardTitle>
+                        {conteudo.tags && conteudo.tags.length > 0 && (
+                          <Badge variant="default" className="text-xs shrink-0">
+                            {conteudo.tags[0]}
+                          </Badge>
+                        )}
+                      </div>
+                      {conteudo.descricao && (
+                        <CardDescription className="line-clamp-2">
+                          {conteudo.descricao}
+                        </CardDescription>
+                      )}
+                    </CardHeader>
+                    <CardContent>
+                      {conteudo.url && (
+                        <div className="flex items-center gap-2 text-sm text-primary">
+                          <ExternalLink className="h-4 w-4" />
+                          <span>Acessar conteúdo</span>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <p className="text-center text-muted-foreground py-8">
+                Nenhum conteúdo encontrado.
+              </p>
+            )}
+          </div>
+        </TabsContent>
 
         <TabsContent value="gravacoes" className="space-y-6">
           {/* Gravações de Encontros */}
