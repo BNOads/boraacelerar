@@ -1,15 +1,31 @@
 import { useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { Target, Plus } from "lucide-react";
+import { Target, Plus, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { MetaCard } from "@/components/MetaCard";
 import { NovaMetaDialog } from "@/components/NovaMetaDialog";
 import { NovoObjetivoDialog } from "@/components/NovoObjetivoDialog";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+
+interface Mentorado {
+  id: string;
+  user_id: string;
+  turma: string | null;
+  status: string | null;
+  profiles: {
+    nome_completo: string;
+    apelido: string | null;
+    foto_url: string | null;
+  } | null;
+}
 
 export default function Metas() {
+  const { isAdmin } = useIsAdmin();
   const [mentoradoId, setMentoradoId] = useState<string | null>(null);
   const [metas, setMetas] = useState<any[]>([]);
   const [anoSelecionado, setAnoSelecionado] = useState<string>(new Date().getFullYear().toString());
@@ -19,16 +35,25 @@ export default function Metas() {
   const [dialogNovoObjetivoAberto, setDialogNovoObjetivoAberto] = useState(false);
   const [metaSelecionada, setMetaSelecionada] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mentorados, setMentorados] = useState<Mentorado[]>([]);
+  const [mentoradoSelecionado, setMentoradoSelecionado] = useState<string | null>(null);
 
   useEffect(() => {
     carregarMentorado();
   }, []);
 
   useEffect(() => {
-    if (mentoradoId) {
-      carregarMetas();
+    if (isAdmin) {
+      carregarTodosMentorados();
     }
-  }, [mentoradoId, anoSelecionado]);
+  }, [isAdmin]);
+
+  useEffect(() => {
+    const idParaBuscar = isAdmin && mentoradoSelecionado ? mentoradoSelecionado : mentoradoId;
+    if (idParaBuscar) {
+      carregarMetas(idParaBuscar);
+    }
+  }, [mentoradoId, mentoradoSelecionado, anoSelecionado, isAdmin]);
 
   const carregarMentorado = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -42,19 +67,34 @@ export default function Metas() {
     }
   };
 
-  const carregarMetas = async () => {
-    if (!mentoradoId) return;
+  const carregarTodosMentorados = async () => {
+    const { data, error } = await supabase
+      .from("mentorados")
+      .select(`
+        id,
+        user_id,
+        turma,
+        status,
+        profiles:user_id (nome_completo, apelido, foto_url)
+      `)
+      .eq("status", "ativo")
+      .order("created_at", { ascending: false });
 
+    if (!error && data) {
+      setMentorados(data as Mentorado[]);
+    }
+  };
+
+  const carregarMetas = async (id: string) => {
     setLoading(true);
 
-    // Buscar metas do ano selecionado
     const anoInicio = `${anoSelecionado}-01-01`;
     const anoFim = `${anoSelecionado}-12-31`;
 
     const { data, error } = await supabase
       .from("metas")
       .select(`*, objetivos (*)`)
-      .eq("mentorado_id", mentoradoId)
+      .eq("mentorado_id", id)
       .gte("data_inicio", anoInicio)
       .lte("data_inicio", anoFim)
       .order("created_at", { ascending: false });
@@ -68,19 +108,15 @@ export default function Metas() {
     setLoading(false);
   };
 
-  // Extrair anos únicos das metas (para dropdown)
   const anosDisponiveis = useMemo(() => {
     const anos = new Set<string>();
-    // Adicionar ano atual sempre
     anos.add(new Date().getFullYear().toString());
-    // Adicionar últimos 3 anos
     for (let i = 1; i <= 3; i++) {
       anos.add((new Date().getFullYear() - i).toString());
     }
     return Array.from(anos).sort((a, b) => b.localeCompare(a));
   }, []);
 
-  // Calcular trimestre de uma data
   const getTrimestreFromDate = (dateStr: string) => {
     const date = new Date(dateStr);
     const mes = date.getMonth() + 1;
@@ -90,16 +126,13 @@ export default function Metas() {
     return "Q4";
   };
 
-  // Filtrar metas por trimestre e status
   const metasFiltradas = useMemo(() => {
     return metas.filter(meta => {
-      // Filtro por trimestre
       if (trimestreSelecionado !== "todos") {
         const trimestre = getTrimestreFromDate(meta.data_inicio);
         if (trimestre !== trimestreSelecionado) return false;
       }
 
-      // Filtro por status
       if (statusSelecionado !== "todas") {
         if (meta.status !== statusSelecionado) return false;
       }
@@ -107,6 +140,9 @@ export default function Metas() {
       return true;
     });
   }, [metas, trimestreSelecionado, statusSelecionado]);
+
+  const mentoradoAtual = mentorados.find(m => m.id === mentoradoSelecionado);
+  const idParaMeta = isAdmin && mentoradoSelecionado ? mentoradoSelecionado : mentoradoId;
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -123,11 +159,75 @@ export default function Metas() {
         <Button
           onClick={() => setDialogNovaMetaAberto(true)}
           className="bg-secondary hover:bg-secondary/90 text-white"
+          disabled={!idParaMeta}
         >
           <Plus className="mr-2 h-4 w-4" />
           Nova Meta
         </Button>
       </div>
+
+      {/* Admin: Seletor de Mentorado */}
+      {isAdmin && (
+        <Card className="border-border bg-card shadow-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Selecione um Mentorado
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-3 md:grid-cols-4 lg:grid-cols-6">
+              {mentorados.map((mentorado) => (
+                <div
+                  key={mentorado.id}
+                  className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                    mentoradoSelecionado === mentorado.id
+                      ? "border-primary bg-primary/10"
+                      : "border-border hover:border-primary/50 hover:bg-muted/50"
+                  }`}
+                  onClick={() => setMentoradoSelecionado(mentorado.id)}
+                >
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={mentorado.profiles?.foto_url || undefined} />
+                    <AvatarFallback className="bg-secondary/10 text-secondary text-sm">
+                      {mentorado.profiles?.nome_completo?.charAt(0) || "?"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">
+                      {mentorado.profiles?.apelido || mentorado.profiles?.nome_completo?.split(' ')[0]}
+                    </p>
+                    {mentorado.turma && (
+                      <p className="text-xs text-muted-foreground truncate">{mentorado.turma}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+            {mentoradoAtual && (
+              <div className="mt-4 p-3 bg-primary/5 rounded-lg flex items-center gap-3">
+                <Avatar className="h-12 w-12 border-2 border-primary/20">
+                  <AvatarImage src={mentoradoAtual.profiles?.foto_url || undefined} />
+                  <AvatarFallback className="bg-secondary/10 text-secondary">
+                    {mentoradoAtual.profiles?.nome_completo?.charAt(0) || "?"}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-semibold">{mentoradoAtual.profiles?.nome_completo}</p>
+                  <div className="flex gap-2 mt-1">
+                    {mentoradoAtual.turma && (
+                      <Badge variant="outline" className="text-xs">{mentoradoAtual.turma}</Badge>
+                    )}
+                    <Badge variant={mentoradoAtual.status === "ativo" ? "default" : "secondary"} className="text-xs">
+                      {mentoradoAtual.status}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Filtros */}
       <Card className="border-border bg-card shadow-card">
@@ -193,10 +293,20 @@ export default function Metas() {
           <CardTitle>
             Metas de {anoSelecionado}
             {trimestreSelecionado !== "todos" && ` - ${trimestreSelecionado}`}
+            {isAdmin && mentoradoAtual && (
+              <span className="text-muted-foreground font-normal text-base ml-2">
+                ({mentoradoAtual.profiles?.nome_completo})
+              </span>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {loading ? (
+          {isAdmin && !mentoradoSelecionado ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>Selecione um mentorado acima para ver suas metas</p>
+            </div>
+          ) : loading ? (
             <div className="flex justify-center py-12">
               <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
             </div>
@@ -223,7 +333,10 @@ export default function Metas() {
                     setMetaSelecionada(metaId);
                     setDialogNovoObjetivoAberto(true);
                   }}
-                  onUpdate={carregarMetas}
+                  onUpdate={() => {
+                    const id = isAdmin && mentoradoSelecionado ? mentoradoSelecionado : mentoradoId;
+                    if (id) carregarMetas(id);
+                  }}
                 />
               ))}
             </div>
@@ -232,12 +345,15 @@ export default function Metas() {
       </Card>
 
       {/* Dialogs */}
-      {mentoradoId && (
+      {idParaMeta && (
         <NovaMetaDialog
           open={dialogNovaMetaAberto}
           onOpenChange={setDialogNovaMetaAberto}
-          mentoradoId={mentoradoId}
-          onSuccess={carregarMetas}
+          mentoradoId={idParaMeta}
+          onSuccess={() => {
+            const id = isAdmin && mentoradoSelecionado ? mentoradoSelecionado : mentoradoId;
+            if (id) carregarMetas(id);
+          }}
         />
       )}
 
@@ -245,7 +361,10 @@ export default function Metas() {
         open={dialogNovoObjetivoAberto}
         onOpenChange={setDialogNovoObjetivoAberto}
         metaId={metaSelecionada}
-        onSuccess={carregarMetas}
+        onSuccess={() => {
+          const id = isAdmin && mentoradoSelecionado ? mentoradoSelecionado : mentoradoId;
+          if (id) carregarMetas(id);
+        }}
       />
     </div>
   );

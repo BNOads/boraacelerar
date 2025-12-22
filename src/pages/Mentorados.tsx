@@ -17,7 +17,6 @@ import { ptBR } from "date-fns/locale";
 import { AdminCriarUsuarioDialog } from "@/components/AdminCriarUsuarioDialog";
 import { AdminImportarUsuariosDialog } from "@/components/AdminImportarUsuariosDialog";
 import { AdminImportarMentoradosCompleto } from "@/components/AdminImportarMentoradosCompleto";
-import { AdminImportarGravacoesDialog } from "@/components/AdminImportarGravacoesDialog";
 
 export default function Mentorados() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -150,7 +149,6 @@ export default function Mentorados() {
             </p>
           </div>
           <div className="flex gap-2">
-            <AdminImportarGravacoesDialog />
             <AdminImportarMentoradosCompleto />
             <AdminImportarUsuariosDialog />
             <AdminCriarUsuarioDialog />
