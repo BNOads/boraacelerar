@@ -317,6 +317,7 @@ export type Database = {
       }
       diario_bordo: {
         Row: {
+          anexos: string[] | null
           autor_id: string
           conteudo: string
           created_at: string
@@ -326,6 +327,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          anexos?: string[] | null
           autor_id: string
           conteudo: string
           created_at?: string
@@ -335,6 +337,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          anexos?: string[] | null
           autor_id?: string
           conteudo?: string
           created_at?: string
@@ -356,6 +359,87 @@ export type Database = {
             columns: ["mentorado_id"]
             isOneToOne: false
             referencedRelation: "mentorados"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      diario_bordo_reacoes: {
+        Row: {
+          autor_id: string
+          created_at: string
+          emoji: string
+          entrada_id: string
+          id: string
+        }
+        Insert: {
+          autor_id: string
+          created_at?: string
+          emoji: string
+          entrada_id: string
+          id?: string
+        }
+        Update: {
+          autor_id?: string
+          created_at?: string
+          emoji?: string
+          entrada_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diario_bordo_reacoes_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diario_bordo_reacoes_entrada_id_fkey"
+            columns: ["entrada_id"]
+            isOneToOne: false
+            referencedRelation: "diario_bordo"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      diario_bordo_respostas: {
+        Row: {
+          autor_id: string
+          conteudo: string
+          created_at: string
+          entrada_id: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          autor_id: string
+          conteudo: string
+          created_at?: string
+          entrada_id: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          autor_id?: string
+          conteudo?: string
+          created_at?: string
+          entrada_id?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diario_bordo_respostas_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diario_bordo_respostas_entrada_id_fkey"
+            columns: ["entrada_id"]
+            isOneToOne: false
+            referencedRelation: "diario_bordo"
             referencedColumns: ["id"]
           },
         ]
