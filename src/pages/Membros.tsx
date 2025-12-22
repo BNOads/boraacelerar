@@ -11,6 +11,7 @@ import { AdminMembrosDialog } from "@/components/AdminMembrosDialog";
 import { AdminImportarConteudoDialog } from "@/components/AdminImportarConteudoDialog";
 import { AdminPostoIpirangaDialog } from "@/components/AdminPostoIpirangaDialog";
 import { EditarPostoIpirangaDialog } from "@/components/EditarPostoIpirangaDialog";
+import { AdminGravacaoIndividualDialog } from "@/components/AdminGravacaoIndividualDialog";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 export default function Membros() {
@@ -136,6 +137,7 @@ export default function Membros() {
           </div>
           {isAdmin && (
             <div className="flex gap-2">
+              <AdminGravacaoIndividualDialog />
               <AdminImportarConteudoDialog />
               <AdminMembrosDialog />
             </div>
