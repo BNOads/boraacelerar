@@ -12,6 +12,7 @@ import Auth from "./pages/Auth";
 import UpdatePassword from "./pages/UpdatePassword";
 import Dashboard from "./pages/Dashboard";
 import Trilha from "./pages/Trilha";
+import TrilhaDetalhe from "./pages/TrilhaDetalhe";
 import Resultados from "./pages/Resultados";
 import Metas from "./pages/Metas";
 import Membros from "./pages/Membros";
@@ -63,6 +64,7 @@ const App = () => (
           <Route path="/" element={<Navigate to="/dashboard" />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/trilha" element={<ProtectedRoute><Trilha /></ProtectedRoute>} />
+          <Route path="/trilha/:id" element={<ProtectedRoute><TrilhaDetalhe /></ProtectedRoute>} />
           <Route path="/resultados" element={<ProtectedRoute><Resultados /></ProtectedRoute>} />
           <Route path="/metas" element={<ProtectedRoute><Metas /></ProtectedRoute>} />
           <Route path="/agenda" element={<Navigate to="/dashboard" replace />} />
