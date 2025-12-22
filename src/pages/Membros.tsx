@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, Video, FileText, Clock, Play, ExternalLink, Edit, User, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Video, FileText, Clock, Play, ExternalLink, Edit, User, ChevronLeft, ChevronRight, FileSearch } from "lucide-react";
 import { AdminMembrosDialog } from "@/components/AdminMembrosDialog";
 import { AdminImportarConteudoDialog } from "@/components/AdminImportarConteudoDialog";
 import { AdminPostoIpirangaDialog } from "@/components/AdminPostoIpirangaDialog";
@@ -462,7 +462,7 @@ export default function Membros() {
                   <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
                 </div>
               ) : filteredIndividuais && filteredIndividuais.length > 0 ? (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                   {filteredIndividuais.map((gravacao) => {
                     const thumbnail = getVideoThumbnail(gravacao.url_video);
                     return (
@@ -481,28 +481,42 @@ export default function Membros() {
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <div className="flex items-center justify-center h-full bg-card p-4">
+                            <div className="flex items-center justify-center h-full bg-card p-2">
                               <img src={logoBora} alt="Logo" className="max-h-full max-w-full object-contain opacity-60" />
                             </div>
                           )}
                           <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 transition-opacity">
-                            <Play className="h-12 w-12 text-white" />
+                            <Play className="h-8 w-8 text-white" />
                           </div>
                         </div>
-                        <CardHeader>
-                          <CardTitle className="text-base">{gravacao.titulo}</CardTitle>
+                        <CardHeader className="p-3">
+                          <CardTitle className="text-sm line-clamp-2">{gravacao.titulo}</CardTitle>
                           {gravacao.descricao && (
-                            <CardDescription className="line-clamp-2">
+                            <CardDescription className="text-xs line-clamp-1">
                               {gravacao.descricao}
                             </CardDescription>
                           )}
                         </CardHeader>
-                        <CardContent className="space-y-2">
+                        <CardContent className="p-3 pt-0 space-y-2">
                           {gravacao.duracao_seg && (
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <Clock className="h-4 w-4" />
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Clock className="h-3 w-3" />
                               <span>{Math.floor(gravacao.duracao_seg / 60)} min</span>
                             </div>
+                          )}
+                          {gravacao.resumo_url && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="w-full text-xs h-7 gap-1"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(gravacao.resumo_url, "_blank");
+                              }}
+                            >
+                              <FileSearch className="h-3 w-3" />
+                              Ver Resumo
+                            </Button>
                           )}
                         </CardContent>
                       </Card>
@@ -537,7 +551,7 @@ export default function Membros() {
                   <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
                 </div>
               ) : filteredTodasIndividuais && filteredTodasIndividuais.length > 0 ? (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                   {filteredTodasIndividuais.map((gravacao) => {
                     const thumbnail = getVideoThumbnail(gravacao.url_video);
                     const mentoradoNome = gravacao.mentorado?.profile?.apelido || gravacao.mentorado?.profile?.nome_completo || "Mentorado";
@@ -557,45 +571,59 @@ export default function Membros() {
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <div className="flex items-center justify-center h-full bg-card p-4">
+                            <div className="flex items-center justify-center h-full bg-card p-2">
                               <img src={logoBora} alt="Logo" className="max-h-full max-w-full object-contain opacity-60" />
                             </div>
                           )}
                           <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 transition-opacity">
-                            <Play className="h-12 w-12 text-white" />
+                            <Play className="h-8 w-8 text-white" />
                           </div>
                         </div>
-                        <CardHeader>
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <User className="h-4 w-4 text-muted-foreground" />
-                              <span className="text-sm text-muted-foreground font-medium">{mentoradoNome}</span>
+                        <CardHeader className="p-3">
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="flex items-center gap-1 overflow-hidden">
+                              <User className="h-3 w-3 text-muted-foreground shrink-0" />
+                              <span className="text-xs text-muted-foreground font-medium truncate">{mentoradoNome}</span>
                             </div>
                             <Button
                               size="icon"
                               variant="ghost"
-                              className="h-8 w-8"
+                              className="h-6 w-6 shrink-0"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setEditingGravacao(gravacao);
                               }}
                             >
-                              <Edit className="h-4 w-4" />
+                              <Edit className="h-3 w-3" />
                             </Button>
                           </div>
-                          <CardTitle className="text-base">{gravacao.titulo}</CardTitle>
+                          <CardTitle className="text-sm line-clamp-2">{gravacao.titulo}</CardTitle>
                           {gravacao.descricao && (
-                            <CardDescription className="line-clamp-2">
+                            <CardDescription className="text-xs line-clamp-1">
                               {gravacao.descricao}
                             </CardDescription>
                           )}
                         </CardHeader>
-                        <CardContent className="space-y-2">
+                        <CardContent className="p-3 pt-0 space-y-2">
                           {gravacao.duracao_seg && (
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <Clock className="h-4 w-4" />
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Clock className="h-3 w-3" />
                               <span>{Math.floor(gravacao.duracao_seg / 60)} min</span>
                             </div>
+                          )}
+                          {gravacao.resumo_url && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="w-full text-xs h-7 gap-1"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(gravacao.resumo_url, "_blank");
+                              }}
+                            >
+                              <FileSearch className="h-3 w-3" />
+                              Ver Resumo
+                            </Button>
                           )}
                         </CardContent>
                       </Card>

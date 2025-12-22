@@ -37,6 +37,7 @@ export function AdminGravacaoIndividualDialog({ onSuccess }: AdminGravacaoIndivi
     mentorado_id: "",
     titulo: "",
     url_video: "",
+    resumo_url: "",
     descricao: "",
     duracao_min: "",
     data_gravacao: new Date().toISOString().split("T")[0],
@@ -96,6 +97,7 @@ export function AdminGravacaoIndividualDialog({ onSuccess }: AdminGravacaoIndivi
         mentorado_id: form.mentorado_id,
         titulo: form.titulo,
         url_video: form.url_video,
+        resumo_url: form.resumo_url || null,
         descricao: form.descricao || null,
         duracao_seg: form.duracao_min ? parseInt(form.duracao_min) * 60 : null,
         data_gravacao: form.data_gravacao,
@@ -114,6 +116,7 @@ export function AdminGravacaoIndividualDialog({ onSuccess }: AdminGravacaoIndivi
         mentorado_id: "",
         titulo: "",
         url_video: "",
+        resumo_url: "",
         descricao: "",
         duracao_min: "",
         data_gravacao: new Date().toISOString().split("T")[0],
@@ -188,20 +191,30 @@ export function AdminGravacaoIndividualDialog({ onSuccess }: AdminGravacaoIndivi
               onChange={(e) => setForm({ ...form, url_video: e.target.value })}
               placeholder="https://..."
             />
-          </div>
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="descricao">Descrição</Label>
-            <Textarea
-              id="descricao"
-              value={form.descricao}
-              onChange={(e) => setForm({ ...form, descricao: e.target.value })}
-              placeholder="Descrição ou resumo da sessão"
-              rows={3}
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="resumo_url">Link do Resumo</Label>
+              <Input
+                id="resumo_url"
+                value={form.resumo_url}
+                onChange={(e) => setForm({ ...form, resumo_url: e.target.value })}
+                placeholder="https://... (link para resumo da conversa)"
+              />
+            </div>
 
-          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="descricao">Descrição</Label>
+              <Textarea
+                id="descricao"
+                value={form.descricao}
+                onChange={(e) => setForm({ ...form, descricao: e.target.value })}
+                placeholder="Descrição ou resumo da sessão"
+                rows={3}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="data_gravacao">Data da Gravação</Label>
               <Input
