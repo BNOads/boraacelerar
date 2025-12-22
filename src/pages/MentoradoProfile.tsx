@@ -13,7 +13,7 @@ import { ptBR } from "date-fns/locale";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
+import { DiarioBordo } from "@/components/DiarioBordo";
 export default function MentoradoProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -625,6 +625,9 @@ export default function MentoradoProfile() {
             )}
           </TabsContent>
         </Tabs>
+
+        {/* Diário de Bordo - Apenas para admins */}
+        <DiarioBordo mentoradoId={id!} />
 
         {/* Últimos Atendimentos */}
         {atendimentos && atendimentos.length > 0 && (
