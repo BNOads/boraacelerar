@@ -10,7 +10,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
-import { TrendingUp, Users, CheckCircle, Target, ArrowUpDown, Search } from "lucide-react";
+import { TrendingUp, Users, CheckCircle, Target, ArrowUpDown, Search, Settings2 } from "lucide-react";
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
 import { FAIXAS_PREMIACAO, determinarFaixa } from "@/constants/faixas";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
@@ -50,6 +51,17 @@ const getPerformanceColor = (valor: number): string => {
 
 const ITEMS_PER_PAGE = 20;
 
+// Configuração das colunas disponíveis
+const COLUNAS_DISPONIVEIS = [
+  { key: 'faturamentoTotal', label: 'Fat. Total', defaultVisible: false },
+  { key: 'faturamentoMedio', label: 'Fat. Médio', defaultVisible: true },
+  { key: 'contratosTotal', label: 'Contratos', defaultVisible: false },
+  { key: 'taxaConversao', label: 'Conversão', defaultVisible: true },
+  { key: 'clientesAtuais', label: 'Clientes', defaultVisible: true },
+  { key: 'progressoMedioOKR', label: 'OKRs', defaultVisible: false },
+  { key: 'notaMediaPilares', label: 'Pilares', defaultVisible: false },
+] as const;
+
 export function ResultadosAdmin() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
@@ -60,6 +72,9 @@ export function ResultadosAdmin() {
     key: 'faturamentoMedio',
     order: 'desc'
   });
+  const [colunasVisiveis, setColunasVisiveis] = useState<Record<string, boolean>>(
+    COLUNAS_DISPONIVEIS.reduce((acc, col) => ({ ...acc, [col.key]: col.defaultVisible }), {})
+  );
 
   // Query para dados de evolução temporal
   const { data: evolucaoTemporal } = useQuery({
@@ -308,7 +323,7 @@ export function ResultadosAdmin() {
             <CardTitle className="text-foreground">Evolução da Mentoria ao Longo do Tempo</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={400}>
+            <ResponsiveContainer width="100%" height={250}>
               <LineChart data={evolucaoTemporal}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis 
@@ -479,8 +494,33 @@ export function ResultadosAdmin() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-foreground">Ranking de Mentorados</CardTitle>
-            <div className="text-sm text-muted-foreground">
-              Mostrando {startIndex + 1} - {Math.min(endIndex, mentoradosFiltrados.length)} de {mentoradosFiltrados.length} mentorados
+            <div className="flex items-center gap-4">
+              <div className="text-sm text-muted-foreground">
+                Mostrando {startIndex + 1} - {Math.min(endIndex, mentoradosFiltrados.length)} de {mentoradosFiltrados.length}
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Settings2 className="h-4 w-4 mr-2" />
+                    Colunas
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuLabel>Exibir colunas</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {COLUNAS_DISPONIVEIS.map((coluna) => (
+                    <DropdownMenuCheckboxItem
+                      key={coluna.key}
+                      checked={colunasVisiveis[coluna.key]}
+                      onCheckedChange={(checked) =>
+                        setColunasVisiveis((prev) => ({ ...prev, [coluna.key]: checked }))
+                      }
+                    >
+                      {coluna.label}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </CardHeader>
@@ -500,61 +540,97 @@ export function ResultadosAdmin() {
                       <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                   </TableHead>
-                  <TableHead className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleSort('faturamentoTotal')}
-                      className="hover:bg-muted float-right"
-                    >
-                      Fat. Total
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                  </TableHead>
-                  <TableHead className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleSort('faturamentoMedio')}
-                      className="hover:bg-muted float-right"
-                    >
-                      Fat. Médio
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                  </TableHead>
-                  <TableHead className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleSort('contratosTotal')}
-                      className="hover:bg-muted float-right"
-                    >
-                      Contratos
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                  </TableHead>
-                  <TableHead className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleSort('taxaConversao')}
-                      className="hover:bg-muted float-right"
-                    >
-                      Conversão
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                  </TableHead>
-                  <TableHead className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleSort('clientesAtuais')}
-                      className="hover:bg-muted float-right"
-                    >
-                      Clientes
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                  </TableHead>
+                  {colunasVisiveis.faturamentoTotal && (
+                    <TableHead className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleSort('faturamentoTotal')}
+                        className="hover:bg-muted float-right"
+                      >
+                        Fat. Total
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                      </Button>
+                    </TableHead>
+                  )}
+                  {colunasVisiveis.faturamentoMedio && (
+                    <TableHead className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleSort('faturamentoMedio')}
+                        className="hover:bg-muted float-right"
+                      >
+                        Fat. Médio
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                      </Button>
+                    </TableHead>
+                  )}
+                  {colunasVisiveis.contratosTotal && (
+                    <TableHead className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleSort('contratosTotal')}
+                        className="hover:bg-muted float-right"
+                      >
+                        Contratos
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                      </Button>
+                    </TableHead>
+                  )}
+                  {colunasVisiveis.taxaConversao && (
+                    <TableHead className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleSort('taxaConversao')}
+                        className="hover:bg-muted float-right"
+                      >
+                        Conversão
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                      </Button>
+                    </TableHead>
+                  )}
+                  {colunasVisiveis.clientesAtuais && (
+                    <TableHead className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleSort('clientesAtuais')}
+                        className="hover:bg-muted float-right"
+                      >
+                        Clientes
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                      </Button>
+                    </TableHead>
+                  )}
+                  {colunasVisiveis.progressoMedioOKR && (
+                    <TableHead className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleSort('progressoMedioOKR')}
+                        className="hover:bg-muted float-right"
+                      >
+                        OKRs
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                      </Button>
+                    </TableHead>
+                  )}
+                  {colunasVisiveis.notaMediaPilares && (
+                    <TableHead className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleSort('notaMediaPilares')}
+                        className="hover:bg-muted float-right"
+                      >
+                        Pilares
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                      </Button>
+                    </TableHead>
+                  )}
                   <TableHead>Premiação</TableHead>
                 </TableRow>
               </TableHeader>
