@@ -178,81 +178,6 @@ export default function Dashboard() {
         </p>
       </div>
 
-      {/* Notificações */}
-      <Card className="border-border bg-card shadow-card">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Bell className="h-6 w-6 text-primary" />
-              <CardTitle className="text-foreground">Avisos e Comunicados</CardTitle>
-            </div>
-            <div className="flex items-center gap-2">
-              {isAdmin && (
-                <Button
-                  size="sm"
-                  className="bg-primary hover:bg-primary/90"
-                  onClick={() => navigate("/admin/notifications/create")}
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  Nova Notificação
-                </Button>
-              )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate("/notifications")}
-              >
-                Ver Todas
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {notifications && notifications.length > 0 ? (
-            <div className="space-y-3">
-              {notifications.map((notification: any) => {
-                const isRead = userId ? notification.read_by?.includes(userId) : false;
-                return (
-                  <div
-                    key={notification.id}
-                    className={`p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer ${
-                      !isRead ? "border-l-4 border-l-primary bg-primary/5" : ""
-                    }`}
-                    onClick={() => navigate("/notifications")}
-                  >
-                    <div className="flex items-start gap-3">
-                      {getNotificationIcon(notification.type)}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="font-semibold text-foreground">{notification.title}</h4>
-                          {!isRead && (
-                            <Badge variant="default" className="text-xs">Nova</Badge>
-                          )}
-                          {notification.priority === "alta" && (
-                            <Badge variant="destructive" className="text-xs">Alta Prioridade</Badge>
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                          {notification.message}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-2">
-                          {format(new Date(notification.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground">Nenhum aviso no momento</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
       {/* Agenda e Links em Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         {/* Agenda Completa */}
@@ -445,7 +370,7 @@ export default function Dashboard() {
         </CardHeader>
         <CardContent>
           {navegadores && navegadores.length > 0 ? (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="space-y-4">
               {navegadores.map((nav: any) => {
                 const nome = nav.nome || nav.profiles?.nome_completo || nav.profiles?.apelido || "Navegador";
                 const fotoUrl = nav.foto_url || nav.profiles?.foto_url;
@@ -453,24 +378,24 @@ export default function Dashboard() {
                 return (
                   <div
                     key={nav.id}
-                    className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
+                    className="p-5 border border-border rounded-lg hover:bg-muted/50 transition-colors"
                   >
-                    <div className="flex items-start gap-4">
-                      <Avatar className="h-14 w-14 border-2 border-primary/20">
+                    <div className="flex items-start gap-5">
+                      <Avatar className="h-16 w-16 border-2 border-primary/20 flex-shrink-0">
                         <AvatarImage src={fotoUrl || ""} alt={nome} />
-                        <AvatarFallback className="bg-secondary/10 text-secondary text-lg">
+                        <AvatarFallback className="bg-secondary/10 text-secondary text-xl">
                           {nome.charAt(0) || <User className="h-6 w-6" />}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-start justify-between gap-2 mb-2">
                           <div>
-                            <h4 className="font-semibold text-foreground">{nome}</h4>
+                            <h4 className="font-semibold text-lg text-foreground">{nome}</h4>
                             {nav.cargo && (
-                              <p className="text-sm text-secondary">{nav.cargo}</p>
+                              <p className="text-sm text-secondary font-medium">{nav.cargo}</p>
                             )}
                           </div>
-                          <div className="flex gap-1 items-center">
+                          <div className="flex gap-1 items-center flex-shrink-0">
                             {!nav.ativo && (
                               <Badge variant="secondary" className="text-xs">Inativo</Badge>
                             )}
@@ -487,16 +412,16 @@ export default function Dashboard() {
                           </div>
                         </div>
                         {nav.bio_curta && (
-                          <p className="text-sm text-foreground/80 mt-2 leading-relaxed">{nav.bio_curta}</p>
+                          <p className="text-foreground/80 mt-3 leading-relaxed">{nav.bio_curta}</p>
                         )}
-                        <div className="flex gap-2 mt-3">
+                        <div className="flex gap-3 mt-4">
                           {nav.whatsapp_url && (
                             <Button
                               size="sm"
-                              className="flex-1 bg-primary hover:bg-primary/90"
+                              className="bg-primary hover:bg-primary/90"
                               onClick={() => window.open(nav.whatsapp_url, "_blank")}
                             >
-                              <MessageCircle className="h-4 w-4 mr-1" />
+                              <MessageCircle className="h-4 w-4 mr-2" />
                               WhatsApp
                             </Button>
                           )}
@@ -504,10 +429,9 @@ export default function Dashboard() {
                             <Button
                               size="sm"
                               variant="outline"
-                              className="flex-1"
                               onClick={() => window.open(`mailto:${nav.email}`, "_blank")}
                             >
-                              <Mail className="h-4 w-4 mr-1" />
+                              <Mail className="h-4 w-4 mr-2" />
                               E-mail
                             </Button>
                           )}
@@ -522,6 +446,81 @@ export default function Dashboard() {
             <div className="text-center py-8">
               <User className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
               <p className="text-muted-foreground">Nenhum navegador disponível no momento</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Notificações - Avisos e Comunicados */}
+      <Card className="border-border bg-card shadow-card">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Bell className="h-6 w-6 text-primary" />
+              <CardTitle className="text-foreground">Avisos e Comunicados</CardTitle>
+            </div>
+            <div className="flex items-center gap-2">
+              {isAdmin && (
+                <Button
+                  size="sm"
+                  className="bg-primary hover:bg-primary/90"
+                  onClick={() => navigate("/admin/notifications/create")}
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Nova Notificação
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate("/notifications")}
+              >
+                Ver Todas
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {notifications && notifications.length > 0 ? (
+            <div className="space-y-3">
+              {notifications.map((notification: any) => {
+                const isRead = userId ? notification.read_by?.includes(userId) : false;
+                return (
+                  <div
+                    key={notification.id}
+                    className={`p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer ${
+                      !isRead ? "border-l-4 border-l-primary bg-primary/5" : ""
+                    }`}
+                    onClick={() => navigate("/notifications")}
+                  >
+                    <div className="flex items-start gap-3">
+                      {getNotificationIcon(notification.type)}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className="font-semibold text-foreground">{notification.title}</h4>
+                          {!isRead && (
+                            <Badge variant="default" className="text-xs">Nova</Badge>
+                          )}
+                          {notification.priority === "alta" && (
+                            <Badge variant="destructive" className="text-xs">Alta Prioridade</Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                          {notification.message}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          {format(new Date(notification.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+              <p className="text-muted-foreground">Nenhum aviso no momento</p>
             </div>
           )}
         </CardContent>
