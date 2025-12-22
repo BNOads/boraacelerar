@@ -336,11 +336,12 @@ export default function MentoradoProfile() {
 
         {/* Tabs de Evolução */}
         <Tabs defaultValue="financeiro" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="financeiro">Financeiro</TabsTrigger>
             <TabsTrigger value="metas">Metas</TabsTrigger>
             <TabsTrigger value="redes">Redes Sociais</TabsTrigger>
             <TabsTrigger value="pilares">Pilares</TabsTrigger>
+            <TabsTrigger value="diario">Diário de Bordo</TabsTrigger>
           </TabsList>
 
           {/* Tab Financeiro */}
@@ -624,10 +625,22 @@ export default function MentoradoProfile() {
               </Card>
             )}
           </TabsContent>
-        </Tabs>
 
-        {/* Diário de Bordo - Apenas para admins */}
-        <DiarioBordo mentoradoId={id!} />
+          {/* Tab Diário de Bordo */}
+          <TabsContent value="diario">
+            <Card className="border-border bg-card/50 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  📓 Diário de Bordo
+                </CardTitle>
+                <CardDescription>Observações e anotações sobre o mentorado</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <DiarioBordo mentoradoId={id!} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
         {/* Últimos Atendimentos */}
         {atendimentos && atendimentos.length > 0 && (
