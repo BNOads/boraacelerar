@@ -491,6 +491,56 @@ export type Database = {
           },
         ]
       }
+      itens_trilha: {
+        Row: {
+          concluido: boolean | null
+          concluido_em: string | null
+          created_at: string | null
+          descricao: string | null
+          duracao_min: number | null
+          id: string
+          ordem: number | null
+          tipo: string
+          titulo: string
+          trilha_id: string
+          url: string | null
+        }
+        Insert: {
+          concluido?: boolean | null
+          concluido_em?: string | null
+          created_at?: string | null
+          descricao?: string | null
+          duracao_min?: number | null
+          id?: string
+          ordem?: number | null
+          tipo: string
+          titulo: string
+          trilha_id: string
+          url?: string | null
+        }
+        Update: {
+          concluido?: boolean | null
+          concluido_em?: string | null
+          created_at?: string | null
+          descricao?: string | null
+          duracao_min?: number | null
+          id?: string
+          ordem?: number | null
+          tipo?: string
+          titulo?: string
+          trilha_id?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "itens_trilha_trilha_id_fkey"
+            columns: ["trilha_id"]
+            isOneToOne: false
+            referencedRelation: "trilhas_mentorado"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       livros_recomendados: {
         Row: {
           autor: string
@@ -1160,6 +1210,60 @@ export type Database = {
           url?: string | null
         }
         Relationships: []
+      }
+      trilhas_mentorado: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          descricao: string | null
+          id: string
+          mentorado_id: string
+          prazo: string | null
+          prioridade: string | null
+          status: string | null
+          titulo: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          descricao?: string | null
+          id?: string
+          mentorado_id: string
+          prazo?: string | null
+          prioridade?: string | null
+          status?: string | null
+          titulo: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          descricao?: string | null
+          id?: string
+          mentorado_id?: string
+          prazo?: string | null
+          prioridade?: string | null
+          status?: string | null
+          titulo?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trilhas_mentorado_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trilhas_mentorado_mentorado_id_fkey"
+            columns: ["mentorado_id"]
+            isOneToOne: false
+            referencedRelation: "mentorados"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
