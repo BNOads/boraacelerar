@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { TablesInsert } from "@/integrations/supabase/types";
 import {
   Dialog,
   DialogContent,
@@ -18,8 +17,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
 
-const tiposConteudo = ["Vídeo", "PDF", "Link", "Checklist"] as const;
-const pilares = ["Empreendedor", "Estruturação", "Marketing", "Vendas", "Gestão", "Finanças"] as const;
+const tiposConteudo = [
+  "Hotseat",
+  "Implementação", 
+  "Mentoria",
+  "Análise Temática",
+  "Imersões com Convidados"
+] as const;
+
+type TipoConteudo = (typeof tiposConteudo)[number];
 
 export function AdminMembrosDialog() {
   const [open, setOpen] = useState(false);
@@ -27,62 +33,27 @@ export function AdminMembrosDialog() {
   const [formData, setFormData] = useState({
     titulo: "",
     descricao: "",
-    tipo: "" as (typeof tiposConteudo)[number] | "",
-    pilar: "" as (typeof pilares)[number] | "",
+    tipo: "" as TipoConteudo | "",
     url: "",
     data_publicacao: new Date().toISOString().split('T')[0],
     ativo: true,
   });
 
-  // Buscar mentorados para atribuição
-  const { data: mentorados } = useQuery({
-    queryKey: ["mentorados-list"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("mentorados")
-        .select("id, profiles(nome_completo, apelido)")
-        .eq("status", "ativo");
-      if (error) throw error;
-      return data;
-    },
-    enabled: open,
-  });
-
-  const [selectedMentorado, setSelectedMentorado] = useState("todos");
-
   const addConteudoMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      // Criar o conteúdo
-      const insertData: TablesInsert<"conteudo_direcionado"> = {
-        titulo: data.titulo,
-        descricao: data.descricao,
-        tipo: data.tipo as (typeof tiposConteudo)[number],
-        pilar: data.pilar ? (data.pilar as (typeof pilares)[number]) : null,
-        url: data.url,
-        data_publicacao: data.data_publicacao,
-        ativo: data.ativo,
-      };
-      const { data: conteudo, error: conteudoError } = await supabase
+      const { error: conteudoError } = await supabase
         .from("conteudo_direcionado")
-        .insert([insertData])
-        .select()
-        .single();
+        .insert([{
+          titulo: data.titulo,
+          descricao: data.descricao,
+          tipo: "Vídeo" as const, // Usamos Vídeo como tipo base no banco
+          url: data.url,
+          data_publicacao: data.data_publicacao,
+          ativo: data.ativo,
+          tags: [data.tipo], // Armazenamos o tipo real como tag
+        }]);
       
       if (conteudoError) throw conteudoError;
-
-      // Se mentorado selecionado (não "todos"), criar atribuição
-      if (selectedMentorado && selectedMentorado !== "todos" && conteudo) {
-        const atribData: TablesInsert<"atribuicoes_conteudo"> = {
-          conteudo_id: conteudo.id,
-          audience_type: "mentorado",
-          mentorado_id: selectedMentorado,
-        };
-        const { error: atribError } = await supabase
-          .from("atribuicoes_conteudo")
-          .insert([atribData]);
-        
-        if (atribError) throw atribError;
-      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["conteudo-direcionado"] });
@@ -92,12 +63,10 @@ export function AdminMembrosDialog() {
         titulo: "",
         descricao: "",
         tipo: "",
-        pilar: "",
         url: "",
         data_publicacao: new Date().toISOString().split('T')[0],
         ativo: true,
       });
-      setSelectedMentorado("todos");
     },
     onError: () => {
       toast.error("Erro ao adicionar conteúdo");
@@ -130,38 +99,20 @@ export function AdminMembrosDialog() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="tipo">Tipo *</Label>
-              <Select value={formData.tipo || undefined} onValueChange={(value) => setFormData({ ...formData, tipo: value as typeof formData.tipo })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {tiposConteudo.map((tipo) => (
-                    <SelectItem key={tipo} value={tipo}>
-                      {tipo}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="pilar">Pilar</Label>
-              <Select value={formData.pilar || undefined} onValueChange={(value) => setFormData({ ...formData, pilar: value as typeof formData.pilar })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o pilar" />
-                </SelectTrigger>
-                <SelectContent>
-                  {pilares.map((pilar) => (
-                    <SelectItem key={pilar} value={pilar}>
-                      {pilar}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="tipo">Tipo *</Label>
+            <Select value={formData.tipo || undefined} onValueChange={(value) => setFormData({ ...formData, tipo: value as TipoConteudo })}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                {tiposConteudo.map((tipo) => (
+                  <SelectItem key={tipo} value={tipo}>
+                    {tipo}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
@@ -186,22 +137,6 @@ export function AdminMembrosDialog() {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="mentorado">Atribuir a Mentorado (opcional)</Label>
-            <Select value={selectedMentorado} onValueChange={setSelectedMentorado}>
-              <SelectTrigger>
-                <SelectValue placeholder="Todos os membros" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos os membros</SelectItem>
-                {mentorados?.map((m) => (
-                  <SelectItem key={m.id} value={m.id}>
-                    {m.profiles?.nome_completo || m.profiles?.apelido}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
         </div>
 
         <div className="flex gap-3">
