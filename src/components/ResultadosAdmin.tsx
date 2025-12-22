@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
-import { TrendingUp, Users, CheckCircle, Target, ArrowUpDown, Search, Settings2, Activity } from "lucide-react";
+import { TrendingUp, Users, CheckCircle, Target, ArrowUpDown, Search, Settings2, Activity, Eye, CheckCircle2, XCircle } from "lucide-react";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
 import { FAIXAS_PREMIACAO, determinarFaixa } from "@/constants/faixas";
@@ -18,6 +18,8 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { format, parse, startOfMonth, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface MentoradoRanking {
   id: string;
@@ -120,10 +122,18 @@ export function ResultadosAdmin() {
   const { data: taxaAtualizacao } = useQuery({
     queryKey: ["taxa-atualizacao-dados"],
     queryFn: async () => {
-      // Buscar total de mentorados ativos
+      // Buscar total de mentorados ativos com dados do profile
       const { data: mentorados, error: mentoradosError } = await supabase
         .from("mentorados")
-        .select("id")
+        .select(`
+          id,
+          turma,
+          profiles:user_id (
+            nome_completo,
+            apelido,
+            foto_url
+          )
+        `)
         .eq("status", "ativo");
 
       if (mentoradosError) throw mentoradosError;
@@ -155,6 +165,7 @@ export function ResultadosAdmin() {
           quantidade: mentoradosSet.size,
           percentual: totalMentorados > 0 ? Math.round((mentoradosSet.size / totalMentorados) * 100) : 0,
           totalMentorados,
+          mentoradosQueAtualizaram: Array.from(mentoradosSet),
         }))
         .sort((a, b) => a.mes_ano.localeCompare(b.mes_ano))
         .slice(-12); // Últimos 12 meses
@@ -164,7 +175,31 @@ export function ResultadosAdmin() {
         quantidade: 0,
         percentual: 0,
         totalMentorados,
+        mentoradosQueAtualizaram: [] as string[],
       };
+
+      // Lista de mentorados com status de atualização
+      const mentoradosComStatus = mentorados?.map(m => {
+        const atualizou = dadosMesAtual.mentoradosQueAtualizaram.includes(m.id);
+        return {
+          id: m.id,
+          nome: m.profiles?.nome_completo || 'Sem nome',
+          apelido: m.profiles?.apelido,
+          foto_url: m.profiles?.foto_url,
+          turma: m.turma,
+          atualizou,
+        };
+      }).sort((a, b) => {
+        // Primeiro os que não atualizaram, depois os que atualizaram
+        if (a.atualizou !== b.atualizou) return a.atualizou ? 1 : -1;
+        return a.nome.localeCompare(b.nome);
+      }) || [];
+
+      // Calcular índice de engajamento (média ponderada dos últimos 3 meses)
+      const ultimos3Meses = resultado.slice(-3);
+      const indiceEngajamento = ultimos3Meses.length > 0
+        ? Math.round(ultimos3Meses.reduce((acc, h) => acc + h.percentual, 0) / ultimos3Meses.length)
+        : 0;
 
       return {
         historico: resultado,
@@ -172,6 +207,8 @@ export function ResultadosAdmin() {
           ...dadosMesAtual,
           mesFormatado: format(new Date(), 'MMMM yyyy', { locale: ptBR }),
         },
+        mentoradosComStatus,
+        indiceEngajamento,
       };
     },
   });
@@ -456,33 +493,132 @@ export function ResultadosAdmin() {
 
       {/* Taxa de Atualização de Dados */}
       {taxaAtualizacao && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Card do Mês Atual */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+          {/* Card de Índice de Engajamento */}
+          <Card className="border-border bg-card shadow-card">
+            <CardHeader className="pb-2">
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" />
+                <CardTitle className="text-lg">Índice de Engajamento</CardTitle>
+              </div>
+              <p className="text-xs text-muted-foreground">Média dos últimos 3 meses</p>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-center">
+                <div className={`text-5xl font-bold ${
+                  taxaAtualizacao.indiceEngajamento >= 80 ? 'text-green-500' :
+                  taxaAtualizacao.indiceEngajamento >= 60 ? 'text-primary' :
+                  taxaAtualizacao.indiceEngajamento >= 40 ? 'text-yellow-500' : 'text-red-500'
+                }`}>
+                  {taxaAtualizacao.indiceEngajamento}%
+                </div>
+              </div>
+              <div className="text-center">
+                <Badge variant={
+                  taxaAtualizacao.indiceEngajamento >= 80 ? 'default' :
+                  taxaAtualizacao.indiceEngajamento >= 60 ? 'secondary' :
+                  taxaAtualizacao.indiceEngajamento >= 40 ? 'outline' : 'destructive'
+                } className="text-xs">
+                  {taxaAtualizacao.indiceEngajamento >= 80 ? 'Excelente' :
+                   taxaAtualizacao.indiceEngajamento >= 60 ? 'Bom' :
+                   taxaAtualizacao.indiceEngajamento >= 40 ? 'Regular' : 'Baixo'}
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Card do Mês Atual com botão */}
           <Card className="border-border bg-card shadow-card">
             <CardHeader className="pb-2">
               <div className="flex items-center gap-2">
                 <Activity className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">Atualização Mês Atual</CardTitle>
+                <CardTitle className="text-lg">Mês Atual</CardTitle>
               </div>
               <p className="text-sm text-muted-foreground capitalize">{taxaAtualizacao.mesAtual.mesFormatado}</p>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Mentorados que atualizaram:</span>
-                <span className="text-2xl font-bold text-foreground">
+                <span className="text-muted-foreground text-sm">Atualizaram:</span>
+                <span className="text-xl font-bold text-foreground">
                   {taxaAtualizacao.mesAtual.quantidade} / {taxaAtualizacao.mesAtual.totalMentorados}
                 </span>
               </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Taxa de atualização</span>
-                  <span className="text-lg font-semibold text-primary">{taxaAtualizacao.mesAtual.percentual}%</span>
-                </div>
-                <Progress value={taxaAtualizacao.mesAtual.percentual} className="h-3" />
+              <Progress value={taxaAtualizacao.mesAtual.percentual} className="h-2" />
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-green-500 font-medium">+{taxaAtualizacao.mesAtual.quantidade}</span>
+                <span className="text-red-500 font-medium">-{taxaAtualizacao.mesAtual.totalMentorados - taxaAtualizacao.mesAtual.quantidade}</span>
               </div>
-              <p className="text-xs text-muted-foreground">
-                {taxaAtualizacao.mesAtual.totalMentorados - taxaAtualizacao.mesAtual.quantidade} mentorados ainda não atualizaram este mês
-              </p>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="w-full">
+                    <Eye className="h-4 w-4 mr-2" />
+                    Ver Lista
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle className="capitalize">
+                      Mentorados - {taxaAtualizacao.mesAtual.mesFormatado}
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        <span>Atualizaram: {taxaAtualizacao.mentoradosComStatus.filter(m => m.atualizou).length}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <XCircle className="h-4 w-4 text-red-500" />
+                        <span>Pendentes: {taxaAtualizacao.mentoradosComStatus.filter(m => !m.atualizou).length}</span>
+                      </div>
+                    </div>
+                    <ScrollArea className="h-[400px] pr-4">
+                      <div className="space-y-2">
+                        {taxaAtualizacao.mentoradosComStatus.map((mentorado) => (
+                          <div 
+                            key={mentorado.id}
+                            className={`flex items-center justify-between p-3 rounded-lg border ${
+                              mentorado.atualizou 
+                                ? 'bg-green-500/10 border-green-500/30' 
+                                : 'bg-red-500/10 border-red-500/30'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-8 w-8">
+                                <AvatarImage src={mentorado.foto_url || undefined} />
+                                <AvatarFallback className="text-xs">
+                                  {mentorado.nome.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="text-sm font-medium text-foreground">
+                                  {mentorado.apelido || mentorado.nome.split(' ')[0]}
+                                </p>
+                                {mentorado.turma && (
+                                  <p className="text-xs text-muted-foreground">{mentorado.turma}</p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {mentorado.atualizou ? (
+                                <Badge variant="default" className="bg-green-500 text-xs">
+                                  <CheckCircle2 className="h-3 w-3 mr-1" />
+                                  Atualizado
+                                </Badge>
+                              ) : (
+                                <Badge variant="destructive" className="text-xs">
+                                  <XCircle className="h-3 w-3 mr-1" />
+                                  Pendente
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </CardContent>
           </Card>
 
@@ -492,7 +628,7 @@ export function ResultadosAdmin() {
               <CardTitle className="text-lg">Histórico de Atualizações (Últimos 12 meses)</CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={200}>
+              <ResponsiveContainer width="100%" height={180}>
                 <BarChart data={taxaAtualizacao.historico}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                   <XAxis 
@@ -529,18 +665,16 @@ export function ResultadosAdmin() {
                   />
                 </BarChart>
               </ResponsiveContainer>
-              <div className="mt-3 flex items-center justify-between text-sm">
-                <div className="flex items-center gap-4">
-                  <span className="text-muted-foreground">
-                    Média geral: <span className="font-semibold text-foreground">
-                      {taxaAtualizacao.historico.length > 0 
-                        ? Math.round(taxaAtualizacao.historico.reduce((acc, h) => acc + h.percentual, 0) / taxaAtualizacao.historico.length) 
-                        : 0}%
-                    </span>
-                  </span>
-                </div>
+              <div className="mt-2 flex items-center justify-between text-xs">
                 <span className="text-muted-foreground">
-                  Total base: {taxaAtualizacao.mesAtual.totalMentorados} mentorados
+                  Média: <span className="font-semibold text-foreground">
+                    {taxaAtualizacao.historico.length > 0 
+                      ? Math.round(taxaAtualizacao.historico.reduce((acc, h) => acc + h.percentual, 0) / taxaAtualizacao.historico.length) 
+                      : 0}%
+                  </span>
+                </span>
+                <span className="text-muted-foreground">
+                  Base: {taxaAtualizacao.mesAtual.totalMentorados} mentorados
                 </span>
               </div>
             </CardContent>
