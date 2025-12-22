@@ -6,7 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, User, Edit, Save, X, ExternalLink } from "lucide-react";
@@ -29,7 +36,9 @@ export default function Mentorados() {
   // Verificar se usuário é admin
   useEffect(() => {
     const checkAdmin = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
 
       const { data } = await supabase
@@ -50,10 +59,12 @@ export default function Mentorados() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("mentorados")
-        .select(`
+        .select(
+          `
           *,
           profiles:user_id (*)
-        `)
+        `,
+        )
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -66,12 +77,9 @@ export default function Mentorados() {
   const updateMentoradoMutation = useMutation({
     mutationFn: async (data: any) => {
       const { id, profiles, ...mentoradoData } = data;
-      
+
       // Atualizar mentorado
-      const { error: mentoradoError } = await supabase
-        .from("mentorados")
-        .update(mentoradoData)
-        .eq("id", id);
+      const { error: mentoradoError } = await supabase.from("mentorados").update(mentoradoData).eq("id", id);
 
       if (mentoradoError) throw mentoradoError;
 
@@ -110,7 +118,7 @@ export default function Mentorados() {
       m.profiles?.nome_completo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       m.profiles?.apelido?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       m.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      m.turma?.toLowerCase().includes(searchTerm.toLowerCase())
+      m.turma?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   if (!isAdmin) {
@@ -118,9 +126,7 @@ export default function Mentorados() {
       <div className="flex items-center justify-center min-h-[400px]">
         <Card className="border-border bg-card/50">
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <p className="text-muted-foreground">
-              Você não tem permissão para acessar esta página.
-            </p>
+            <p className="text-muted-foreground">Você não tem permissão para acessar esta página.</p>
           </CardContent>
         </Card>
       </div>
@@ -144,9 +150,7 @@ export default function Mentorados() {
             <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
               👥 Gerenciar Usuários
             </h1>
-            <p className="text-muted-foreground">
-              Adicione novos usuários e gerencie informações dos mentorados
-            </p>
+            <p className="text-muted-foreground">Adicione novos usuários e gerencie informações dos mentorados</p>
           </div>
           <div className="flex gap-2">
             <AdminImportarMentoradosCompleto />
@@ -192,31 +196,22 @@ export default function Mentorados() {
                       {mentorado.turma}
                     </Badge>
                   )}
-                  <Badge
-                    variant={mentorado.status === "ativo" ? "default" : "secondary"}
-                    className="text-xs"
-                  >
+                  <Badge variant={mentorado.status === "ativo" ? "default" : "secondary"} className="text-xs">
                     {mentorado.status}
                   </Badge>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
-              {mentorado.email && (
-                <p className="text-sm text-muted-foreground">📧 {mentorado.email}</p>
-              )}
-              {mentorado.whatsapp && (
-                <p className="text-sm text-muted-foreground">📱 {mentorado.whatsapp}</p>
-              )}
-              {mentorado.instagram && (
-                <p className="text-sm text-muted-foreground">📷 {mentorado.instagram}</p>
-              )}
+              {mentorado.email && <p className="text-sm text-muted-foreground">📧 {mentorado.email}</p>}
+              {mentorado.whatsapp && <p className="text-sm text-muted-foreground">📱 {mentorado.whatsapp}</p>}
+              {mentorado.instagram && <p className="text-sm text-muted-foreground">📷 {mentorado.instagram}</p>}
               {mentorado.data_ingresso && (
                 <p className="text-sm text-muted-foreground">
                   Ingresso: {format(new Date(mentorado.data_ingresso), "dd/MM/yyyy", { locale: ptBR })}
                 </p>
               )}
-              
+
               <div className="flex gap-2">
                 <Button
                   variant="default"
@@ -230,7 +225,7 @@ export default function Mentorados() {
                   <ExternalLink className="mr-2 h-4 w-4" />
                   Ver Perfil
                 </Button>
-                
+
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button
@@ -246,130 +241,115 @@ export default function Mentorados() {
                       Editar
                     </Button>
                   </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>Editar Mentorado</DialogTitle>
-                    <DialogDescription>
-                      Atualize as informações do mentorado
-                    </DialogDescription>
-                  </DialogHeader>
-                  {editingMentorado && (
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
+                  <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>Editar Mentorado</DialogTitle>
+                      <DialogDescription>Atualize as informações do mentorado</DialogDescription>
+                    </DialogHeader>
+                    {editingMentorado && (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Nome Completo</Label>
+                            <Input
+                              value={editingMentorado.profiles?.nome_completo || ""}
+                              onChange={(e) =>
+                                setEditingMentorado({
+                                  ...editingMentorado,
+                                  profiles: {
+                                    ...editingMentorado.profiles,
+                                    nome_completo: e.target.value,
+                                  },
+                                })
+                              }
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Apelido</Label>
+                            <Input
+                              value={editingMentorado.profiles?.apelido || ""}
+                              onChange={(e) =>
+                                setEditingMentorado({
+                                  ...editingMentorado,
+                                  profiles: {
+                                    ...editingMentorado.profiles,
+                                    apelido: e.target.value,
+                                  },
+                                })
+                              }
+                            />
+                          </div>
+                        </div>
+
                         <div className="space-y-2">
-                          <Label>Nome Completo</Label>
+                          <Label>Email</Label>
                           <Input
-                            value={editingMentorado.profiles?.nome_completo || ""}
-                            onChange={(e) =>
-                              setEditingMentorado({
-                                ...editingMentorado,
-                                profiles: {
-                                  ...editingMentorado.profiles,
-                                  nome_completo: e.target.value,
-                                },
-                              })
-                            }
+                            type="email"
+                            value={editingMentorado.email || ""}
+                            onChange={(e) => setEditingMentorado({ ...editingMentorado, email: e.target.value })}
                           />
                         </div>
-                        <div className="space-y-2">
-                          <Label>Apelido</Label>
-                          <Input
-                            value={editingMentorado.profiles?.apelido || ""}
-                            onChange={(e) =>
-                              setEditingMentorado({
-                                ...editingMentorado,
-                                profiles: {
-                                  ...editingMentorado.profiles,
-                                  apelido: e.target.value,
-                                },
-                              })
-                            }
-                          />
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>WhatsApp</Label>
+                            <Input
+                              value={editingMentorado.whatsapp || ""}
+                              onChange={(e) => setEditingMentorado({ ...editingMentorado, whatsapp: e.target.value })}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Instagram</Label>
+                            <Input
+                              value={editingMentorado.instagram || ""}
+                              onChange={(e) => setEditingMentorado({ ...editingMentorado, instagram: e.target.value })}
+                            />
+                          </div>
                         </div>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label>Email</Label>
-                        <Input
-                          type="email"
-                          value={editingMentorado.email || ""}
-                          onChange={(e) =>
-                            setEditingMentorado({ ...editingMentorado, email: e.target.value })
-                          }
-                        />
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>WhatsApp</Label>
-                          <Input
-                            value={editingMentorado.whatsapp || ""}
-                            onChange={(e) =>
-                              setEditingMentorado({ ...editingMentorado, whatsapp: e.target.value })
-                            }
-                          />
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Turma</Label>
+                            <Input
+                              value={editingMentorado.turma || ""}
+                              onChange={(e) => setEditingMentorado({ ...editingMentorado, turma: e.target.value })}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Status</Label>
+                            <Select
+                              value={editingMentorado.status}
+                              onValueChange={(value) => setEditingMentorado({ ...editingMentorado, status: value })}
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="ativo">Ativo</SelectItem>
+                                <SelectItem value="inativo">Inativo</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </div>
-                        <div className="space-y-2">
-                          <Label>Instagram</Label>
-                          <Input
-                            value={editingMentorado.instagram || ""}
-                            onChange={(e) =>
-                              setEditingMentorado({ ...editingMentorado, instagram: e.target.value })
-                            }
-                          />
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Turma</Label>
-                          <Input
-                            value={editingMentorado.turma || ""}
-                            onChange={(e) =>
-                              setEditingMentorado({ ...editingMentorado, turma: e.target.value })
-                            }
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Status</Label>
-                          <Select
-                            value={editingMentorado.status}
-                            onValueChange={(value) =>
-                              setEditingMentorado({ ...editingMentorado, status: value })
-                            }
+
+                        <div className="flex gap-2 pt-4">
+                          <Button
+                            className="flex-1"
+                            onClick={() => updateMentoradoMutation.mutate(editingMentorado)}
+                            disabled={updateMentoradoMutation.isPending}
                           >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="ativo">Ativo</SelectItem>
-                              <SelectItem value="inativo">Inativo</SelectItem>
-                            </SelectContent>
-                          </Select>
+                            <Save className="mr-2 h-4 w-4" />
+                            Salvar Alterações
+                          </Button>
+                          <Button variant="outline" onClick={() => setEditingMentorado(null)}>
+                            <X className="mr-2 h-4 w-4" />
+                            Cancelar
+                          </Button>
                         </div>
                       </div>
-                      
-                      <div className="flex gap-2 pt-4">
-                        <Button
-                          className="flex-1"
-                          onClick={() => updateMentoradoMutation.mutate(editingMentorado)}
-                          disabled={updateMentoradoMutation.isPending}
-                        >
-                          <Save className="mr-2 h-4 w-4" />
-                          Salvar Alterações
-                        </Button>
-                        <Button
-                          variant="outline"
-                          onClick={() => setEditingMentorado(null)}
-                        >
-                          <X className="mr-2 h-4 w-4" />
-                          Cancelar
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </DialogContent>
-              </Dialog>
+                    )}
+                  </DialogContent>
+                </Dialog>
               </div>
             </CardContent>
           </Card>
