@@ -15,6 +15,7 @@ import { AdminImportarEncontrosDialog } from "@/components/AdminImportarEncontro
 import { AdminLinksDialog } from "@/components/AdminLinksDialog";
 import { AdminImportarLinksDialog } from "@/components/AdminImportarLinksDialog";
 import { EditarLinkDialog } from "@/components/EditarLinkDialog";
+import { EditarAgendaDialog } from "@/components/EditarAgendaDialog";
 interface Profile {
   nome_completo: string;
   apelido: string | null;
@@ -236,7 +237,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Calendar className="h-6 w-6 text-secondary" />
-              <CardTitle className="text-foreground">Agenda de Mentorias</CardTitle>
+              <CardTitle className="text-foreground">Agenda da Mentoria</CardTitle>
             </div>
             <div className="flex items-center gap-2">
               {isAdmin && (
@@ -316,14 +317,19 @@ export default function Dashboard() {
                             </p>
                           )}
                         </div>
-                        {encontro.link_zoom && !isPast && (
-                          <Button size="sm" asChild>
-                            <a href={encontro.link_zoom} target="_blank" rel="noopener noreferrer">
-                              <Video className="h-4 w-4 mr-1" />
-                              Acessar
-                            </a>
-                          </Button>
-                        )}
+                        <div className="flex items-center gap-2">
+                          {isAdmin && (
+                            <EditarAgendaDialog encontro={encontro} />
+                          )}
+                          {encontro.link_zoom && !isPast && (
+                            <Button size="sm" asChild>
+                              <a href={encontro.link_zoom} target="_blank" rel="noopener noreferrer">
+                                <Video className="h-4 w-4 mr-1" />
+                                Acessar
+                              </a>
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );

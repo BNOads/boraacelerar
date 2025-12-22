@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { AdminAgendaDialog } from "@/components/AdminAgendaDialog";
 import { AdminImportarAgendaDialog } from "@/components/AdminImportarAgendaDialog";
 import { AdminImportarEncontrosDialog } from "@/components/AdminImportarEncontrosDialog";
+import { EditarAgendaDialog } from "@/components/EditarAgendaDialog";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 export default function Agenda() {
@@ -104,11 +105,16 @@ export default function Agenda() {
                     <CardTitle className="text-lg text-foreground">
                       {encontro.titulo}
                     </CardTitle>
-                    <div className="flex gap-2 shrink-0">
-                      {getCountdownBadge(daysUntil)}
-                      <span className="px-2 py-1 text-xs font-medium bg-secondary/10 text-secondary rounded-full">
-                        {encontro.tipo}
-                      </span>
+                    <div className="flex gap-2 shrink-0 items-center">
+                      {isAdmin && (
+                        <EditarAgendaDialog encontro={encontro} />
+                      )}
+                      <div className="flex gap-2">
+                        {getCountdownBadge(daysUntil)}
+                        <span className="px-2 py-1 text-xs font-medium bg-secondary/10 text-secondary rounded-full">
+                          {encontro.tipo}
+                        </span>
+                      </div>
                     </div>
                   </div>
                   <CardDescription>{encontro.descricao}</CardDescription>
