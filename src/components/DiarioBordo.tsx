@@ -176,31 +176,13 @@ export function DiarioBordo({ mentoradoId }: DiarioBordoProps) {
   return (
     <>
       <div className="space-y-6">
-        {/* Formulário para nova entrada */}
-        <div className="space-y-4">
-          <Textarea
-            placeholder="Escreva um resumo sobre o mentorado, detalhes de analise ou informações rapidas..."
-            value={novaEntrada}
-            onChange={(e) => setNovaEntrada(e.target.value)}
-            className="min-h-[100px] resize-none"
-          />
-          <Button
-            onClick={() => createMutation.mutate()}
-            disabled={!novaEntrada.trim() || createMutation.isPending}
-            className="gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Adicionar entrada
-          </Button>
-        </div>
-
-        {/* Lista de entradas */}
+        {/* Lista de entradas (acima do campo de envio) */}
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
           </div>
         ) : entradas && entradas.length > 0 ? (
-          <div className="space-y-4">
+          <div className="max-h-[360px] overflow-y-auto space-y-4 pr-2">
             {entradas.map((entrada) => (
               <div key={entrada.id} className="flex gap-3 p-4 rounded-lg bg-muted/30 border border-border/50">
                 <Avatar className="h-10 w-10 shrink-0">
@@ -279,6 +261,24 @@ export function DiarioBordo({ mentoradoId }: DiarioBordoProps) {
             <p className="text-sm">Adicione observações sobre o progresso deste mentorado.</p>
           </div>
         )}
+
+        {/* Formulário para nova entrada (abaixo das entradas) */}
+        <div className="space-y-4 pt-4 border-t border-border/50">
+          <Textarea
+            placeholder="Escreva um resumo sobre o mentorado, detalhes de analise ou informações rapidas..."
+            value={novaEntrada}
+            onChange={(e) => setNovaEntrada(e.target.value)}
+            className="min-h-[100px] resize-none"
+          />
+          <Button
+            onClick={() => createMutation.mutate()}
+            disabled={!novaEntrada.trim() || createMutation.isPending}
+            className="gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Adicionar entrada
+          </Button>
+        </div>
       </div>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
