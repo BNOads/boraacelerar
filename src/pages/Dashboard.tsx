@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, Rocket, Clock, Video, Plus, Bell, AlertCircle, Info, AlertTriangle, ExternalLink, Edit, Link as LinkIcon } from "lucide-react";
+import { Calendar, Rocket, Clock, Video, Plus, Bell, AlertCircle, Info, AlertTriangle, ExternalLink, Edit, Link as LinkIcon, MessageCircle, Mail, User } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { useQuery } from "@tanstack/react-query";
@@ -15,6 +16,9 @@ import { AdminLinksDialog } from "@/components/AdminLinksDialog";
 import { AdminImportarLinksDialog } from "@/components/AdminImportarLinksDialog";
 import { EditarLinkDialog } from "@/components/EditarLinkDialog";
 import { EditarAgendaDialog } from "@/components/EditarAgendaDialog";
+import { AdminNavegadorDialog } from "@/components/AdminNavegadorDialog";
+import { EditarNavegadorDialog } from "@/components/EditarNavegadorDialog";
+import { EstatisticasNavegadorDialog } from "@/components/EstatisticasNavegadorDialog";
 interface Profile {
   nome_completo: string;
   apelido: string | null;
@@ -37,6 +41,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [editingLink, setEditingLink] = useState<any>(null);
+  const [editingNavegador, setEditingNavegador] = useState<any>(null);
 
   // Query para notificacoes
   const { data: notifications } = useQuery({
@@ -67,6 +72,24 @@ export default function Dashboard() {
         query = query.eq("ativo", true);
       }
 
+      const { data, error } = await query;
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Query para navegadores
+  const { data: navegadores } = useQuery({
+    queryKey: ["dashboard-navegadores", isAdmin],
+    queryFn: async () => {
+      let query = supabase
+        .from("navegadores")
+        .select("id, user_id, nome, foto_url, cargo, bio_curta, email, whatsapp_url, ativo, profiles(id, nome_completo, apelido, foto_url)");
+      
+      if (!isAdmin) {
+        query = query.eq("ativo", true);
+      }
+      
       const { data, error } = await query;
       if (error) throw error;
       return data;
@@ -406,12 +429,122 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
+      {/* Navegadores */}
+      <Card className="border-border bg-card shadow-card">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <User className="h-6 w-6 text-secondary" />
+              <CardTitle className="text-foreground">Equipe de Navegadores</CardTitle>
+            </div>
+            {isAdmin && <AdminNavegadorDialog />}
+          </div>
+        </CardHeader>
+        <CardContent>
+          {navegadores && navegadores.length > 0 ? (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {navegadores.map((nav: any) => {
+                const nome = nav.nome || nav.profiles?.nome_completo || nav.profiles?.apelido || "Navegador";
+                const fotoUrl = nav.foto_url || nav.profiles?.foto_url;
+                
+                return (
+                  <div
+                    key={nav.id}
+                    className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex items-start gap-4">
+                      <Avatar className="h-14 w-14 border-2 border-primary/20">
+                        <AvatarImage src={fotoUrl || ""} alt={nome} />
+                        <AvatarFallback className="bg-secondary/10 text-secondary text-lg">
+                          {nome.charAt(0) || <User className="h-6 w-6" />}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <h4 className="font-semibold text-foreground">{nome}</h4>
+                            {nav.cargo && (
+                              <p className="text-sm text-secondary">{nav.cargo}</p>
+                            )}
+                          </div>
+                          <div className="flex gap-1 items-center">
+                            {!nav.ativo && (
+                              <Badge variant="secondary" className="text-xs">Inativo</Badge>
+                            )}
+                            {isAdmin && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-8 w-8 p-0"
+                                  onClick={() => setEditingNavegador(nav)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <EstatisticasNavegadorDialog
+                                  navegadorId={nav.id}
+                                  navegadorNome={nome}
+                                />
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        {nav.bio_curta && (
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{nav.bio_curta}</p>
+                        )}
+                        <div className="flex gap-2 mt-3">
+                          {nav.whatsapp_url && (
+                            <Button
+                              size="sm"
+                              className="flex-1 bg-primary hover:bg-primary/90"
+                              onClick={() => window.open(nav.whatsapp_url, "_blank")}
+                            >
+                              <MessageCircle className="h-4 w-4 mr-1" />
+                              WhatsApp
+                            </Button>
+                          )}
+                          {nav.email && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="flex-1"
+                              onClick={() => window.open(`mailto:${nav.email}`, "_blank")}
+                            >
+                              <Mail className="h-4 w-4 mr-1" />
+                              E-mail
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <User className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+              <p className="text-muted-foreground">Nenhum navegador disponível no momento</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Dialog de Edição de Link */}
       {editingLink && (
         <EditarLinkDialog
           link={editingLink}
           open={!!editingLink}
           onOpenChange={(open) => !open && setEditingLink(null)}
+        />
+      )}
+
+      {/* Dialog de Edição de Navegador */}
+      {editingNavegador && (
+        <EditarNavegadorDialog
+          navegador={editingNavegador}
+          open={!!editingNavegador}
+          onOpenChange={(open) => !open && setEditingNavegador(null)}
         />
       )}
 
