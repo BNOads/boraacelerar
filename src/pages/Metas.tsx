@@ -1,10 +1,11 @@
 import { useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { Target, Plus, Users } from "lucide-react";
+import { Target, Plus, Users, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { MetaCard } from "@/components/MetaCard";
 import { NovaMetaDialog } from "@/components/NovaMetaDialog";
 import { NovoObjetivoDialog } from "@/components/NovoObjetivoDialog";
@@ -24,6 +25,8 @@ interface Mentorado {
   } | null;
 }
 
+const MENTORADOS_PER_PAGE = 5;
+
 export default function Metas() {
   const { isAdmin } = useIsAdmin();
   const [mentoradoId, setMentoradoId] = useState<string | null>(null);
@@ -37,6 +40,8 @@ export default function Metas() {
   const [loading, setLoading] = useState(true);
   const [mentorados, setMentorados] = useState<Mentorado[]>([]);
   const [mentoradoSelecionado, setMentoradoSelecionado] = useState<string | null>(null);
+  const [searchMentorado, setSearchMentorado] = useState("");
+  const [currentPage, setCurrentPage] = useState(0);
 
   useEffect(() => {
     carregarMentorado();
@@ -141,6 +146,29 @@ export default function Metas() {
     });
   }, [metas, trimestreSelecionado, statusSelecionado]);
 
+  // Filtrar mentorados por busca
+  const mentoradosFiltrados = useMemo(() => {
+    if (!searchMentorado.trim()) return mentorados;
+    const search = searchMentorado.toLowerCase();
+    return mentorados.filter(m => 
+      m.profiles?.nome_completo?.toLowerCase().includes(search) ||
+      m.profiles?.apelido?.toLowerCase().includes(search) ||
+      m.turma?.toLowerCase().includes(search)
+    );
+  }, [mentorados, searchMentorado]);
+
+  // Paginação
+  const totalPages = Math.ceil(mentoradosFiltrados.length / MENTORADOS_PER_PAGE);
+  const mentoradosPaginados = mentoradosFiltrados.slice(
+    currentPage * MENTORADOS_PER_PAGE,
+    (currentPage + 1) * MENTORADOS_PER_PAGE
+  );
+
+  // Reset page when search changes
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [searchMentorado]);
+
   const mentoradoAtual = mentorados.find(m => m.id === mentoradoSelecionado);
   const idParaMeta = isAdmin && mentoradoSelecionado ? mentoradoSelecionado : mentoradoId;
 
@@ -175,9 +203,21 @@ export default function Metas() {
               Selecione um Mentorado
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid gap-3 md:grid-cols-4 lg:grid-cols-6">
-              {mentorados.map((mentorado) => (
+          <CardContent className="space-y-4">
+            {/* Barra de pesquisa */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por nome, apelido ou turma..."
+                value={searchMentorado}
+                onChange={(e) => setSearchMentorado(e.target.value)}
+                className="pl-10 bg-background/50 border-border"
+              />
+            </div>
+
+            {/* Grid de mentorados */}
+            <div className="grid gap-3 md:grid-cols-5">
+              {mentoradosPaginados.map((mentorado) => (
                 <div
                   key={mentorado.id}
                   className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
@@ -204,8 +244,43 @@ export default function Metas() {
                 </div>
               ))}
             </div>
+
+            {/* Paginação */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between pt-2">
+                <p className="text-sm text-muted-foreground">
+                  Mostrando {currentPage * MENTORADOS_PER_PAGE + 1}-{Math.min((currentPage + 1) * MENTORADOS_PER_PAGE, mentoradosFiltrados.length)} de {mentoradosFiltrados.length}
+                </p>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
+                    disabled={currentPage === 0}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
+                    disabled={currentPage >= totalPages - 1}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {mentoradosFiltrados.length === 0 && searchMentorado && (
+              <p className="text-center text-muted-foreground py-4">
+                Nenhum mentorado encontrado para "{searchMentorado}"
+              </p>
+            )}
+
+            {/* Mentorado selecionado */}
             {mentoradoAtual && (
-              <div className="mt-4 p-3 bg-primary/5 rounded-lg flex items-center gap-3">
+              <div className="p-3 bg-primary/5 rounded-lg flex items-center gap-3">
                 <Avatar className="h-12 w-12 border-2 border-primary/20">
                   <AvatarImage src={mentoradoAtual.profiles?.foto_url || undefined} />
                   <AvatarFallback className="bg-secondary/10 text-secondary">
