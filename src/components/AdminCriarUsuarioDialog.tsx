@@ -83,7 +83,7 @@ export function AdminCriarUsuarioDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-secondary hover:bg-secondary/90">
+        <Button className="bg-secondary hover:bg-secondary/90 text-secondary-foreground">
           <UserPlus className="mr-2 h-4 w-4" />
           Criar Novo Usuário
         </Button>

@@ -78,8 +78,8 @@ All colors MUST be HSL.
     --primary-foreground: 0 0% 100%;
     --primary-glow: 195 65% 50%;
 
-    --secondary: 195 30% 90%;
-    --secondary-foreground: 195 65% 25%;
+    --secondary: 195 65% 35%;
+    --secondary-foreground: 0 0% 100%;
     --secondary-light: 195 40% 80%;
     --secondary-subtle: 195 65% 40% / 0.1;
     --secondary-hover: 195 65% 40% / 0.15;

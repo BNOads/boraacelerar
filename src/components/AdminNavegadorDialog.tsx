@@ -166,7 +166,7 @@ export function AdminNavegadorDialog() {
       if (!isOpen) resetForm();
     }}>
       <DialogTrigger asChild>
-        <Button className="bg-secondary hover:bg-secondary/90">
+        <Button className="bg-secondary hover:bg-secondary/90 text-secondary-foreground">
           <Plus className="mr-2 h-4 w-4" />
           Adicionar Navegador
         </Button>
