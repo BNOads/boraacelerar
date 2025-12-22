@@ -30,15 +30,17 @@ export default function Membros() {
   const { data: mentorado } = useQuery({
     queryKey: ["mentorado-profile"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return null;
-      
+
       const { data, error } = await supabase
         .from("mentorados")
         .select("id")
         .eq("user_id", user.id)
-        .single();
-      
+        .maybeSingle();
+
       if (error) throw error;
       return data;
     },
@@ -100,10 +102,8 @@ export default function Membros() {
 
   // Conteúdo Direcionado
   const { data: conteudoDirecionado, isLoading: loadingConteudo } = useQuery({
-    queryKey: ["conteudo-direcionado", mentorado?.id],
+    queryKey: ["conteudo-direcionado"],
     queryFn: async () => {
-      if (!mentorado?.id) return [];
-      
       const { data, error } = await supabase
         .from("conteudo_direcionado")
         .select(`
@@ -112,11 +112,10 @@ export default function Membros() {
         `)
         .eq("ativo", true)
         .order("data_publicacao", { ascending: false });
-      
+
       if (error) throw error;
       return data;
     },
-    enabled: !!mentorado?.id,
   });
 
   // Links do Posto Ipiranga
@@ -159,8 +158,8 @@ export default function Membros() {
 
   const filteredConteudo = conteudoDirecionado?.filter(
     (c) =>
-      c.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.descricao?.toLowerCase().includes(searchTerm.toLowerCase())
+      c.titulo.toLowerCase().includes(searchEncontros.toLowerCase()) ||
+      c.descricao?.toLowerCase().includes(searchEncontros.toLowerCase())
   );
 
   return (
@@ -188,9 +187,8 @@ export default function Membros() {
 
 
       {/* Tabs */}
-      <Tabs defaultValue="conteudos" className="space-y-6">
+      <Tabs defaultValue="gravacoes" className="space-y-6">
         <TabsList className="bg-card/50 border border-border">
-          <TabsTrigger value="conteudos">Conteúdos</TabsTrigger>
           <TabsTrigger value="gravacoes">Minhas Gravações</TabsTrigger>
           <TabsTrigger value="agentes-ia">Agentes de IA</TabsTrigger>
           <TabsTrigger value="posto-ipiranga">
@@ -198,67 +196,6 @@ export default function Membros() {
             Posto Ipiranga
           </TabsTrigger>
         </TabsList>
-
-        {/* Conteúdos Direcionados */}
-        <TabsContent value="conteudos" className="space-y-6">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between gap-4">
-              <h3 className="text-xl font-bold text-foreground">Conteúdos para Membros</h3>
-              <div className="relative flex-1 max-w-xs">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar conteúdo..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-card/50 border-border"
-                />
-              </div>
-            </div>
-            {loadingConteudo ? (
-              <div className="flex justify-center py-8">
-                <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
-              </div>
-            ) : filteredConteudo && filteredConteudo.length > 0 ? (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {filteredConteudo.map((conteudo) => (
-                  <Card
-                    key={conteudo.id}
-                    className="border-border bg-card/50 backdrop-blur-sm hover:shadow-elegant hover:scale-[1.02] transition-all duration-300 cursor-pointer"
-                    onClick={() => conteudo.url && window.open(conteudo.url, "_blank")}
-                  >
-                    <CardHeader>
-                      <div className="flex items-center justify-between gap-2">
-                        <CardTitle className="text-base">{conteudo.titulo}</CardTitle>
-                        {conteudo.tags && conteudo.tags.length > 0 && (
-                          <Badge variant="default" className="text-xs shrink-0">
-                            {conteudo.tags[0]}
-                          </Badge>
-                        )}
-                      </div>
-                      {conteudo.descricao && (
-                        <CardDescription className="line-clamp-2">
-                          {conteudo.descricao}
-                        </CardDescription>
-                      )}
-                    </CardHeader>
-                    <CardContent>
-                      {conteudo.url && (
-                        <div className="flex items-center gap-2 text-sm text-primary">
-                          <ExternalLink className="h-4 w-4" />
-                          <span>Acessar conteúdo</span>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <p className="text-center text-muted-foreground py-8">
-                Nenhum conteúdo encontrado.
-              </p>
-            )}
-          </div>
-        </TabsContent>
 
         <TabsContent value="gravacoes" className="space-y-6">
           {/* Gravações de Encontros */}
@@ -268,93 +205,138 @@ export default function Membros() {
               <div className="relative flex-1 max-w-xs">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Buscar encontro..."
+                  placeholder="Buscar encontro ou conteúdo..."
                   value={searchEncontros}
                   onChange={(e) => setSearchEncontros(e.target.value)}
                   className="pl-10 bg-card/50 border-border"
                 />
               </div>
             </div>
-            {loadingEncontros ? (
+            {loadingEncontros || loadingConteudo ? (
               <div className="flex justify-center py-8">
                 <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
               </div>
-            ) : filteredEncontros && filteredEncontros.length > 0 ? (
+            ) : (filteredEncontros && filteredEncontros.length > 0) || (filteredConteudo && filteredConteudo.length > 0) ? (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {filteredEncontros.map((gravacao) => {
-                  const thumbnail = gravacao.thumbnail_url || getVideoThumbnail(gravacao.url_video);
-                  return (
-                    <Card
-                      key={gravacao.id}
-                      className="border-border bg-card/50 backdrop-blur-sm hover:shadow-elegant hover:scale-[1.02] transition-all duration-300"
-                    >
-                      <div 
-                        className="relative aspect-video bg-muted cursor-pointer"
-                        onClick={() => window.open(gravacao.url_video, "_blank")}
+                {[...(filteredEncontros || []).map((g: any) => ({ kind: "encontro" as const, item: g })), ...(filteredConteudo || []).map((c: any) => ({ kind: "conteudo" as const, item: c }))]
+                  .sort((a, b) => {
+                    const aDate = new Date(a.item.data_publicacao || a.item.created_at || 0).getTime();
+                    const bDate = new Date(b.item.data_publicacao || b.item.created_at || 0).getTime();
+                    return bDate - aDate;
+                  })
+                  .map(({ kind, item }) => {
+                    if (kind === "encontro") {
+                      const gravacao = item;
+                      const thumbnail = gravacao.thumbnail_url || getVideoThumbnail(gravacao.url_video);
+                      return (
+                        <Card
+                          key={`encontro-${gravacao.id}`}
+                          className="border-border bg-card/50 backdrop-blur-sm hover:shadow-elegant hover:scale-[1.02] transition-all duration-300"
+                        >
+                          <div
+                            className="relative aspect-video bg-muted cursor-pointer"
+                            onClick={() => window.open(gravacao.url_video, "_blank")}
+                          >
+                            {thumbnail ? (
+                              <img src={thumbnail} alt={gravacao.titulo} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="flex items-center justify-center h-full">
+                                <Video className="h-12 w-12 text-muted-foreground" />
+                              </div>
+                            )}
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 transition-opacity">
+                              <Play className="h-12 w-12 text-white" />
+                            </div>
+                          </div>
+                          <CardHeader>
+                            <div className="flex items-center justify-between">
+                              <CardTitle className="text-base">{gravacao.titulo}</CardTitle>
+                              {isAdmin && (
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-8 w-8"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingEncontro(gravacao);
+                                  }}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </div>
+                            {gravacao.descricao && (
+                              <CardDescription className="line-clamp-2">{gravacao.descricao}</CardDescription>
+                            )}
+                          </CardHeader>
+                          <CardContent className="space-y-2">
+                            {gravacao.duracao_seg && (
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Clock className="h-4 w-4" />
+                                <span>{Math.floor(gravacao.duracao_seg / 60)} min</span>
+                              </div>
+                            )}
+                            {gravacao.tags && gravacao.tags.length > 0 && (
+                              <div className="flex flex-wrap gap-1">
+                                {gravacao.tags.slice(0, 3).map((tag: string, idx: number) => (
+                                  <Badge key={idx} variant="secondary" className="text-xs">
+                                    {tag}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      );
+                    }
+
+                    const conteudo = item;
+                    const tipo = conteudo.tags?.[0];
+                    const thumb = conteudo.url ? getVideoThumbnail(conteudo.url) : null;
+
+                    return (
+                      <Card
+                        key={`conteudo-${conteudo.id}`}
+                        className="border-border bg-card/50 backdrop-blur-sm hover:shadow-elegant hover:scale-[1.02] transition-all duration-300 cursor-pointer"
+                        onClick={() => conteudo.url && window.open(conteudo.url, "_blank")}
                       >
-                        {thumbnail ? (
-                          <img
-                            src={thumbnail}
-                            alt={gravacao.titulo}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="flex items-center justify-center h-full">
-                            <Video className="h-12 w-12 text-muted-foreground" />
-                          </div>
-                        )}
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 transition-opacity">
-                          <Play className="h-12 w-12 text-white" />
-                        </div>
-                      </div>
-                      <CardHeader>
-                        <div className="flex items-center justify-between">
-                          <CardTitle className="text-base">{gravacao.titulo}</CardTitle>
-                          {isAdmin && (
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="h-8 w-8"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setEditingEncontro(gravacao);
-                              }}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
+                        <div className="relative aspect-video bg-muted">
+                          {thumb ? (
+                            <img src={thumb} alt={conteudo.titulo} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="flex items-center justify-center h-full">
+                              <FileText className="h-12 w-12 text-muted-foreground" />
+                            </div>
                           )}
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                            <ExternalLink className="h-8 w-8 text-white" />
+                          </div>
                         </div>
-                        {gravacao.descricao && (
-                          <CardDescription className="line-clamp-2">
-                            {gravacao.descricao}
-                          </CardDescription>
-                        )}
-                      </CardHeader>
-                      <CardContent className="space-y-2">
-                        {gravacao.duracao_seg && (
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Clock className="h-4 w-4" />
-                            <span>{Math.floor(gravacao.duracao_seg / 60)} min</span>
-                          </div>
-                        )}
-                        {gravacao.tags && gravacao.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-1">
-                            {gravacao.tags.slice(0, 3).map((tag, idx) => (
-                              <Badge key={idx} variant="secondary" className="text-xs">
-                                {tag}
+                        <CardHeader>
+                          <div className="flex items-center justify-between gap-2">
+                            <CardTitle className="text-base">{conteudo.titulo}</CardTitle>
+                            {tipo && (
+                              <Badge variant="default" className="text-xs shrink-0">
+                                {tipo}
                               </Badge>
-                            ))}
+                            )}
                           </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  );
-                })}
+                          {conteudo.descricao && (
+                            <CardDescription className="line-clamp-2">{conteudo.descricao}</CardDescription>
+                          )}
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex items-center gap-2 text-sm text-primary">
+                            <ExternalLink className="h-4 w-4" />
+                            <span>Acessar conteúdo</span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
               </div>
             ) : (
-              <p className="text-center text-muted-foreground py-8">
-                Nenhuma gravação encontrada.
-              </p>
+              <p className="text-center text-muted-foreground py-8">Nenhuma gravação encontrada.</p>
             )}
           </div>
 
