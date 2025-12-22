@@ -18,7 +18,7 @@ import { EditarLinkDialog } from "@/components/EditarLinkDialog";
 import { EditarAgendaDialog } from "@/components/EditarAgendaDialog";
 import { AdminNavegadorDialog } from "@/components/AdminNavegadorDialog";
 import { EditarNavegadorDialog } from "@/components/EditarNavegadorDialog";
-import { EstatisticasNavegadorDialog } from "@/components/EstatisticasNavegadorDialog";
+
 interface Profile {
   nome_completo: string;
   apelido: string | null;
@@ -472,25 +472,19 @@ export default function Dashboard() {
                               <Badge variant="secondary" className="text-xs">Inativo</Badge>
                             )}
                             {isAdmin && (
-                              <>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="h-8 w-8 p-0"
-                                  onClick={() => setEditingNavegador(nav)}
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                                <EstatisticasNavegadorDialog
-                                  navegadorId={nav.id}
-                                  navegadorNome={nome}
-                                />
-                              </>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 w-8 p-0"
+                                onClick={() => setEditingNavegador(nav)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
                             )}
                           </div>
                         </div>
                         {nav.bio_curta && (
-                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{nav.bio_curta}</p>
+                          <p className="text-sm text-foreground/80 mt-2 leading-relaxed">{nav.bio_curta}</p>
                         )}
                         <div className="flex gap-2 mt-3">
                           {nav.whatsapp_url && (
