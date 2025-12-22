@@ -14,17 +14,22 @@ import { EditarPostoIpirangaDialog } from "@/components/EditarPostoIpirangaDialo
 import { AdminGravacaoIndividualDialog } from "@/components/AdminGravacaoIndividualDialog";
 import { EditarGravacaoIndividualDialog } from "@/components/EditarGravacaoIndividualDialog";
 import { EditarEncontroGravadoDialog } from "@/components/EditarEncontroGravadoDialog";
+import { EditarConteudoDialog } from "@/components/EditarConteudoDialog";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { getVideoThumbnail } from "@/lib/videoUtils";
+
+const TIPOS_FILTRO = ["Todos", "Hotseat", "Implementação", "Mentoria", "Análise Temática", "Imersões com Convidados"] as const;
 
 export default function Membros() {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchEncontros, setSearchEncontros] = useState("");
   const [searchIndividuais, setSearchIndividuais] = useState("");
+  const [filtroTipo, setFiltroTipo] = useState<string>("Todos");
   const { isAdmin } = useIsAdmin();
   const [editingLink, setEditingLink] = useState<any>(null);
   const [editingGravacao, setEditingGravacao] = useState<any>(null);
   const [editingEncontro, setEditingEncontro] = useState<any>(null);
+  const [editingConteudo, setEditingConteudo] = useState<any>(null);
 
   // Buscar mentorado_id do usuário
   const { data: mentorado } = useQuery({
@@ -156,11 +161,13 @@ export default function Membros() {
     );
   });
 
-  const filteredConteudo = conteudoDirecionado?.filter(
-    (c) =>
+  const filteredConteudo = conteudoDirecionado?.filter((c) => {
+    const matchSearch =
       c.titulo.toLowerCase().includes(searchEncontros.toLowerCase()) ||
-      c.descricao?.toLowerCase().includes(searchEncontros.toLowerCase())
-  );
+      c.descricao?.toLowerCase().includes(searchEncontros.toLowerCase());
+    const matchTipo = filtroTipo === "Todos" || c.tags?.[0] === filtroTipo;
+    return matchSearch && matchTipo;
+  });
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -200,16 +207,31 @@ export default function Membros() {
         <TabsContent value="gravacoes" className="space-y-6">
           {/* Gravações de Encontros */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between gap-4">
-              <h3 className="text-xl font-bold text-foreground">Encontros Gravados</h3>
-              <div className="relative flex-1 max-w-xs">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar encontro ou conteúdo..."
-                  value={searchEncontros}
-                  onChange={(e) => setSearchEncontros(e.target.value)}
-                  className="pl-10 bg-card/50 border-border"
-                />
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between gap-4">
+                <h3 className="text-xl font-bold text-foreground">Encontros Gravados</h3>
+                <div className="relative flex-1 max-w-xs">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar encontro ou conteúdo..."
+                    value={searchEncontros}
+                    onChange={(e) => setSearchEncontros(e.target.value)}
+                    className="pl-10 bg-card/50 border-border"
+                  />
+                </div>
+              </div>
+              {/* Filtros por tipo */}
+              <div className="flex flex-wrap gap-2">
+                {TIPOS_FILTRO.map((tipo) => (
+                  <Badge
+                    key={tipo}
+                    variant={filtroTipo === tipo ? "default" : "outline"}
+                    className="cursor-pointer hover:bg-primary/20 transition-colors"
+                    onClick={() => setFiltroTipo(tipo)}
+                  >
+                    {tipo}
+                  </Badge>
+                ))}
               </div>
             </div>
             {loadingEncontros || loadingConteudo ? (
@@ -315,11 +337,26 @@ export default function Membros() {
                         <CardHeader>
                           <div className="flex items-center justify-between gap-2">
                             <CardTitle className="text-base">{conteudo.titulo}</CardTitle>
-                            {tipo && (
-                              <Badge variant="default" className="text-xs shrink-0">
-                                {tipo}
-                              </Badge>
-                            )}
+                            <div className="flex items-center gap-1">
+                              {tipo && (
+                                <Badge variant="default" className="text-xs shrink-0">
+                                  {tipo}
+                                </Badge>
+                              )}
+                              {isAdmin && (
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-8 w-8"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingConteudo(conteudo);
+                                  }}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </div>
                           </div>
                           {conteudo.descricao && (
                             <CardDescription className="line-clamp-2">{conteudo.descricao}</CardDescription>
@@ -792,6 +829,12 @@ export default function Membros() {
         gravacao={editingEncontro}
         open={!!editingEncontro}
         onOpenChange={(open) => !open && setEditingEncontro(null)}
+      />
+
+      <EditarConteudoDialog
+        conteudo={editingConteudo}
+        open={!!editingConteudo}
+        onOpenChange={(open) => !open && setEditingConteudo(null)}
       />
     </div>
   );
