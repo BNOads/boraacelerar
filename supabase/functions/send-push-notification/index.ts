@@ -225,10 +225,13 @@ Deno.serve(async (req) => {
             );
         }
 
-        const { data: subscriptions, error: subError } = await supabase
-            .from('push_subscriptions')
-            .select('*')
-            .eq('user_id', user_id);
+        // Support broadcasting to all users
+        let query = supabase.from('push_subscriptions').select('*');
+        if (user_id !== 'all') {
+            query = query.eq('user_id', user_id);
+        }
+
+        const { data: subscriptions, error: subError } = await query;
 
         if (subError || !subscriptions || subscriptions.length === 0) {
             return new Response(

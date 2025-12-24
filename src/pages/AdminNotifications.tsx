@@ -42,6 +42,24 @@ export default function AdminNotifications() {
         .insert([notification]);
 
       if (error) throw error;
+
+      // Trigger mass push notification
+      try {
+        await supabase.functions.invoke('send-push-notification', {
+          body: {
+            user_id: 'all',
+            payload: {
+              title: formData.title,
+              body: formData.message,
+              url: "/notifications"
+            }
+          }
+        });
+        console.log('[AdminNotifications] Mass push notification triggered');
+      } catch (pushError) {
+        // Log error but don't fail the primary notification creation
+        console.error('[AdminNotifications] Failed to trigger mass push:', pushError);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications-list"] });
