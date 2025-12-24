@@ -1,4 +1,4 @@
-project_id = "jgmbervgykezwoimsqns"
+project_id = "tbdooscfrrkwfutkdjha"
 
 [functions.create-admin-user]
 verify_jwt = false
@@ -10,4 +10,7 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.notificar-encontros]
+verify_jwt = false
+
+[functions.send-push-notification]
 verify_jwt = false

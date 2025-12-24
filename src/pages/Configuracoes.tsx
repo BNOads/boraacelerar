@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { useTheme } from "next-themes";
 import { User, Mail, Instagram, Phone, Save, Upload, Lock, Eye, EyeOff, Sun, Moon } from "lucide-react";
+import { PushNotificationSettings } from "@/components/PushNotificationSettings";
 
 export default function Configuracoes() {
   const queryClient = useQueryClient();
@@ -388,6 +389,9 @@ export default function Configuracoes() {
           )}
         </CardContent>
       </Card>
+
+      {/* Notificações Push */}
+      <PushNotificationSettings />
 
       {/* Segurança */}
       <Card className="border-border bg-card/50 backdrop-blur-sm">
