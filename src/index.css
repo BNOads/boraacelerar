@@ -120,7 +120,97 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Modern Mobile Menu - iOS Style */
+:root {
+  --component-inactive-color: hsl(var(--muted-foreground));
+  --component-bg: hsl(var(--card));
+  --component-shadow: hsla(0, 0%, 0%, 0.2);
+  --component-active-bg: hsla(var(--primary), 0.1);
+  --component-line-inactive-color: hsl(var(--border));
+  --component-active-color-default: hsl(var(--primary));
+}
+
+.dark {
+  --component-inactive-color: hsl(var(--muted-foreground));
+  --component-bg: hsl(var(--card));
+  --component-shadow: hsla(0, 0%, 0%, 0.4);
+  --component-active-bg: hsla(var(--primary), 0.15);
+  --component-line-inactive-color: hsl(var(--muted-foreground));
+  --component-active-color-default: hsl(var(--primary));
+}
+
+@keyframes iconBounce {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  20% {
+    transform: translateY(-0.3em);
+  }
+
+  40% {
+    transform: translateY(0);
+  }
+
+  60% {
+    transform: translateY(-0.1em);
+  }
+
+  80% {
+    transform: translateY(0);
+  }
+}
+
+.menu {
+  @apply fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center h-16 px-4 border-t border-border backdrop-blur-lg bg-card/80;
+  box-shadow: 0 -4px 12px var(--component-shadow);
+}
+
+.menu__item {
+  @apply relative flex flex-col items-center justify-center w-full h-full text-[--component-inactive-color] transition-colors duration-300;
+  --component-active-color: var(--component-active-color-default);
+}
+
+.menu__item.active {
+  @apply text-[--component-active-color];
+}
+
+.menu__icon {
+  @apply relative flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300;
+}
+
+.menu__item.active .menu__icon {
+  @apply bg-[--component-active-bg];
+  animation: iconBounce 0.6s ease-out;
+}
+
+.menu__icon .icon {
+  @apply w-5 h-5;
+}
+
+.menu__text {
+  @apply mt-1 text-[10px] font-medium transition-all duration-300 opacity-70;
+}
+
+.menu__item.active .menu__text {
+  @apply opacity-100;
+}
+
+/* Line indicator logic for the modern menu */
+.menu__item::after {
+  content: '';
+  @apply absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 bg-[--component-active-color] transition-all duration-300 scale-x-0;
+  width: var(--lineWidth, 0px);
+}
+
+.menu__item.active::after {
+  @apply scale-x-100;
 }

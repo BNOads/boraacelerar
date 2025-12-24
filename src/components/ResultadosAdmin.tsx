@@ -301,7 +301,7 @@ export function ResultadosAdmin() {
 
     // Filtro de busca
     if (searchTerm) {
-      resultado = resultado.filter(m => 
+      resultado = resultado.filter(m =>
         m.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
         m.apelido?.toLowerCase().includes(searchTerm.toLowerCase())
       );
@@ -321,14 +321,14 @@ export function ResultadosAdmin() {
     resultado.sort((a, b) => {
       const aVal = a[sortConfig.key];
       const bVal = b[sortConfig.key];
-      
+
       if (sortConfig.key === 'nome') {
-        return sortConfig.order === 'asc' 
+        return sortConfig.order === 'asc'
           ? aVal.toString().localeCompare(bVal.toString())
           : bVal.toString().localeCompare(aVal.toString());
       }
-      
-      return sortConfig.order === 'asc' 
+
+      return sortConfig.order === 'asc'
         ? (aVal as number) - (bVal as number)
         : (bVal as number) - (aVal as number);
     });
@@ -354,8 +354,8 @@ export function ResultadosAdmin() {
     const totalMentorados = mentoradosRanking.length;
     const faturamentoTotal = mentoradosRanking.reduce((acc, m) => acc + m.faturamentoTotal, 0);
     const contratosTotal = mentoradosRanking.reduce((acc, m) => acc + m.contratosTotal, 0);
-    const progressoMedio = mentoradosRanking.length > 0 
-      ? mentoradosRanking.reduce((acc, m) => acc + m.progressoMedioOKR, 0) / mentoradosRanking.length 
+    const progressoMedio = mentoradosRanking.length > 0
+      ? mentoradosRanking.reduce((acc, m) => acc + m.progressoMedioOKR, 0) / mentoradosRanking.length
       : 0;
 
     return {
@@ -386,7 +386,7 @@ export function ResultadosAdmin() {
           <TrendingUp className="h-8 w-8 text-primary" />
           <h1 className="text-4xl font-bold text-foreground">Painel Administrativo - Resultados</h1>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map(i => (
             <Card key={i}>
@@ -406,11 +406,11 @@ export function ResultadosAdmin() {
 
   return (
     <div className="space-y-6 animate-slide-in">
-      <div className="flex items-center gap-3">
-        <TrendingUp className="h-8 w-8 text-primary" />
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <TrendingUp className="h-6 w-6 md:h-8 md:w-8 text-primary" />
         <div>
-          <h1 className="text-4xl font-bold text-foreground">Painel Administrativo - Resultados</h1>
-          <p className="text-muted-foreground text-lg">Visão consolidada de performance de todos os mentorados</p>
+          <h1 className="text-2xl md:text-4xl font-bold text-foreground">Painel Administrativo - Resultados</h1>
+          <p className="text-muted-foreground text-sm md:text-lg">Visão consolidada de performance de todos os mentorados</p>
         </div>
       </div>
 
@@ -424,37 +424,37 @@ export function ResultadosAdmin() {
             <ResponsiveContainer width="100%" height={250}>
               <LineChart data={evolucaoTemporal}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis 
-                  dataKey="mes_formatado" 
+                <XAxis
+                  dataKey="mes_formatado"
                   className="text-xs"
                   stroke="hsl(var(--muted-foreground))"
                 />
-                <YAxis 
+                <YAxis
                   yAxisId="left"
                   className="text-xs"
                   stroke="hsl(var(--muted-foreground))"
-                  label={{ 
-                    value: 'Mentorados Ativos', 
-                    angle: -90, 
+                  label={{
+                    value: 'Mentorados Ativos',
+                    angle: -90,
                     position: 'insideLeft',
                     style: { fill: 'hsl(var(--muted-foreground))' }
                   }}
                 />
-                <YAxis 
+                <YAxis
                   yAxisId="right"
                   orientation="right"
                   className="text-xs"
                   stroke="hsl(var(--muted-foreground))"
-                  label={{ 
-                    value: 'Faturamento Total (R$)', 
-                    angle: 90, 
+                  label={{
+                    value: 'Faturamento Total (R$)',
+                    angle: 90,
                     position: 'insideRight',
                     style: { fill: 'hsl(var(--muted-foreground))' }
                   }}
                   tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`}
                 />
-                <Tooltip 
-                  contentStyle={{ 
+                <Tooltip
+                  contentStyle={{
                     backgroundColor: 'hsl(var(--card))',
                     border: '1px solid hsl(var(--border))',
                     borderRadius: '8px'
@@ -467,20 +467,20 @@ export function ResultadosAdmin() {
                   }}
                 />
                 <Legend />
-                <Line 
+                <Line
                   yAxisId="left"
-                  type="monotone" 
-                  dataKey="total_mentorados" 
-                  stroke="hsl(var(--primary))" 
+                  type="monotone"
+                  dataKey="total_mentorados"
+                  stroke="hsl(var(--primary))"
                   strokeWidth={2}
                   name="Mentorados Ativos"
                   dot={{ fill: 'hsl(var(--primary))' }}
                 />
-                <Line 
+                <Line
                   yAxisId="right"
-                  type="monotone" 
-                  dataKey="faturamento_total" 
-                  stroke="hsl(var(--chart-2))" 
+                  type="monotone"
+                  dataKey="faturamento_total"
+                  stroke="hsl(var(--chart-2))"
                   strokeWidth={2}
                   name="Faturamento Total"
                   dot={{ fill: 'hsl(var(--chart-2))' }}
@@ -505,23 +505,22 @@ export function ResultadosAdmin() {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center justify-center">
-                <div className={`text-5xl font-bold ${
-                  taxaAtualizacao.indiceEngajamento >= 80 ? 'text-green-500' :
-                  taxaAtualizacao.indiceEngajamento >= 60 ? 'text-primary' :
-                  taxaAtualizacao.indiceEngajamento >= 40 ? 'text-yellow-500' : 'text-red-500'
-                }`}>
+                <div className={`text-5xl font-bold ${taxaAtualizacao.indiceEngajamento >= 80 ? 'text-green-500' :
+                    taxaAtualizacao.indiceEngajamento >= 60 ? 'text-primary' :
+                      taxaAtualizacao.indiceEngajamento >= 40 ? 'text-yellow-500' : 'text-red-500'
+                  }`}>
                   {taxaAtualizacao.indiceEngajamento}%
                 </div>
               </div>
               <div className="text-center">
                 <Badge variant={
                   taxaAtualizacao.indiceEngajamento >= 80 ? 'default' :
-                  taxaAtualizacao.indiceEngajamento >= 60 ? 'secondary' :
-                  taxaAtualizacao.indiceEngajamento >= 40 ? 'outline' : 'destructive'
+                    taxaAtualizacao.indiceEngajamento >= 60 ? 'secondary' :
+                      taxaAtualizacao.indiceEngajamento >= 40 ? 'outline' : 'destructive'
                 } className="text-xs">
                   {taxaAtualizacao.indiceEngajamento >= 80 ? 'Excelente' :
-                   taxaAtualizacao.indiceEngajamento >= 60 ? 'Bom' :
-                   taxaAtualizacao.indiceEngajamento >= 40 ? 'Regular' : 'Baixo'}
+                    taxaAtualizacao.indiceEngajamento >= 60 ? 'Bom' :
+                      taxaAtualizacao.indiceEngajamento >= 40 ? 'Regular' : 'Baixo'}
                 </Badge>
               </div>
             </CardContent>
@@ -575,13 +574,12 @@ export function ResultadosAdmin() {
                     <ScrollArea className="h-[400px] pr-4">
                       <div className="space-y-2">
                         {(taxaAtualizacao.mentoradosComStatus || []).map((mentorado) => (
-                          <div 
+                          <div
                             key={mentorado.id}
-                            className={`flex items-center justify-between p-3 rounded-lg border ${
-                              mentorado.atualizou 
-                                ? 'bg-green-500/10 border-green-500/30' 
+                            className={`flex items-center justify-between p-3 rounded-lg border ${mentorado.atualizou
+                                ? 'bg-green-500/10 border-green-500/30'
                                 : 'bg-red-500/10 border-red-500/30'
-                            }`}
+                              }`}
                           >
                             <div className="flex items-center gap-3">
                               <Avatar className="h-8 w-8">
@@ -631,20 +629,20 @@ export function ResultadosAdmin() {
               <ResponsiveContainer width="100%" height={180}>
                 <BarChart data={taxaAtualizacao.historico}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis 
-                    dataKey="mes_formatado" 
+                  <XAxis
+                    dataKey="mes_formatado"
                     className="text-xs"
                     stroke="hsl(var(--muted-foreground))"
                     tick={{ fontSize: 10 }}
                   />
-                  <YAxis 
+                  <YAxis
                     className="text-xs"
                     stroke="hsl(var(--muted-foreground))"
                     tickFormatter={(value) => `${value}%`}
                     domain={[0, 100]}
                   />
-                  <Tooltip 
-                    contentStyle={{ 
+                  <Tooltip
+                    contentStyle={{
                       backgroundColor: 'hsl(var(--card))',
                       border: '1px solid hsl(var(--border))',
                       borderRadius: '8px'
@@ -657,9 +655,9 @@ export function ResultadosAdmin() {
                     }}
                     labelFormatter={(label) => `Mês: ${label}`}
                   />
-                  <Bar 
-                    dataKey="percentual" 
-                    fill="hsl(var(--primary))" 
+                  <Bar
+                    dataKey="percentual"
+                    fill="hsl(var(--primary))"
                     name="Taxa (%)"
                     radius={[4, 4, 0, 0]}
                   />
@@ -668,8 +666,8 @@ export function ResultadosAdmin() {
               <div className="mt-2 flex items-center justify-between text-xs">
                 <span className="text-muted-foreground">
                   Média: <span className="font-semibold text-foreground">
-                    {taxaAtualizacao.historico.length > 0 
-                      ? Math.round(taxaAtualizacao.historico.reduce((acc, h) => acc + h.percentual, 0) / taxaAtualizacao.historico.length) 
+                    {taxaAtualizacao.historico.length > 0
+                      ? Math.round(taxaAtualizacao.historico.reduce((acc, h) => acc + h.percentual, 0) / taxaAtualizacao.historico.length)
                       : 0}%
                   </span>
                 </span>
@@ -739,7 +737,7 @@ export function ResultadosAdmin() {
       {/* Filtros e Busca */}
       <Card className="border-border bg-card shadow-card">
         <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -749,30 +747,32 @@ export function ResultadosAdmin() {
                 className="pl-10"
               />
             </div>
-            <Select value={filtroTurma} onValueChange={setFiltroTurma}>
-              <SelectTrigger className="w-full md:w-[200px]">
-                <SelectValue placeholder="Todas as turmas" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todas">Todas as turmas</SelectItem>
-                {turmasUnicas.map(turma => (
-                  <SelectItem key={turma} value={turma!}>{turma}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={filtroFaixa} onValueChange={setFiltroFaixa}>
-              <SelectTrigger className="w-full md:w-[200px]">
-                <SelectValue placeholder="Todas as faixas" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todas">Todas as faixas</SelectItem>
-                {FAIXAS_PREMIACAO.map(faixa => (
-                  <SelectItem key={faixa.nome} value={faixa.nome}>
-                    {faixa.emoji} {faixa.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Select value={filtroTurma} onValueChange={setFiltroTurma}>
+                <SelectTrigger className="w-full lg:w-[200px]">
+                  <SelectValue placeholder="Todas as turmas" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todas">Todas as turmas</SelectItem>
+                  {turmasUnicas.map(turma => (
+                    <SelectItem key={turma} value={turma!}>{turma}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={filtroFaixa} onValueChange={setFiltroFaixa}>
+                <SelectTrigger className="w-full lg:w-[200px]">
+                  <SelectValue placeholder="Todas as faixas" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todas">Todas as faixas</SelectItem>
+                  {FAIXAS_PREMIACAO.map(faixa => (
+                    <SelectItem key={faixa.nome} value={faixa.nome}>
+                      {faixa.emoji} {faixa.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -931,8 +931,8 @@ export function ResultadosAdmin() {
                   </TableRow>
                 ) : (
                   mentoradosPaginados.map((mentorado) => (
-                    <TableRow 
-                      key={mentorado.id} 
+                    <TableRow
+                      key={mentorado.id}
                       className="hover:bg-muted/50"
                     >
                       <TableCell>
@@ -1013,9 +1013,9 @@ export function ResultadosAdmin() {
                   {/* Páginas ao redor da atual */}
                   {Array.from({ length: totalPages }, (_, i) => i + 1)
                     .filter(page => {
-                      return page === currentPage || 
-                             page === currentPage - 1 || 
-                             page === currentPage + 1;
+                      return page === currentPage ||
+                        page === currentPage - 1 ||
+                        page === currentPage + 1;
                     })
                     .map(page => (
                       <PaginationItem key={page}>

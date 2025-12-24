@@ -18,6 +18,8 @@ import { EditarConteudoDialog } from "@/components/EditarConteudoDialog";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { getVideoThumbnail } from "@/lib/videoUtils";
 import logoBora from "@/assets/logo-bora.png";
+import { INITIAL_AI_AGENTS, AIAgent } from "@/data/ai-agents";
+import { AdminAgenteDialog } from "@/components/AdminAgenteDialog";
 
 const TIPOS_FILTRO = ["Todos", "Hotseat", "Implementação", "Mentoria", "Análise Temática", "Imersões com Convidados"] as const;
 
@@ -31,7 +33,37 @@ export default function Membros() {
   const [editingGravacao, setEditingGravacao] = useState<any>(null);
   const [editingEncontro, setEditingEncontro] = useState<any>(null);
   const [editingConteudo, setEditingConteudo] = useState<any>(null);
-  
+  const [aiAgents, setAiAgents] = useState<AIAgent[]>([]);
+
+  // Carregar agentes do localStorage ou do arquivo inicial
+  useEffect(() => {
+    const savedAgents = localStorage.getItem("bora_ai_agents");
+    if (savedAgents) {
+      setAiAgents(JSON.parse(savedAgents));
+    } else {
+      setAiAgents(INITIAL_AI_AGENTS);
+    }
+  }, []);
+
+  const saveAgents = (newAgents: AIAgent[]) => {
+    setAiAgents(newAgents);
+    localStorage.setItem("bora_ai_agents", JSON.stringify(newAgents));
+  };
+
+  const handleAddAgent = (newAgent: AIAgent) => {
+    saveAgents([...aiAgents, newAgent]);
+  };
+
+  const handleUpdateAgent = (updatedAgent: AIAgent) => {
+    saveAgents(aiAgents.map(a => a.id === updatedAgent.id ? updatedAgent : a));
+  };
+
+  const handleDeleteAgent = (id: string) => {
+    saveAgents(aiAgents.filter(a => a.id !== id));
+  };
+
+  const categories = Array.from(new Set(aiAgents.map(a => a.category)));
+
   // Scroll do carrossel de conteúdos
   const conteudoScrollRef = useRef<HTMLDivElement>(null);
   const [conteudoScrollInfo, setConteudoScrollInfo] = useState({ start: 1, end: 4, total: 0 });
@@ -77,7 +109,7 @@ export default function Membros() {
     queryKey: ["gravacoes-individuais", mentorado?.id],
     queryFn: async () => {
       if (!mentorado?.id) return [];
-      
+
       const { data, error } = await supabase
         .from("gravacoes_individuais")
         .select("*")
@@ -182,11 +214,11 @@ export default function Membros() {
       const scrollLeft = container.scrollLeft;
       const containerWidth = container.clientWidth;
       const itemWidth = CARD_WIDTH + CARD_GAP;
-      
+
       const startIndex = Math.floor(scrollLeft / itemWidth) + 1;
       const visibleItems = Math.max(1, Math.floor(containerWidth / itemWidth));
       const endIndex = Math.min(startIndex + visibleItems - 1, filteredConteudo.length);
-      
+
       setConteudoScrollInfo({
         start: Math.max(1, startIndex),
         end: Math.max(1, endIndex),
@@ -214,18 +246,18 @@ export default function Membros() {
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
+      <div className="space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+            <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
               🎥 Área de Membros
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-sm md:text-base">
               Acesse suas gravações, conteúdos direcionados e recomendações personalizadas
             </p>
           </div>
           {isAdmin && (
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <AdminGravacaoIndividualDialog />
               <AdminImportarConteudoDialog />
               <AdminMembrosDialog />
@@ -237,22 +269,24 @@ export default function Membros() {
 
       {/* Tabs */}
       <Tabs defaultValue="gravacoes" className="space-y-6">
-        <TabsList className="bg-card/50 border border-border">
-          <TabsTrigger value="gravacoes">Minhas Gravações</TabsTrigger>
-          <TabsTrigger value="agentes-ia">Agentes de IA</TabsTrigger>
-          <TabsTrigger value="posto-ipiranga">
-            <span className="mr-2">⛽️</span>
-            Posto Ipiranga
-          </TabsTrigger>
-        </TabsList>
+        <div className="w-full overflow-x-auto pb-1 scrollbar-hide">
+          <TabsList className="bg-card/50 border border-border inline-flex w-auto min-w-full md:w-full justify-start md:justify-center">
+            <TabsTrigger value="gravacoes" className="whitespace-nowrap">Minhas Gravações</TabsTrigger>
+            <TabsTrigger value="agentes-ia" className="whitespace-nowrap">Agentes de IA</TabsTrigger>
+            <TabsTrigger value="posto-ipiranga" className="whitespace-nowrap">
+              <span className="mr-2">⛽️</span>
+              Posto Ipiranga
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="gravacoes" className="space-y-6">
           {/* Gravações de Encontros */}
           <div className="space-y-4">
             <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <h3 className="text-xl font-bold text-foreground">Encontros Gravados</h3>
-                <div className="relative flex-1 max-w-xs">
+                <div className="relative w-full sm:max-w-xs">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Buscar encontro ou conteúdo..."
@@ -314,7 +348,7 @@ export default function Membros() {
                       </div>
                     </div>
                     <div className="relative">
-                      <div 
+                      <div
                         ref={conteudoScrollRef}
                         className="overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent"
                         onScroll={updateScrollInfo}
@@ -470,7 +504,7 @@ export default function Membros() {
                         key={gravacao.id}
                         className="border-border bg-card/50 backdrop-blur-sm hover:shadow-elegant hover:scale-[1.02] transition-all duration-300"
                       >
-                        <div 
+                        <div
                           className="relative aspect-video bg-muted cursor-pointer"
                           onClick={() => window.open(gravacao.url_video, "_blank")}
                         >
@@ -560,7 +594,7 @@ export default function Membros() {
                         key={gravacao.id}
                         className="border-border bg-card/50 backdrop-blur-sm hover:shadow-elegant hover:scale-[1.02] transition-all duration-300"
                       >
-                        <div 
+                        <div
                           className="relative aspect-video bg-muted cursor-pointer"
                           onClick={() => window.open(gravacao.url_video, "_blank")}
                         >
@@ -641,164 +675,63 @@ export default function Membros() {
 
         <TabsContent value="agentes-ia">
           <Card className="border-border bg-card/50">
-            <CardHeader>
-              <div>
-                <CardTitle className="flex items-center gap-2">🤖 Agentes de IA</CardTitle>
-                <CardDescription>
-                  Coleção de agentes para apoiar metas, precificação, posicionamento, marketing, vendas, projetos e obras.
-                </CardDescription>
+            <CardHeader className="p-4 md:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <CardTitle className="flex items-center gap-2 text-xl md:text-2xl">🤖 Agentes de IA</CardTitle>
+                  <CardDescription className="text-sm">
+                    Coleção de agentes para apoiar metas, precificação, posicionamento, marketing, vendas, projetos e obras.
+                  </CardDescription>
+                </div>
+                {isAdmin && (
+                  <div className="flex-shrink-0">
+                    <AdminAgenteDialog
+                      onSuccess={handleAddAgent}
+                      categories={categories.length > 0 ? categories : ["Metas", "Precificação", "Posicionamento", "Marketing", "Vendas", "Projetos", "Obras"]}
+                    />
+                  </div>
+                )}
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h4 className="font-semibold">🤖 Agentes de suporte para auxiliar na criação de Metas</h4>
-                <ul className="mt-2 space-y-1 list-none">
-                  <li>
-                    <a href="https://chatgpt.com/g/g-693d3dfde064819191ec396762e96ee8-mba-metas-pessoais-2026" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
-                      Metas pessoais
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  </li>
-                  <li>
-                    <a href="https://chatgpt.com/g/g-693d7baae68c8191a4ab4ed1639edd65-mba-metas-para-escritorios-e-construtora" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
-                      Metas do negócio
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="font-semibold">🤖 Agentes de suporte para auxiliar na Precificação</h4>
-                <ul className="mt-2 space-y-1 list-none">
-                  <li>
-                    <a href="https://chatgpt.com/g/g-68753f363fb0819183e161707647d548-boranaobra-calculadora-da-hora-do-escritorio" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
-                      Calculadora de custo/hora do escritório
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  </li>
-                  <li>
-                    <a href="https://chatgpt.com/g/g-68754d3406ac81918d8d55840722d725-boranaobra-precificacao-de-projeto" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
-                      Calculadora de valor de Projeto
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  </li>
-                  <li>
-                    <a href="https://chatgpt.com/g/g-68754de919808191a4dca447e904b99f-mba-precificador-evf" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
-                      Calculadora de valor de EVF
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  </li>
-                  <li>
-                    <a href="https://chatgpt.com/g/g-687552be41a08191993b9ad7a0ed2705-mba-precificador-de-custo-fixo-de-obra" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
-                      Calculadora de valor fixo mensal de Obra
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="font-semibold">🤖 Agentes para trabalhar o Posicionamento</h4>
-                <ul className="mt-2 space-y-1 list-none">
-                  <li>
-                    <a href="https://chatgpt.com/g/g-686451db18a48191b82471c2e12b423c-mba-posicionamento-estrategico" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
-                      Posicionamento pessoal
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  </li>
-                  <li>
-                    <a href="https://chatgpt.com/g/g-6891ed5302a0819181dd2eef80557650-mba-posicionamento-empresarial" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
-                      Agente de posicionamento de estratégia da empresa
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="font-semibold">🤖 Agente de suporte para facilitar o Marketing</h4>
-                <ul className="mt-2 space-y-1 list-none">
-                  <li>
-                    <a href="https://chatgpt.com/g/g-6864770bdb0c819193664fc8e6dbec06-mba-organizador-de-perfil-profissional" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
-                      Organizador de perfil profissional (bio e posts fixados)
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  </li>
-                  <li>
-                    <a href="https://chatgpt.com/g/g-6839cc7005f88191aa6b98d1c0f95a11-ace-agente-de-producao-de-conteudo" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
-                      Produção de Conteúdo
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  </li>
-                  <li>
-                    <a href="https://chatgpt.com/g/g-68be3d13a8ec8191ae908402c4e7cdaa-mba-producao-de-conteudo-c1-c2-e-c3" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
-                      Produção de conteúdo (c1, c2, c3)
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="font-semibold">🤖 Agente de suporte para facilitar nas Vendas</h4>
-                <ul className="mt-2 space-y-1 list-none">
-                  <li>
-                    <a href="https://chatgpt.com/g/g-6875a39fea8c819181846aca5aea3057-mba-construtor-de-jornada-do-cliente" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
-                      Criação da Jornada do Cliente
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  </li>
-                  <li>
-                    <a href="https://chatgpt.com/g/g-684d572390cc8191a7362c85d163e0da-ace-criacao-de-campanhas-de-vendas-conteudo" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
-                      Estruturação de Campanhas de Vendas
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  </li>
-                  <li>
-                    <a href="https://chatgpt.com/g/g-68759980cf488191bdc3adb7c3af7688-mba-assistente-de-caixa-rapido" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
-                      Estratégia de Caixa Rápido
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  </li>
-                  <li>
-                    <a href="https://chatgpt.com/g/g-6874fca635348191a595871bb3e11ffd-mba-assistente-de-proposta-irresistivel" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
-                      Criação da Proposta Irresistível
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="font-semibold">🤖 Agente de suporte para facilitar o desenvolvimento de Projetos</h4>
-                <ul className="mt-2 space-y-1 list-none">
-                  <li>
-                    <a href="https://chatgpt.com/g/g-68408938b23481918104237904e496ba-boranaobra-renderizador-de-projetos" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
-                      Renderizador de projetos
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="font-semibold">🤖 Agente de suporte para facilitar o desenvolvimento das Obras</h4>
-                <ul className="mt-2 space-y-1 list-none">
-                  <li>
-                    <a href="https://chatgpt.com/g/g-xfw2K2cNJ-agente-profissional-de-campo" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
-                      Agente profissional de campo
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  </li>
-                  <li>
-                    <a href="https://chatgpt.com/g/g-6734b4dd282c81908061652f23285871-agente-de-planejamento-de-obra/" target="_blank" rel="noopener noreferrer" className="text-secondary inline-flex items-center gap-2">
-                      Agente de planejamento de obra
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  </li>
-                </ul>
-              </div>
+            <CardContent className="p-4 md:p-6 space-y-6">
+              {categories.map((category) => (
+                <div key={category} className="space-y-4">
+                  <h4 className="font-semibold text-lg flex items-center gap-2">
+                    🤖 Agentes de suporte para auxiliar {category === "Metas" ? "na criação de" : category === "Posicionamento" ? "no" : "no(a)"} {category}
+                  </h4>
+                  <ul className="mt-2 space-y-2 list-none">
+                    {aiAgents
+                      .filter((agent) => agent.category === category)
+                      .sort((a, b) => a.order - b.order)
+                      .map((agent) => (
+                        <li key={agent.id} className="flex items-center justify-between group">
+                          <a
+                            href={agent.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-secondary hover:underline inline-flex items-center gap-2 transition-all"
+                          >
+                            {agent.title}
+                            <ExternalLink className="h-4 w-4" />
+                          </a>
+                          {isAdmin && (
+                            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                              <AdminAgenteDialog
+                                agent={agent}
+                                onSuccess={handleUpdateAgent}
+                                onDelete={handleDeleteAgent}
+                                categories={categories}
+                              />
+                            </div>
+                          )}
+                        </li>
+                      ))}
+                  </ul>
+                </div>
+              ))}
+              {aiAgents.length === 0 && (
+                <p className="text-center text-muted-foreground py-8">Nenhum agente cadastrado.</p>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -806,14 +739,14 @@ export default function Membros() {
         {/* Posto Ipiranga Tab */}
         <TabsContent value="posto-ipiranga" className="space-y-6">
           <Card className="border-border bg-card/50">
-            <CardHeader>
-              <div className="flex items-center justify-between">
+            <CardHeader className="p-4 md:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-xl md:text-2xl">
                     <span className="text-2xl">⛽️</span>
                     Posto Ipiranga
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-sm">
                     Recursos e materiais organizados por categoria para apoiar sua jornada
                   </CardDescription>
                 </div>
@@ -841,7 +774,7 @@ export default function Membros() {
                         </p>
                       </div>
                       {isAdmin && (
-                        <AdminPostoIpirangaDialog 
+                        <AdminPostoIpirangaDialog
                           categoria={categoria}
                           onSuccess={() => refetchPostoIpiranga()}
                         />
@@ -865,28 +798,28 @@ export default function Membros() {
                                     {link.descricao && (
                                       <p className="text-sm text-muted-foreground mb-3">{link.descricao}</p>
                                     )}
-                                     <a
-                                       href={link.url}
-                                       target="_blank"
-                                       rel="noopener noreferrer"
-                                       className="inline-flex items-center gap-2 text-sm text-secondary hover:underline"
-                                     >
-                                       Acessar recurso
-                                       <ExternalLink className="h-4 w-4" />
-                                     </a>
-                                   </div>
-                                   {isAdmin && (
-                                     <div className="flex gap-2">
-                                       <Button
-                                         size="icon"
-                                         variant="ghost"
-                                         onClick={() => setEditingLink(link)}
-                                       >
-                                         <Edit className="h-4 w-4" />
-                                       </Button>
-                                     </div>
-                                   )}
-                                 </div>
+                                    <a
+                                      href={link.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-2 text-sm text-secondary hover:underline"
+                                    >
+                                      Acessar recurso
+                                      <ExternalLink className="h-4 w-4" />
+                                    </a>
+                                  </div>
+                                  {isAdmin && (
+                                    <div className="flex gap-2">
+                                      <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        onClick={() => setEditingLink(link)}
+                                      >
+                                        <Edit className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  )}
+                                </div>
                               </CardContent>
                             </Card>
                           ))}

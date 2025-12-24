@@ -135,7 +135,7 @@ export default function Resultados() {
       console.error(error);
     } else {
       toast.success("Métricas salvas com sucesso!");
-      
+
       // Atualizar lista
       const { data: metricasData } = await supabase
         .from("metricas_mensais")
@@ -156,8 +156,8 @@ export default function Resultados() {
     }
 
     // Validação básica
-    if (novoDesempenho.faturamento_mensal < 0 || novoDesempenho.contratos_fechados < 0 || 
-        novoDesempenho.clientes_mes < 0 || novoDesempenho.qtd_propostas < 0) {
+    if (novoDesempenho.faturamento_mensal < 0 || novoDesempenho.contratos_fechados < 0 ||
+      novoDesempenho.clientes_mes < 0 || novoDesempenho.qtd_propostas < 0) {
       toast.error("Os valores não podem ser negativos");
       return;
     }
@@ -178,7 +178,7 @@ export default function Resultados() {
       console.error(error);
     } else {
       toast.success("Desempenho salvo com sucesso!");
-      
+
       // Atualizar lista
       const { data: allData } = await supabase
         .from("desempenho_mensal")
@@ -239,7 +239,7 @@ export default function Resultados() {
   ) || FAIXAS_PREMIACAO[0];
 
   const proximaFaixa = FAIXAS_PREMIACAO[FAIXAS_PREMIACAO.indexOf(faixaAtual) + 1];
-  const progressoFaixa = proximaFaixa 
+  const progressoFaixa = proximaFaixa
     ? ((faturamentoMedioMensal - faixaAtual.min) / (proximaFaixa.min - faixaAtual.min)) * 100
     : 100;
 
@@ -304,11 +304,11 @@ export default function Resultados() {
   // Se for mentorado, mostrar seus resultados
   return (
     <div className="space-y-6 animate-slide-in">
-      <div className="flex items-center gap-3">
-        <TrendingUp className="h-8 w-8 text-primary" />
-        <h1 className="text-4xl font-bold text-foreground">📊 Painel de Controle</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <TrendingUp className="h-6 w-6 md:h-8 md:w-8 text-primary" />
+        <h1 className="text-2xl md:text-4xl font-bold text-foreground">📊 Painel de Controle</h1>
       </div>
-      <p className="text-muted-foreground text-lg">
+      <p className="text-muted-foreground text-sm md:text-lg">
         Acompanhe seu desempenho e evolução
       </p>
 
@@ -321,73 +321,75 @@ export default function Resultados() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 p-4 bg-muted/30 rounded-lg">
-            <div className="space-y-2">
-              <Label htmlFor="desempenho_mes_ano">Mês/Ano</Label>
-              <Input
-                id="desempenho_mes_ano"
-                type="month"
-                value={novoDesempenho.mes_ano}
-                onChange={(e) => setNovoDesempenho({ ...novoDesempenho, mes_ano: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="faturamento" className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4" />
-                Faturamento (R$)
-              </Label>
-              <Input
-                id="faturamento"
-                type="number"
-                value={novoDesempenho.faturamento_mensal}
-                onChange={(e) => setNovoDesempenho({ ...novoDesempenho, faturamento_mensal: parseFloat(e.target.value) || 0 })}
-                min="0"
-                step="0.01"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="contratos" className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                Contratos Fechados
-              </Label>
-              <Input
-                id="contratos"
-                type="number"
-                value={novoDesempenho.contratos_fechados}
-                onChange={(e) => setNovoDesempenho({ ...novoDesempenho, contratos_fechados: parseInt(e.target.value) || 0 })}
-                min="0"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="clientes" className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                Clientes
-              </Label>
-              <Input
-                id="clientes"
-                type="number"
-                value={novoDesempenho.clientes_mes}
-                onChange={(e) => setNovoDesempenho({ ...novoDesempenho, clientes_mes: parseInt(e.target.value) || 0 })}
-                min="0"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="propostas" className="flex items-center gap-2">
-                <Target className="h-4 w-4" />
-                Propostas
-              </Label>
-              <Input
-                id="propostas"
-                type="number"
-                value={novoDesempenho.qtd_propostas}
-                onChange={(e) => setNovoDesempenho({ ...novoDesempenho, qtd_propostas: parseInt(e.target.value) || 0 })}
-                min="0"
-              />
-            </div>
-            <div className="flex items-end">
-              <Button onClick={handleSalvarDesempenho} className="w-full">
-                Salvar Desempenho
-              </Button>
+          <div className="flex flex-col gap-4 p-3 md:p-4 bg-muted/30 rounded-lg">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="desempenho_mes_ano">Mês/Ano</Label>
+                <Input
+                  id="desempenho_mes_ano"
+                  type="month"
+                  value={novoDesempenho.mes_ano}
+                  onChange={(e) => setNovoDesempenho({ ...novoDesempenho, mes_ano: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="faturamento" className="flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4" />
+                  Faturamento (R$)
+                </Label>
+                <Input
+                  id="faturamento"
+                  type="number"
+                  value={novoDesempenho.faturamento_mensal}
+                  onChange={(e) => setNovoDesempenho({ ...novoDesempenho, faturamento_mensal: parseFloat(e.target.value) || 0 })}
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="contratos" className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4" />
+                  Contratos Fechados
+                </Label>
+                <Input
+                  id="contratos"
+                  type="number"
+                  value={novoDesempenho.contratos_fechados}
+                  onChange={(e) => setNovoDesempenho({ ...novoDesempenho, contratos_fechados: parseInt(e.target.value) || 0 })}
+                  min="0"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="clientes" className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Clientes
+                </Label>
+                <Input
+                  id="clientes"
+                  type="number"
+                  value={novoDesempenho.clientes_mes}
+                  onChange={(e) => setNovoDesempenho({ ...novoDesempenho, clientes_mes: parseInt(e.target.value) || 0 })}
+                  min="0"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="propostas" className="flex items-center gap-2">
+                  <Target className="h-4 w-4" />
+                  Propostas
+                </Label>
+                <Input
+                  id="propostas"
+                  type="number"
+                  value={novoDesempenho.qtd_propostas}
+                  onChange={(e) => setNovoDesempenho({ ...novoDesempenho, qtd_propostas: parseInt(e.target.value) || 0 })}
+                  min="0"
+                />
+              </div>
+              <div className="flex items-end">
+                <Button onClick={handleSalvarDesempenho} className="w-full">
+                  Salvar
+                </Button>
+              </div>
             </div>
           </div>
         </CardContent>
@@ -445,7 +447,7 @@ export default function Resultados() {
               </div>
               <Progress value={progressoFaixa} className="h-3" />
               <p className="text-xs text-muted-foreground text-center">
-                Faltam R$ {(proximaFaixa.min - faturamentoMedioMensal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} 
+                Faltam R$ {(proximaFaixa.min - faturamentoMedioMensal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 {' '}de média mensal para atingir {proximaFaixa.nome}
               </p>
             </div>
@@ -453,13 +455,12 @@ export default function Resultados() {
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2 pt-4 border-t">
             {FAIXAS_PREMIACAO.map((faixa) => (
-              <div 
+              <div
                 key={faixa.nome}
-                className={`p-3 rounded-lg text-center border-2 ${
-                  faixa.nome === faixaAtual.nome 
-                    ? 'border-secondary bg-secondary/10' 
+                className={`p-3 rounded-lg text-center border-2 ${faixa.nome === faixaAtual.nome
+                    ? 'border-secondary bg-secondary/10'
                     : 'border-border bg-muted/30'
-                }`}
+                  }`}
               >
                 <div className="text-2xl mb-1">{faixa.emoji}</div>
                 <div className="text-xs font-semibold">{faixa.nome}</div>
@@ -704,16 +705,16 @@ export default function Resultados() {
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={metricasFormatadas}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis 
-                  dataKey="mes_formatado" 
+                <XAxis
+                  dataKey="mes_formatado"
                   className="text-xs"
                   tick={{ fill: 'hsl(var(--muted-foreground))' }}
                 />
-                <YAxis 
+                <YAxis
                   className="text-xs"
                   tick={{ fill: 'hsl(var(--muted-foreground))' }}
                 />
-                <Tooltip 
+                <Tooltip
                   contentStyle={{
                     backgroundColor: 'hsl(var(--card))',
                     border: '1px solid hsl(var(--border))',
@@ -721,25 +722,25 @@ export default function Resultados() {
                   }}
                 />
                 <Legend />
-                <Line 
-                  type="monotone" 
-                  dataKey="qtd_colaboradores" 
+                <Line
+                  type="monotone"
+                  dataKey="qtd_colaboradores"
                   name="Colaboradores"
-                  stroke="#8b5cf6" 
+                  stroke="#8b5cf6"
                   strokeWidth={2}
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="seguidores_instagram" 
+                <Line
+                  type="monotone"
+                  dataKey="seguidores_instagram"
                   name="Instagram"
-                  stroke="#e4405f" 
+                  stroke="#e4405f"
                   strokeWidth={2}
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="seguidores_youtube" 
+                <Line
+                  type="monotone"
+                  dataKey="seguidores_youtube"
                   name="YouTube"
-                  stroke="#ff0000" 
+                  stroke="#ff0000"
                   strokeWidth={2}
                 />
                 <Line

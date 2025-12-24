@@ -85,11 +85,11 @@ export default function Dashboard() {
       let query = supabase
         .from("navegadores")
         .select("id, user_id, nome, foto_url, cargo, bio_curta, email, whatsapp_url, ativo, profiles(id, nome_completo, apelido, foto_url)");
-      
+
       if (!isAdmin) {
         query = query.eq("ativo", true);
       }
-      
+
       const { data, error } = await query;
       if (error) throw error;
       return data;
@@ -161,388 +161,387 @@ export default function Dashboard() {
   };
   if (loading) {
     return <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-muted-foreground">Carregando...</div>
-      </div>;
+      <div className="text-muted-foreground">Carregando...</div>
+    </div>;
   }
   return <div className="space-y-6 animate-slide-in">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-card to-card/50 border border-border rounded-lg p-8 shadow-glow">
-        <div className="flex items-center gap-3 mb-2">
-          <Rocket className="h-8 w-8 text-secondary" strokeWidth={1.5} />
-          <h1 className="text-4xl font-bold text-foreground">
-            Bem-vindo(a), {profile?.apelido || profile?.nome_completo?.split(' ')[0]}! 🚀
-          </h1>
-        </div>
-        <p className="text-muted-foreground text-lg">
-          Continue sua jornada de aceleração rumo ao sucesso
-        </p>
+    {/* Hero Section */}
+    <div className="bg-gradient-to-r from-card to-card/50 border border-border rounded-lg p-4 md:p-8 shadow-glow">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
+        <Rocket className="h-6 w-6 md:h-8 md:w-8 text-secondary" strokeWidth={1.5} />
+        <h1 className="text-2xl md:text-4xl font-bold text-foreground">
+          Bem-vindo(a), {profile?.apelido || profile?.nome_completo?.split(' ')[0]}! 🚀
+        </h1>
       </div>
+      <p className="text-muted-foreground text-sm md:text-lg">
+        Continue sua jornada de aceleração rumo ao sucesso
+      </p>
+    </div>
 
-      {/* Agenda e Links em Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        {/* Agenda Completa */}
-        <Card className="border-border bg-card shadow-card h-fit">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <Calendar className="h-6 w-6 text-secondary" />
-                <CardTitle className="text-foreground">Agenda da Mentoria</CardTitle>
-              </div>
-              <div className="flex items-center gap-2">
-                {isAdmin && (
-                  <div className="flex gap-2">
-                    <AdminImportarAgendaDialog />
-                    <AdminAgendaDialog />
-                  </div>
-                )}
-              </div>
+    {/* Agenda e Links em Grid */}
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+      {/* Agenda Completa */}
+      <Card className="border-border bg-card shadow-card h-fit">
+        <CardHeader className="p-4 md:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3 md:gap-4">
+              <Calendar className="h-5 w-5 md:h-6 md:w-6 text-secondary" />
+              <CardTitle className="text-lg md:text-xl text-foreground">Agenda da Mentoria</CardTitle>
             </div>
-          </CardHeader>
-          <CardContent>
-            {/* Filtros */}
-            <div className="flex gap-2 mb-4 flex-wrap">
-              <Button
-                variant={filtroAgenda === 'proximos' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setFiltroAgenda('proximos')}
-              >
-                Próximos ({proximosEncontros.length})
-              </Button>
-              <Button
-                variant={filtroAgenda === 'passados' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setFiltroAgenda('passados')}
-              >
-                Passados ({encontrosPassados.length})
-              </Button>
-              <Button
-                variant={filtroAgenda === 'todos' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setFiltroAgenda('todos')}
-              >
-                Todos ({proximosEncontros.length + encontrosPassados.length})
-              </Button>
-            </div>
-
-            {/* Lista de Encontros */}
-            {(() => {
-              const encontrosExibir =
-                filtroAgenda === 'proximos' ? proximosEncontros :
-                filtroAgenda === 'passados' ? encontrosPassados :
-                [...proximosEncontros, ...encontrosPassados].sort((a, b) =>
-                  new Date(b.data_hora).getTime() - new Date(a.data_hora).getTime()
-                );
-
-              return encontrosExibir.length > 0 ? (
-                <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
-                  {encontrosExibir.map(encontro => {
-                    const daysUntil = getDaysUntilMeeting(encontro.data_hora);
-                    const isPast = new Date(encontro.data_hora) < new Date();
-
-                    return (
-                      <div
-                        key={encontro.id}
-                        className={`p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors ${isPast ? 'opacity-75' : ''}`}
-                      >
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2 flex-wrap">
-                              <Badge variant="outline" className="text-xs">
-                                {encontro.tipo}
-                              </Badge>
-                              {!isPast && getCountdownBadge(daysUntil)}
-                              <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                <Clock className="h-3 w-3" />
-                                {format(new Date(encontro.data_hora), "dd 'de' MMMM 'às' HH:mm", {
-                                  locale: ptBR
-                                })}
-                              </div>
-                            </div>
-                            <h4 className="font-semibold text-foreground mb-1">{encontro.titulo}</h4>
-                            {encontro.descricao && (
-                              <p className="text-sm text-muted-foreground line-clamp-2">
-                                {encontro.descricao}
-                              </p>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {isAdmin && (
-                              <EditarAgendaDialog encontro={encontro} />
-                            )}
-                            {encontro.link_zoom && !isPast && (
-                              <Button size="sm" asChild>
-                                <a href={encontro.link_zoom} target="_blank" rel="noopener noreferrer">
-                                  <Video className="h-4 w-4 mr-1" />
-                                  Acessar
-                                </a>
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <p className="text-muted-foreground text-center py-8">
-                  Nenhum encontro encontrado.
-                </p>
-              );
-            })()}
-          </CardContent>
-        </Card>
-
-        {/* Links Úteis */}
-        <Card className="border-border bg-card shadow-card h-fit">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <LinkIcon className="h-6 w-6 text-primary" />
-                <CardTitle className="text-foreground">Links Úteis</CardTitle>
-              </div>
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
               {isAdmin && (
                 <div className="flex gap-2">
-                  <AdminImportarLinksDialog />
-                  <AdminLinksDialog />
+                  <AdminImportarAgendaDialog />
+                  <AdminAgendaDialog />
                 </div>
               )}
             </div>
-          </CardHeader>
-          <CardContent>
-            {links && links.length > 0 ? (
+          </div>
+        </CardHeader>
+        <CardContent>
+          {/* Filtros */}
+          <div className="flex gap-2 mb-4 flex-wrap">
+            <Button
+              variant={filtroAgenda === 'proximos' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFiltroAgenda('proximos')}
+            >
+              Próximos ({proximosEncontros.length})
+            </Button>
+            <Button
+              variant={filtroAgenda === 'passados' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFiltroAgenda('passados')}
+            >
+              Passados ({encontrosPassados.length})
+            </Button>
+            <Button
+              variant={filtroAgenda === 'todos' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFiltroAgenda('todos')}
+            >
+              Todos ({proximosEncontros.length + encontrosPassados.length})
+            </Button>
+          </div>
+
+          {/* Lista de Encontros */}
+          {(() => {
+            const encontrosExibir =
+              filtroAgenda === 'proximos' ? proximosEncontros :
+                filtroAgenda === 'passados' ? encontrosPassados :
+                  [...proximosEncontros, ...encontrosPassados].sort((a, b) =>
+                    new Date(b.data_hora).getTime() - new Date(a.data_hora).getTime()
+                  );
+
+            return encontrosExibir.length > 0 ? (
               <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
-                {links.map((link: any) => (
-                  <div
-                    key={link.id}
-                    className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
+                {encontrosExibir.map(encontro => {
+                  const daysUntil = getDaysUntilMeeting(encontro.data_hora);
+                  const isPast = new Date(encontro.data_hora) < new Date();
+
+                  return (
+                    <div
+                      key={encontro.id}
+                      className={`p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors ${isPast ? 'opacity-75' : ''}`}
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2 flex-wrap">
+                            <Badge variant="outline" className="text-xs">
+                              {encontro.tipo}
+                            </Badge>
+                            {!isPast && getCountdownBadge(daysUntil)}
+                            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                              <Clock className="h-3 w-3" />
+                              {format(new Date(encontro.data_hora), "dd 'de' MMMM 'às' HH:mm", {
+                                locale: ptBR
+                              })}
+                            </div>
+                          </div>
+                          <h4 className="font-semibold text-foreground mb-1">{encontro.titulo}</h4>
+                          {encontro.descricao && (
+                            <p className="text-sm text-muted-foreground line-clamp-2">
+                              {encontro.descricao}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {isAdmin && (
+                            <EditarAgendaDialog encontro={encontro} />
+                          )}
+                          {encontro.link_zoom && !isPast && (
+                            <Button size="sm" asChild>
+                              <a href={encontro.link_zoom} target="_blank" rel="noopener noreferrer">
+                                <Video className="h-4 w-4 mr-1" />
+                                Acessar
+                              </a>
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-center py-8">
+                Nenhum encontro encontrado.
+              </p>
+            );
+          })()}
+        </CardContent>
+      </Card>
+
+      {/* Links Úteis */}
+      <Card className="border-border bg-card shadow-card h-fit">
+        <CardHeader className="p-4 md:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3 md:gap-4">
+              <LinkIcon className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+              <CardTitle className="text-lg md:text-xl text-foreground">Links Úteis</CardTitle>
+            </div>
+            {isAdmin && (
+              <div className="flex gap-2 overflow-x-auto pb-1 sm:pb-0">
+                <AdminImportarLinksDialog />
+                <AdminLinksDialog />
+              </div>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent>
+          {links && links.length > 0 ? (
+            <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+              {links.map((link: any) => (
+                <div
+                  key={link.id}
+                  className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-2 mb-3">
+                    <h4 className="font-semibold text-foreground">{link.titulo}</h4>
+                    <div className="flex gap-1 items-center">
+                      {!link.ativo && (
+                        <Badge variant="secondary" className="text-xs">
+                          Inativo
+                        </Badge>
+                      )}
+                      {isAdmin && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 w-8 p-0"
+                          onClick={() => setEditingLink(link)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  <Button
+                    className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+                    size="sm"
+                    onClick={() => window.open(link.url_zoom, "_blank")}
                   >
-                    <div className="flex items-start justify-between gap-2 mb-3">
-                      <h4 className="font-semibold text-foreground">{link.titulo}</h4>
-                      <div className="flex gap-1 items-center">
-                        {!link.ativo && (
-                          <Badge variant="secondary" className="text-xs">
-                            Inativo
-                          </Badge>
-                        )}
-                        {isAdmin && (
+                    Acessar
+                    <ExternalLink className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <LinkIcon className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+              <p className="text-muted-foreground">Nenhum link disponível no momento</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+
+    {/* Navegadores */}
+    <Card className="border-border bg-card shadow-card">
+      <CardHeader className="p-4 md:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3 md:gap-4">
+            <User className="h-5 w-5 md:h-6 md:w-6 text-secondary" />
+            <CardTitle className="text-lg md:text-xl text-foreground">Equipe de Navegadores</CardTitle>
+          </div>
+          {isAdmin && <AdminNavegadorDialog />}
+        </div>
+      </CardHeader>
+      <CardContent>
+        {navegadores && navegadores.length > 0 ? (
+          <div className="space-y-4">
+            {navegadores.map((nav: any) => {
+              const nome = nav.nome || nav.profiles?.nome_completo || nav.profiles?.apelido || "Navegador";
+              const fotoUrl = nav.foto_url || nav.profiles?.foto_url;
+
+              return (
+                <div
+                  key={nav.id}
+                  className="p-4 md:p-5 border border-border rounded-lg hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex flex-col sm:flex-row items-start gap-4 md:gap-5">
+                    <Avatar className="h-14 w-14 md:h-16 md:w-16 border-2 border-primary/20 flex-shrink-0">
+                      <AvatarImage src={fotoUrl || ""} alt={nome} />
+                      <AvatarFallback className="bg-secondary/10 text-secondary text-lg md:text-xl">
+                        {nome.charAt(0) || <User className="h-5 w-5 md:h-6 md:w-6" />}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div>
+                          <h4 className="font-semibold text-lg text-foreground">{nome}</h4>
+                          {nav.cargo && (
+                            <p className="text-sm text-secondary font-medium">{nav.cargo}</p>
+                          )}
+                        </div>
+                        <div className="flex gap-1 items-center flex-shrink-0">
+                          {!nav.ativo && (
+                            <Badge variant="secondary" className="text-xs">Inativo</Badge>
+                          )}
+                          {isAdmin && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0"
+                              onClick={() => setEditingNavegador(nav)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                      {nav.bio_curta && (
+                        <p className="text-foreground/80 mt-3 leading-relaxed">{nav.bio_curta}</p>
+                      )}
+                      <div className="flex gap-3 mt-4">
+                        {nav.whatsapp_url && (
                           <Button
                             size="sm"
-                            variant="ghost"
-                            className="h-8 w-8 p-0"
-                            onClick={() => setEditingLink(link)}
+                            className="bg-primary hover:bg-primary/90"
+                            onClick={() => window.open(nav.whatsapp_url, "_blank")}
                           >
-                            <Edit className="h-4 w-4" />
+                            <MessageCircle className="h-4 w-4 mr-2" />
+                            WhatsApp
+                          </Button>
+                        )}
+                        {nav.email && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => window.open(`mailto:${nav.email}`, "_blank")}
+                          >
+                            <Mail className="h-4 w-4 mr-2" />
+                            E-mail
                           </Button>
                         )}
                       </div>
                     </div>
-                    <Button
-                      className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
-                      size="sm"
-                      onClick={() => window.open(link.url_zoom, "_blank")}
-                    >
-                      Acessar
-                      <ExternalLink className="ml-2 h-4 w-4" />
-                    </Button>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <LinkIcon className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground">Nenhum link disponível no momento</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Navegadores */}
-      <Card className="border-border bg-card shadow-card">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <User className="h-6 w-6 text-secondary" />
-              <CardTitle className="text-foreground">Equipe de Navegadores</CardTitle>
-            </div>
-            {isAdmin && <AdminNavegadorDialog />}
+                </div>
+              );
+            })}
           </div>
-        </CardHeader>
-        <CardContent>
-          {navegadores && navegadores.length > 0 ? (
-            <div className="space-y-4">
-              {navegadores.map((nav: any) => {
-                const nome = nav.nome || nav.profiles?.nome_completo || nav.profiles?.apelido || "Navegador";
-                const fotoUrl = nav.foto_url || nav.profiles?.foto_url;
-                
-                return (
-                  <div
-                    key={nav.id}
-                    className="p-5 border border-border rounded-lg hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex items-start gap-5">
-                      <Avatar className="h-16 w-16 border-2 border-primary/20 flex-shrink-0">
-                        <AvatarImage src={fotoUrl || ""} alt={nome} />
-                        <AvatarFallback className="bg-secondary/10 text-secondary text-xl">
-                          {nome.charAt(0) || <User className="h-6 w-6" />}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2 mb-2">
-                          <div>
-                            <h4 className="font-semibold text-lg text-foreground">{nome}</h4>
-                            {nav.cargo && (
-                              <p className="text-sm text-secondary font-medium">{nav.cargo}</p>
-                            )}
-                          </div>
-                          <div className="flex gap-1 items-center flex-shrink-0">
-                            {!nav.ativo && (
-                              <Badge variant="secondary" className="text-xs">Inativo</Badge>
-                            )}
-                            {isAdmin && (
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-8 w-8 p-0"
-                                onClick={() => setEditingNavegador(nav)}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                        {nav.bio_curta && (
-                          <p className="text-foreground/80 mt-3 leading-relaxed">{nav.bio_curta}</p>
-                        )}
-                        <div className="flex gap-3 mt-4">
-                          {nav.whatsapp_url && (
-                            <Button
-                              size="sm"
-                              className="bg-primary hover:bg-primary/90"
-                              onClick={() => window.open(nav.whatsapp_url, "_blank")}
-                            >
-                              <MessageCircle className="h-4 w-4 mr-2" />
-                              WhatsApp
-                            </Button>
-                          )}
-                          {nav.email && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => window.open(`mailto:${nav.email}`, "_blank")}
-                            >
-                              <Mail className="h-4 w-4 mr-2" />
-                              E-mail
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <User className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground">Nenhum navegador disponível no momento</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        ) : (
+          <div className="text-center py-8">
+            <User className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+            <p className="text-muted-foreground">Nenhum navegador disponível no momento</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
 
-      {/* Notificações - Avisos e Comunicados */}
-      <Card className="border-border bg-card shadow-card">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Bell className="h-6 w-6 text-primary" />
-              <CardTitle className="text-foreground">Avisos e Comunicados</CardTitle>
-            </div>
-            <div className="flex items-center gap-2">
-              {isAdmin && (
-                <Button
-                  size="sm"
-                  className="bg-primary hover:bg-primary/90"
-                  onClick={() => navigate("/admin/notifications/create")}
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  Nova Notificação
-                </Button>
-              )}
+    {/* Notificações - Avisos e Comunicados */}
+    <Card className="border-border bg-card shadow-card">
+      <CardHeader className="p-4 md:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3 md:gap-4">
+            <Bell className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+            <CardTitle className="text-lg md:text-xl text-foreground">Avisos e Comunicados</CardTitle>
+          </div>
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+            {isAdmin && (
               <Button
-                variant="outline"
                 size="sm"
-                onClick={() => navigate("/notifications")}
+                className="bg-primary hover:bg-primary/90"
+                onClick={() => navigate("/admin/notifications/create")}
               >
-                Ver Todas
+                <Plus className="h-4 w-4 mr-1" />
+                Nova Notificação
               </Button>
-            </div>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/notifications")}
+            >
+              Ver Todas
+            </Button>
           </div>
-        </CardHeader>
-        <CardContent>
-          {notifications && notifications.length > 0 ? (
-            <div className="space-y-3">
-              {notifications.map((notification: any) => {
-                const isRead = userId ? notification.read_by?.includes(userId) : false;
-                return (
-                  <div
-                    key={notification.id}
-                    className={`p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer ${
-                      !isRead ? "border-l-4 border-l-primary bg-primary/5" : ""
+        </div>
+      </CardHeader>
+      <CardContent>
+        {notifications && notifications.length > 0 ? (
+          <div className="space-y-3">
+            {notifications.map((notification: any) => {
+              const isRead = userId ? notification.read_by?.includes(userId) : false;
+              return (
+                <div
+                  key={notification.id}
+                  className={`p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer ${!isRead ? "border-l-4 border-l-primary bg-primary/5" : ""
                     }`}
-                    onClick={() => navigate("/notifications")}
-                  >
-                    <div className="flex items-start gap-3">
-                      {getNotificationIcon(notification.type)}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="font-semibold text-foreground">{notification.title}</h4>
-                          {!isRead && (
-                            <Badge variant="default" className="text-xs">Nova</Badge>
-                          )}
-                          {notification.priority === "alta" && (
-                            <Badge variant="destructive" className="text-xs">Alta Prioridade</Badge>
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                          {notification.message}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-2">
-                          {format(new Date(notification.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
-                        </p>
+                  onClick={() => navigate("/notifications")}
+                >
+                  <div className="flex items-start gap-3">
+                    {getNotificationIcon(notification.type)}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="font-semibold text-foreground">{notification.title}</h4>
+                        {!isRead && (
+                          <Badge variant="default" className="text-xs">Nova</Badge>
+                        )}
+                        {notification.priority === "alta" && (
+                          <Badge variant="destructive" className="text-xs">Alta Prioridade</Badge>
+                        )}
                       </div>
+                      <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                        {notification.message}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        {format(new Date(notification.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                      </p>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground">Nenhum aviso no momento</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+            <p className="text-muted-foreground">Nenhum aviso no momento</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
 
-      {/* Dialog de Edição de Link */}
-      {editingLink && (
-        <EditarLinkDialog
-          link={editingLink}
-          open={!!editingLink}
-          onOpenChange={(open) => !open && setEditingLink(null)}
-        />
-      )}
+    {/* Dialog de Edição de Link */}
+    {editingLink && (
+      <EditarLinkDialog
+        link={editingLink}
+        open={!!editingLink}
+        onOpenChange={(open) => !open && setEditingLink(null)}
+      />
+    )}
 
-      {/* Dialog de Edição de Navegador */}
-      {editingNavegador && (
-        <EditarNavegadorDialog
-          navegador={editingNavegador}
-          open={!!editingNavegador}
-          onOpenChange={(open) => !open && setEditingNavegador(null)}
-        />
-      )}
+    {/* Dialog de Edição de Navegador */}
+    {editingNavegador && (
+      <EditarNavegadorDialog
+        navegador={editingNavegador}
+        open={!!editingNavegador}
+        onOpenChange={(open) => !open && setEditingNavegador(null)}
+      />
+    )}
 
-    </div>;
+  </div>;
 }
