@@ -18,32 +18,7 @@
   <meta name="twitter:site" content="@boraacelerar" />
   <meta name="twitter:image" content="/favicon.png" />
 
-  <!-- iOS PWA Meta Tags -->
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="BORA" />
-  <link rel="apple-touch-icon" href="/icon-192.png" />
-</head>
 
-<body>
-  <div id="root"></div>
-  <script type="module" src="/src/main.tsx"></script>
-
-  <!-- WUUNU SNIPPET - DON'T CHANGE THIS (START) -->
-  <script type="module">
-    if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.DEV === true) {
-      if (!document.getElementById('wuunu-widget-script')) {
-        window.__WUUNU_WS__ = "http://127.0.0.1:64018/?token=d3431db9a089b6e1b0150714f59b28238a21c0e997c33c48";
-        const s = document.createElement('script');
-        s.id = 'wuunu-widget-script';
-        s.src = "https://cdn.jsdelivr.net/npm/@wuunu/widget@0.1.20";
-        s.defer = true;
-        s.crossOrigin = 'anonymous';
-        document.head.appendChild(s);
-      }
-    }
-  </script>
-  <!-- WUUNU SNIPPET - DON'T CHANGE THIS (END) -->
-</body>
+  </body>
 
 </html>
