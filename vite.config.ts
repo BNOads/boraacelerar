@@ -17,9 +17,9 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.png', 'icon-192.png', 'icon-512.png'],
       manifest: {
-        name: 'BORA ACELERAR',
-        short_name: 'BORA',
-        description: 'Mentoria BORA ACELERAR - Acelere seu crescimento',
+        name: 'Mentoria BORA Acelerar',
+        short_name: 'BORA Acelerar',
+        description: 'Mentoria BORA Acelerar - Acelere seu crescimento',
         theme_color: '#050505',
         background_color: '#050505',
         display: 'standalone',
