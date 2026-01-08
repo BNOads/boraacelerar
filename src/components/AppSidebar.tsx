@@ -11,16 +11,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import logo from "@/assets/logo-bora.png";
 import logoLight from "@/assets/logo-bora-light.png";
-const menuItems = [{
+const getMenuItems = (isAdmin: boolean) => [{
   title: "Início",
   url: "/dashboard",
   icon: Home
 }, {
-  title: "Trilha & Conteúdo",
+  title: "Trilha de Aceleração",
   url: "/trilha",
   icon: BookOpen
 }, {
-  title: "Painel de Controle",
+  title: isAdmin ? "Sucesso dos Mentorados" : "Painel de Controle",
   url: "/resultados",
   icon: TrendingUp
 }, {
@@ -28,11 +28,11 @@ const menuItems = [{
   url: "/metas",
   icon: Target
 }, {
-  title: "Área de Membros",
+  title: "Conteúdos Gravados",
   url: "/membros",
   icon: Video
 }, {
-  title: "Loja",
+  title: "Lojinha BORA",
   url: "/loja",
   icon: Store
 }, {
@@ -95,7 +95,7 @@ export function AppSidebar() {
           <SidebarGroupLabel className="text-primary">Navegação</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.filter(item => !item.adminOnly || isAdmin).map(item => <SidebarMenuItem key={item.title}>
+              {getMenuItems(isAdmin).filter(item => !item.adminOnly || isAdmin).map(item => <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
                       <NavLink to={item.url} className={({
                   isActive
